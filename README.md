@@ -66,31 +66,6 @@ Deterministic grounding verification with a safe conversational fallback mode.
 
 ---
 
-## Difficulty
-**Overall: Medium to High**
-
-| Area | Difficulty |
-|------|-----------|
-| Data modeling (courses, prerequisites, requirement trees) | Moderate |
-| Scheduling / recommendation algorithms | Hard |
-| ML recommender (survey, embeddings, ratings) | Moderate |
-| AI grounding / validation layer | Moderate–Hard |
-| Auth, database, frontend, deployment | Moderate |
-
----
-
-## Roles
-
-| Role | Responsibilities | Level |
-|------|-----------------|-------|
-| **Backend / Engine** | Database, degree audit rules engine, scheduling engine, recommendation engine, transcript parser | Hard |
-| **Frontend** | Next.js pages, UI components, accessibility | Beginner–Moderate |
-| **AI & LLM Integration** | Prompt and grounding design, cost and rate-limit controls | Beginner–Intermediate |
-| **ML** | Interest survey, course embeddings, recommendation model using interests and professor ratings | Moderate |
-| **DevOps** | CI/CD, testing, security, deployment | Moderate |
-
----
-
 ## 10-Week Semester Schedule
 
 | Weeks | Focus |
