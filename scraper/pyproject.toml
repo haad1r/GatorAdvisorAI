@@ -1,0 +1,22 @@
+[project]
+name = "gatoradvisor-scraper"
+version = "0.1.0"
+description = "Offline, rate-limited scraper for UF catalog, Schedule of Courses, and exam-credit data"
+requires-python = ">=3.12"
+dependencies = [
+    "requests==2.34.2",
+    "beautifulsoup4==4.15.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==9.1.1"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["scraper"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
