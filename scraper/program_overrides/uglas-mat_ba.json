@@ -1,0 +1,77 @@
+{
+  "reason": "Ported from UF Planner; every quoted sentence re-checked on the 2026-2027 page 2026-10-12. Same gap as uglas-mat_bs (see that file): Major Electives parsed as an open elective slot, 12 cr with zero options. The page states: 'Select four electives, 12 credits minimum, from the approved electives; at least one must be a course offered by the Department of Mathematics at the 4000 level or above.' The 49 ids below are the BA page's own approved-electives table, read off https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/MAT_BA_BS/MAT_BA/ on 2026-08-05 and checked against courses.csv. It differs from the BS list in exactly two rows (BA adds ESI 4317, omits MAP 4314) — kept per page rather than merged. 'Any mathematics course at the 5000 level or above' stays unenumerable (GRAD catalog). s78, punch list item 6. The same page prints 'Select one sequence' as FIVE explicit two-course pairs, not a pool: MAA 4102 & 4103, MAA 4102 & 4402, MAA 4211 & 4103, MAA 4211 & 4212, MAA 4211 & 4402 (re-read 2026-09-09). The scraper flattened them to a 6-credit pool over all five courses, so any two satisfied it, including pairs UF does not print (MAA 4103 & 4402). As logic.options each pair is a bundle the engine queues entire. Its footnote 1: 'If this option is selected, MAA 4402 or MAA 5404 cannot be used to satisfy the mathematics elective requirement.' That is the exclusive set below: a course spent on the sequence is not also an elective. MAA 5404 is graduate-catalog and absent from ours, so MAA 4402 is the only shared id. s80. The electives row's own sentence (cached page, re-read 2026-09-11): 'Select four electives, 12 credits minimum, from the approved electives; at least one must be a course offered by the Department of Mathematics at the 4000 level or above.' The department's prefixes are the ones UF's own Math minor lists for the same department (MAA, MAD, MAP, MAS, MHF, MTG) plus MAT, its special-topics prefix. Was only a placeholder sentence nothing could count against. The 'mathematics-ba-major-electives' patch is not ported: the parser now links that chooser to the Approved Electives tab and lists the same 49 courses UF Planner's patch did.",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "0bfb29fc80735313"
+  },
+  "patch_groups": {
+    "select-one-sequence": {
+      "logic": {
+        "from": [
+          "maa4102",
+          "maa4103",
+          "maa4402",
+          "maa4211",
+          "maa4212"
+        ],
+        "credits": 6.0,
+        "options": [
+          [
+            "maa4102",
+            "maa4103"
+          ],
+          [
+            "maa4102",
+            "maa4402"
+          ],
+          [
+            "maa4211",
+            "maa4103"
+          ],
+          [
+            "maa4211",
+            "maa4212"
+          ],
+          [
+            "maa4211",
+            "maa4402"
+          ]
+        ],
+        "option_labels": [
+          "Intro Real Analysis 1 and 2",
+          "Intro Real Analysis 1 and Functions of a Complex Variable",
+          "Real Analysis and Advanced Calculus 1, Intro Real Analysis 2",
+          "Real Analysis and Advanced Calculus 1 and 2",
+          "Real Analysis and Advanced Calculus 1, Functions of a Complex Variable"
+        ],
+        "curated": "program_overrides/uglas-mat_ba.json"
+      }
+    }
+  },
+  "count_rules": {
+    "mathematics-ba-major-electives": [
+      {
+        "at_least": 1,
+        "unit": "courses",
+        "min_level": 4000,
+        "prefixes": [
+          "maa",
+          "mad",
+          "map",
+          "mas",
+          "mat",
+          "mhf",
+          "mtg"
+        ],
+        "text": "At least one must be a course offered by the Department of Mathematics at the 4000 level or above"
+      }
+    ]
+  },
+  "exclusive_sets": {
+    "sequence-or-elective": [
+      "select-one-sequence",
+      "mathematics-ba-major-electives"
+    ]
+  }
+}

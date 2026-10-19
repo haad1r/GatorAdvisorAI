@@ -1,0 +1,9 @@
+{
+  "reason": "Translation Studies certificate, reviewed 2026-10-12 against the 2026-2027 page. Confidence 0.773 with zero errors (UF Planner's acceptance bar). The translation courses parse concretely; the four remaining rows ('Advanced Language course 1', 'Advanced Language course 2', 'Advanced or specialized foreign language course', 'Elective in foreign language program') depend on the language the student translates from, so they are open slots, not unparsed lists.",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "f1fd096a9f07b306"
+  },
+  "status": "published"
+}

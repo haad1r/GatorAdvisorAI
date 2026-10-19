@@ -1,0 +1,17 @@
+{
+  "reason": "Geography BA, Geographical Science and Sustainability (UGLAS/GPY_BA_BS/GPY_BA03/), ported from UF Planner (s91) and re-checked on the 2026-2027 page 2026-10-12: the page prints 'Major Electives 9: Select three:' over 16 GEO/GIS courses and 'Other geography courses can be counted under the discretion of the undergraduate coordinator.' The scrape splits that into an empty 9-credit header and the 'select-three' list; the header goes and 'select-three' carries the 9 credits and the name. (UF Planner also excluded a duplicate 'requirements' copy of the list; the tab-aware parser no longer produces it.)",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "825e04f85b6df441"
+  },
+  "exclude_groups": [
+    "geography-ba-geographical-science-and-sustainability-major-electives"
+  ],
+  "patch_groups": {
+    "select-three": {
+      "name": "Geography BA Geographical Science and Sustainability Major Electives",
+      "required_credits": 9
+    }
+  }
+}

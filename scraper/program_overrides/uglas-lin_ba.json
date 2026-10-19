@@ -1,0 +1,53 @@
+{
+  "reason": "Linguistics BA, checked against the 2026-2027 page 2026-10-12 (UGLAS/LIN_BA/). The Required Major Coursework table (core 9 + electives 24) and its three elective lists parse correctly. The six tables after them are not requirements: 'Combination Degree Program' (four LIN 6xxx graduate courses for the optional BA/MA track) and five emphasis-area example lists (Theoretical Linguistics, Human Language Processing, Sociolinguistics, Language Acquisition and Teaching, Corpus/Computational Linguistics) under the note 'Consult the undergraduate coordinator or program director for emphasis areas and electives'. Parsed as required they added 66 credits. Replaces UF Planner's override, which folded every list into one 24-credit pool. [2026-10-18, https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/LIN_BA/: the row 'Linguistics electives (3000/4000 level), see list below (Only 12 credits are required if taking 3 credits of Quest 3 below) 15' took its credits from the '12 credits' in its own sentence, so the groups summed to 30 against 'Total Credits 33-36'. The hours cell says 15: 9 core + 15 + 9 = 33 (Quest 3, 0-3, can stand in for 3 of the 15).]",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "89503f1f0868169c"
+  },
+  "exclude_groups": [
+    "requirements-4",
+    "requirements-5",
+    "requirements-6",
+    "requirements-7",
+    "requirements-8",
+    "requirements-9"
+  ],
+  "patch_groups": {
+    "linguistics-electives-3000-4000-level-see-list-below-only-12-credits-are-required-if-taking-3-credits-of-quest-3-below": {
+      "required_credits": 15.0,
+      "logic": {
+        "from": [
+          "lin3677",
+          "lin3680",
+          "lin4005",
+          "lin4071",
+          "lin4124",
+          "lin4136",
+          "lin4205",
+          "lin4320",
+          "lin4400",
+          "lin4500",
+          "lin4600",
+          "lin4656",
+          "lin4701",
+          "lin4702c",
+          "lin4721",
+          "lin4760",
+          "lin4761c",
+          "lin4770c",
+          "lin4790",
+          "lin4803",
+          "lin4820",
+          "lin4850",
+          "lin4905",
+          "lin4930",
+          "lin4970",
+          "tsl3360",
+          "tsl3378"
+        ],
+        "credits": 15.0
+      }
+    }
+  }
+}

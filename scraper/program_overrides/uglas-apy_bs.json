@@ -1,0 +1,236 @@
+{
+  "reason": "s91. The page (UGLAS/APY_BA_BS/APY_BS/, cached 2026-07-25, read 2026-09-23) prints 'Anthropology BS Major Electives 18: Select at least 15 credits:' over 29 ANT courses, and names no other source for the rest. The scrape split it into an empty 18-credit header and a 0-credit required_list of all 29, so a blank board planned every one of them and went infeasible. One row now: the list, 18 credits, a credit pool. s92. The same page prints 'Select three of four sequences from Biology, Chemistry, Physics and Mathematics: 19-26': Biology (BSC 2010/2010L, 2011/2011L), Chemistry (CHM 2045/2045L, 2046/2046L), Physics ('Select one option': A PHY 2053/2053L, 2054/2054L; B PHY 2048/2048L, 2049/2049L) and Mathematics (MAC 2311 or STA 3024). The scrape made the 19-credit row a pool of Biology and Chemistry alone (16 credits, so it read 16/19 forever) and a separate 0-credit 'Select one option' of the two physics options, with the Mathematics row folded into Option B; a blank board planned Biology, Chemistry AND Physics A (26 credits) and still read short. One options group now: each allowed choice of three whole sequences is a route, twelve in all, cheapest first so the first route is UF's printed low end. [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.] [2026-10-18: patch_groups replaces logic wholesale, and this patch's logic was {credits: 18} alone, so the 18-credit electives row carried no course list in logic.from (only in eligible_course_ids); the 29 ANT courses are now in its logic too. Structure otherwise re-checked against the page.]",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "ff32678fa7b5fb55"
+  },
+  "exclude_groups": [
+    "anthropology-bs-major-electives",
+    "select-one-option"
+  ],
+  "patch_groups": {
+    "select-at-least-15-credits": {
+      "name": "Anthropology BS Major Electives",
+      "rtype": "choose_credits",
+      "required_credits": 18,
+      "required_course_count": 0,
+      "logic": {
+        "from": [
+          "ant3146",
+          "ant3164",
+          "ant3186",
+          "ant3420",
+          "ant3515",
+          "ant3520",
+          "ant3555",
+          "ant3930",
+          "ant4113",
+          "ant4114",
+          "ant4117",
+          "ant4147c",
+          "ant4462",
+          "ant4468",
+          "ant4525",
+          "ant4530",
+          "ant4531",
+          "ant4539",
+          "ant4552",
+          "ant4554c",
+          "ant4586",
+          "ant4740",
+          "ant4824",
+          "ant4852",
+          "ant4905",
+          "ant4907",
+          "ant4911",
+          "ant4914",
+          "ant4930"
+        ],
+        "credits": 18
+      }
+    },
+    "select-three-of-four-sequences-from-biology-chemistry-physics-and-mathematics": {
+      "rtype": "choose_credits",
+      "required_credits": 19,
+      "required_course_count": 0,
+      "eligible_course_ids": [
+        "bsc2010",
+        "bsc2010l",
+        "bsc2011",
+        "bsc2011l",
+        "chm2045",
+        "chm2045l",
+        "chm2046",
+        "chm2046l",
+        "sta3024",
+        "phy2048",
+        "phy2048l",
+        "phy2049",
+        "phy2049l",
+        "mac2311",
+        "phy2053",
+        "phy2053l",
+        "phy2054",
+        "phy2054l"
+      ],
+      "logic": {
+        "options": [
+          [
+            "bsc2010",
+            "bsc2010l",
+            "bsc2011",
+            "bsc2011l",
+            "chm2045",
+            "chm2045l",
+            "chm2046",
+            "chm2046l",
+            "sta3024"
+          ],
+          [
+            "bsc2010",
+            "bsc2010l",
+            "bsc2011",
+            "bsc2011l",
+            "phy2048",
+            "phy2048l",
+            "phy2049",
+            "phy2049l",
+            "sta3024"
+          ],
+          [
+            "chm2045",
+            "chm2045l",
+            "chm2046",
+            "chm2046l",
+            "phy2048",
+            "phy2048l",
+            "phy2049",
+            "phy2049l",
+            "sta3024"
+          ],
+          [
+            "bsc2010",
+            "bsc2010l",
+            "bsc2011",
+            "bsc2011l",
+            "chm2045",
+            "chm2045l",
+            "chm2046",
+            "chm2046l",
+            "mac2311"
+          ],
+          [
+            "bsc2010",
+            "bsc2010l",
+            "bsc2011",
+            "bsc2011l",
+            "phy2048",
+            "phy2048l",
+            "phy2049",
+            "phy2049l",
+            "mac2311"
+          ],
+          [
+            "chm2045",
+            "chm2045l",
+            "chm2046",
+            "chm2046l",
+            "phy2048",
+            "phy2048l",
+            "phy2049",
+            "phy2049l",
+            "mac2311"
+          ],
+          [
+            "bsc2010",
+            "bsc2010l",
+            "bsc2011",
+            "bsc2011l",
+            "phy2053",
+            "phy2053l",
+            "phy2054",
+            "phy2054l",
+            "sta3024"
+          ],
+          [
+            "chm2045",
+            "chm2045l",
+            "chm2046",
+            "chm2046l",
+            "phy2053",
+            "phy2053l",
+            "phy2054",
+            "phy2054l",
+            "sta3024"
+          ],
+          [
+            "bsc2010",
+            "bsc2010l",
+            "bsc2011",
+            "bsc2011l",
+            "phy2053",
+            "phy2053l",
+            "phy2054",
+            "phy2054l",
+            "mac2311"
+          ],
+          [
+            "chm2045",
+            "chm2045l",
+            "chm2046",
+            "chm2046l",
+            "phy2053",
+            "phy2053l",
+            "phy2054",
+            "phy2054l",
+            "mac2311"
+          ],
+          [
+            "bsc2010",
+            "bsc2010l",
+            "bsc2011",
+            "bsc2011l",
+            "chm2045",
+            "chm2045l",
+            "chm2046",
+            "chm2046l",
+            "phy2048",
+            "phy2048l",
+            "phy2049",
+            "phy2049l"
+          ],
+          [
+            "bsc2010",
+            "bsc2010l",
+            "bsc2011",
+            "bsc2011l",
+            "chm2045",
+            "chm2045l",
+            "chm2046",
+            "chm2046l",
+            "phy2053",
+            "phy2053l",
+            "phy2054",
+            "phy2054l"
+          ]
+        ],
+        "option_labels": [
+          "Biology, Chemistry, Mathematics (STA 3024)",
+          "Biology, Physics (Option B), Mathematics (STA 3024)",
+          "Chemistry, Physics (Option B), Mathematics (STA 3024)",
+          "Biology, Chemistry, Mathematics (MAC 2311)",
+          "Biology, Physics (Option B), Mathematics (MAC 2311)",
+          "Chemistry, Physics (Option B), Mathematics (MAC 2311)",
+          "Biology, Physics (Option A), Mathematics (STA 3024)",
+          "Chemistry, Physics (Option A), Mathematics (STA 3024)",
+          "Biology, Physics (Option A), Mathematics (MAC 2311)",
+          "Chemistry, Physics (Option A), Mathematics (MAC 2311)",
+          "Biology, Chemistry, Physics (Option B)",
+          "Biology, Chemistry, Physics (Option A)"
+        ],
+        "credits": 19
+      }
+    }
+  }
+}

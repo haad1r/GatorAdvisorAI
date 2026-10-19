@@ -1,0 +1,69 @@
+{
+  "reason": "Checked 2026-10-18 against https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/BOT_UMN/ (cached). The first table prints 'BSC 2010 & 2010L Integrated Principles of Biology 1 and ... Laboratory 3-4 / or BOT 2010C Introductory Botany' and 'BSC 2011 & 2011L ... 4 / or BOT 2011C Plant Diversity'. The parse hung each BOT course on the LAB slot (BSC 2010, then BSC 2010L or BOT 2010C), so a student taking BOT 2010C still owed BSC 2010. Each line is one choice between the lecture+lab bundle and the BOT course: two choosers, 3 and 4 credits (7, as printed). This is the only page in the cache with an 'or' row under an '&' bundle.",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "7bea3a9cde43323b"
+  },
+  "patch_groups": {
+    "requirements": {
+      "name": "Biology 1",
+      "rtype": "choose_credits",
+      "required_credits": 3.0,
+      "required_course_count": 1,
+      "eligible_course_ids": [
+        "bsc2010",
+        "bsc2010l",
+        "bot2010c"
+      ],
+      "logic": {
+        "options": [
+          [
+            "bsc2010",
+            "bsc2010l"
+          ],
+          [
+            "bot2010c"
+          ]
+        ],
+        "option_labels": [
+          "BSC 2010 & 2010L",
+          "BOT 2010C"
+        ],
+        "credits": 3.0
+      }
+    }
+  },
+  "add_groups": [
+    {
+      "group_key": "biology-2",
+      "name": "Biology 2",
+      "rtype": "choose_credits",
+      "logic": {
+        "options": [
+          [
+            "bsc2011",
+            "bsc2011l"
+          ],
+          [
+            "bot2011c"
+          ]
+        ],
+        "option_labels": [
+          "BSC 2011 & 2011L",
+          "BOT 2011C"
+        ],
+        "credits": 4.0
+      },
+      "eligible_course_ids": [
+        "bsc2011",
+        "bsc2011l",
+        "bot2011c"
+      ],
+      "required_credits": 4.0,
+      "required_course_count": 1,
+      "sort_order": 0,
+      "section": "major"
+    }
+  ]
+}

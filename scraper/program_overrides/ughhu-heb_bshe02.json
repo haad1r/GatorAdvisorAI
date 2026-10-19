@@ -1,0 +1,28 @@
+{
+  "reason": "Health Education & Behavior BS - Health Studies (ughhu-heb_bshe02), 2026-07-21. The catalog parsed only the 3-cr HSC capstone table; the specialization's health-science coursework + professional-program prerequisites are prose. Force-published with an honest specialization-coursework slot. Approximate -- verify credits against a College of HHP advising sheet. [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.]",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "af12a4c235800729"
+  },
+  "status": "published",
+  "add_groups": [
+    {
+      "group_key": "health-studies-coursework",
+      "name": "Health Studies Specialization Coursework",
+      "rtype": "choose_credits",
+      "logic": {
+        "from": [],
+        "credits": 30,
+        "placeholders": [
+          "~30 cr of HSC/health-science coursework plus pre-health professional prerequisites (biology, chemistry, etc.) for the Health Studies track -- see an HHP advisor."
+        ]
+      },
+      "eligible_course_ids": [],
+      "required_credits": 30,
+      "required_course_count": 0,
+      "sort_order": 5,
+      "section": "Major"
+    }
+  ]
+}

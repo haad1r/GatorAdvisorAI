@@ -1,0 +1,22 @@
+{
+  "reason": "Innovation minor (UGLAS/INV_UMN/), checked 2026-10-12 against the 2026-2027 page, which offers 'General Concentration or Artificial Intelligence': two ALTERNATIVE routes. The scrape emits both as requirements, so a student would be asked for both (about 25 credits for a 15-credit minor). UF Planner deleted the AI concentration; here its two groups are kept as section 'options' (a documented alternative route a reader can see, not a requirement), and the General concentration is the requirement. Published: the General concentration parses slot for slot; the remaining placeholders were the AI table's seven college headings.",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "5dd7a794fa416ef2"
+  },
+  "status": "published",
+  "patch_groups": {
+    "requirements": {
+      "name": "General Concentration (required courses)"
+    },
+    "requirements-2": {
+      "name": "Artificial Intelligence Concentration (alternative route)",
+      "section": "options"
+    },
+    "college-specific-course-select-one": {
+      "name": "Artificial Intelligence Concentration: college-specific course (alternative route)",
+      "section": "options"
+    }
+  }
+}

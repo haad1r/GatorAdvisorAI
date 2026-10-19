@@ -1,0 +1,31 @@
+{
+  "reason": "Ported from UF Planner; every quoted sentence re-checked on the 2026-2027 page 2026-10-12. s91. The page (https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/POL_BA/, cached 2026-07-25, read 2026-09-23) prints the elective credits as tiers that ADD UP to the total: 'Political Science Major Electives: 3000-level or higher Political Science courses 18, 1000/2000-level or higher Political Science courses 3. Total Political Science Major Coursework: 30'. The tiers are a partition, not overlapping pools, and the required core sits inside them too, so without a set one course paid into several rows and a blank board under-planned (33 of 33 by luck: the board happened to place a fourth core course; the audit could still count one course in both tiers). One exclusive set over the core and every tier. The core is patched too: the page prints 'Political Science Core Courses 9. Complete 3 of the 4 core courses: CPO 2001, INR 2001, POS 2041, POT 2002', and the scrape made it a required_list of all four (plus the sentence as a fifth slot), so the core claimed the fourth course and the set would have made the board plan an extra 3000-level course in its place (36 of 33). A fourth core course taken counts toward the 1000/2000-level tier, which is what 'or higher' allows.",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "9f9aebbff44eb5bd"
+  },
+  "patch_groups": {
+    "political-science-core-courses": {
+      "rtype": "choose_n",
+      "logic": {
+        "from": [
+          "cpo2001",
+          "inr2001",
+          "pos2041",
+          "pot2002"
+        ],
+        "n": 3
+      },
+      "required_credits": 9,
+      "required_course_count": 3
+    }
+  },
+  "exclusive_sets": {
+    "one-tier-per-course": [
+      "political-science-core-courses",
+      "elective-3000-level-or-higher-political-science-courses-18",
+      "elective-1000-2000-level-or-higher-political-science-courses-3"
+    ]
+  }
+}

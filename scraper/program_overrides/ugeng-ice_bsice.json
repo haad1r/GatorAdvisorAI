@@ -1,0 +1,9 @@
+{
+  "reason": "Published via override in the 2026-07-20 Phase-4 batch 3. Plan-derived program: the catalog page has no sc_courselist, so requirements are synthesized from the model plan grid (capped at DERIVED_CONFIDENCE_CAP=0.75 by design -> override-only publishing). Reviewed: the derived group carries a coherent whole-degree course spine of 34 real catalog courses; the 6 placeholder rows are legitimate gen-ed / Quest / elective slots from the plan grid (NOT parse failures), which the app renders as advisory requirement slots. Confidence (0.75) is depressed purely by the placeholder/coverage ratio. Spot-checked across colleges: APK, BME, CSD, and Sport Management all reproduce their real major spines. [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.]",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "135cd8fe007af886"
+  },
+  "status": "published"
+}

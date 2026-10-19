@@ -1,0 +1,29 @@
+{
+  "reason": "s78, punch list items 6+7. The page (https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/GPY_BA_BS/GPY_BS01/, cached, read 2026-09-10) prints: 'The same course may not be used to satisfy requirements for more than one bulleted group.' So every major group is one exclusive set. It bites today on GIS 2002, GEO 4167C/GIS 4021C/4037/4113/4115C and GEO 3427/3452/3454/4612, each of which also sits in the 41-course 'select two geography electives' pool. s91: 'Geography BS Medical Geography in Global Health Major Electives 6-8: Select two geography elective courses:' was an empty 6-credit header beside a 0-credit list of 41; the header goes and the list carries the 6 credits and the name (it was in the set already). [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.]",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "cc76a849e334c1f1"
+  },
+  "exclude_groups": [
+    "geography-bs-medical-geography-in-global-health-major-electives"
+  ],
+  "patch_groups": {
+    "select-two-geography-elective-courses": {
+      "name": "Geography BS Medical Geography in Global Health Major Electives",
+      "required_credits": 6
+    }
+  },
+  "exclusive_sets": {
+    "one-group-per-course": [
+      "geography-bs-medical-geography-in-global-health-core-courses",
+      "select-one",
+      "select-one-geoai-fundamental-course",
+      "select-one-2",
+      "select-one-regional-geography-course",
+      "select-two-medical-geography-core-courses",
+      "select-two-geography-elective-courses",
+      "requirements"
+    ]
+  }
+}

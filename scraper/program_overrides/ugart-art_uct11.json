@@ -1,0 +1,9 @@
+{
+  "reason": "Checked 2026-10-18 against https://catalog.ufl.edu/UGRD/colleges-schools/UGART/ART_UCT11/ (cached). Under 'Required Courses' the page's only course table is the 'Suggested Semester Plan': MUM 4051, MUM 4500C, MUM 4005, MUM 4561C, 3 credits each (all four in the catalog). The page fixes the course set itself: 'Students must first successfully pass two of the four courses before declaring to pursue the graduate certificate track'. The plan-derived list is therefore the curriculum (four required courses, 12 credits); only the ORDER is a suggestion ('Exceptions to the suggested semester plan may be made with the approval of students' advisors').",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "0543dc022e5a478f"
+  },
+  "status": "published"
+}

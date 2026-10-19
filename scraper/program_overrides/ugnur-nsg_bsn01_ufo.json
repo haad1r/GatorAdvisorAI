@@ -1,0 +1,74 @@
+{
+  "reason": "Nursing RN to BSN (UF Online), ported from UF Planner (2026-07-20) and re-checked 2026-10-12: an upper-division completion degree whose page carries no course list, only summary tables ('Upper Division Total', 'Lower Division Total') that parse as empty 120- and 60-credit requirements; they are excluded. The 11-course / 30-credit nursing core is transcribed from the Plan of Study Grid, and today's grid lists exactly those 11 courses (NUR 3066C ... NUR 4827).",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "43398710acc36232"
+  },
+  "status": "published",
+  "exclude_groups": [
+    "upper-division-total",
+    "lower-division-total"
+  ],
+  "add_groups": [
+    {
+      "group_key": "nursing-core",
+      "name": "Upper-Division Nursing Core (RN to BSN)",
+      "rtype": "required_list",
+      "logic": {
+        "slots": [
+          [
+            "nur3066c"
+          ],
+          [
+            "nur3805"
+          ],
+          [
+            "nur3123"
+          ],
+          [
+            "nur3826"
+          ],
+          [
+            "nur3169"
+          ],
+          [
+            "nur3197"
+          ],
+          [
+            "nur3816"
+          ],
+          [
+            "nur4108"
+          ],
+          [
+            "nur4636c"
+          ],
+          [
+            "nur4815"
+          ],
+          [
+            "nur4827"
+          ]
+        ]
+      },
+      "eligible_course_ids": [
+        "nur3066c",
+        "nur3805",
+        "nur3123",
+        "nur3826",
+        "nur3169",
+        "nur3197",
+        "nur3816",
+        "nur4108",
+        "nur4636c",
+        "nur4815",
+        "nur4827"
+      ],
+      "required_credits": 30,
+      "required_course_count": 11,
+      "sort_order": 0,
+      "section": "major"
+    }
+  ]
+}

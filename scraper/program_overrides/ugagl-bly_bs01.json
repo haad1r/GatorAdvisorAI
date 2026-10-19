@@ -1,0 +1,66 @@
+{
+  "reason": "s93. The page (UGAGL/BLY_BS/BLY_BS01/, cached 2026-07-25, read 2026-09-25) prints two 'Select one:' rows under Required Foundation Coursework whose choices are whole ROWS: 'Select one: 4' over 'BSC 2011 & 2011L' and 'BOT 2011C', and 'Select one: 4-8' over 'CHM 2200 & 2200L' and 'CHM 2210 & CHM 2211 & CHM 2211L'. The scrape flattened each into a credit pool of the loose courses, so the first could be met by BSC 2011 without its lab and the second by any 4 credits of five courses; and the pool took BOT 2011C, while the page's own critical tracking asks for 'BSC 2011 / BSC 2011L' by semester 4 and every tracking course 'including labs' by semester 5, so a blank board never met either. Each row is now a route of an options group, in the page's order; the credits are UF's printed low end. The options ranking (s89) takes the BSC route because BSC 2011 is on the board anyway as a prerequisite. [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.]",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "f7cb1c44764fc916"
+  },
+  "patch_groups": {
+    "select-one": {
+      "rtype": "choose_credits",
+      "required_credits": 4,
+      "required_course_count": 0,
+      "eligible_course_ids": [
+        "bsc2011",
+        "bsc2011l",
+        "bot2011c"
+      ],
+      "logic": {
+        "options": [
+          [
+            "bsc2011",
+            "bsc2011l"
+          ],
+          [
+            "bot2011c"
+          ]
+        ],
+        "option_labels": [
+          "BSC 2011 & 2011L",
+          "BOT 2011C"
+        ],
+        "credits": 4
+      }
+    },
+    "select-one-2": {
+      "rtype": "choose_credits",
+      "required_credits": 4,
+      "required_course_count": 0,
+      "eligible_course_ids": [
+        "chm2200",
+        "chm2200l",
+        "chm2210",
+        "chm2211",
+        "chm2211l"
+      ],
+      "logic": {
+        "options": [
+          [
+            "chm2200",
+            "chm2200l"
+          ],
+          [
+            "chm2210",
+            "chm2211",
+            "chm2211l"
+          ]
+        ],
+        "option_labels": [
+          "CHM 2200 & 2200L",
+          "CHM 2210 & CHM 2211 & CHM 2211L"
+        ],
+        "credits": 4
+      }
+    }
+  }
+}

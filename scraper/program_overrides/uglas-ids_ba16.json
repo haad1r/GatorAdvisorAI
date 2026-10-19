@@ -1,0 +1,28 @@
+{
+  "reason": "Interdisciplinary Studies BA - Medieval & Early Modern Studies (uglas-ids_ba16), 2026-07-21. A sponsor-designed individualized major (thesis required); no fixed course table. Modeled as an advisor-designed interdisciplinary coursework slot. Force-published; approximate. [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.]",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "cb8b06547e146225"
+  },
+  "status": "published",
+  "add_groups": [
+    {
+      "group_key": "mems-individualized-coursework",
+      "name": "Medieval & Early Modern Individualized Coursework",
+      "rtype": "choose_credits",
+      "logic": {
+        "from": [],
+        "credits": 36,
+        "placeholders": [
+          "~36 cr of interdisciplinary Medieval & Early Modern coursework (history, literature, languages, art history, religion, philosophy) plus a senior thesis, designed with faculty sponsors and the Interdisciplinary Studies Committee."
+        ]
+      },
+      "eligible_course_ids": [],
+      "required_credits": 36,
+      "required_course_count": 0,
+      "sort_order": 5,
+      "section": "Major"
+    }
+  ]
+}
