@@ -12,7 +12,8 @@ Guarantees:
   (used for SOC terms that have ended).
 - Per-source cooldown: a run that FINISHES after touching the network writes a
   stamp, and until the source's cooldown passes, uncached fetches are refused
-  (cache hits still work). An interrupted run writes no stamp, so rerunning it
+  (cache hits still work, even past their TTL: a stale copy is served rather
+  than revalidated). An interrupted run writes no stamp, so rerunning it
   replays the cache and resumes where it stopped. force=True overrides.
 
 Usage:
@@ -53,6 +54,14 @@ class FetchError(RuntimeError):
 
 class NetworkBlockedError(FetchError):
     """A URL is not cached and the source's network cooldown is active."""
+
+
+class HTTPStatusError(FetchError):
+    """The server answered with a non-success status that retrying won't fix."""
+
+    def __init__(self, status: int, url: str) -> None:
+        super().__init__(f"HTTP {status} for {url}")
+        self.status = status
 
 
 @dataclass(frozen=True)
@@ -190,6 +199,13 @@ class Fetcher:
             log.debug("cache hit: %s", url)
             return Page(url, entry["body"], datetime.fromisoformat(entry["fetched_at"]), from_cache=True)
 
+        if not self.allow_network and entry is not None:
+            # Past its TTL but the cooldown forbids revalidating: the stale copy
+            # is the only answer allowed, and it is what offline re-parses need.
+            # Its fetched_at still says how old it is, so nothing is misreported.
+            log.debug("stale cache hit (cooldown active): %s", url)
+            return Page(url, entry["body"], datetime.fromisoformat(entry["fetched_at"]), from_cache=True)
+
         if not self.allow_network:
             hours = self._cooldown_left.total_seconds() / 3600 if self._cooldown_left else 0
             raise NetworkBlockedError(
@@ -233,7 +249,7 @@ class Fetcher:
                 return None
 
             if not response.ok:
-                raise FetchError(f"HTTP {response.status_code} for {url}")
+                raise HTTPStatusError(response.status_code, url)
 
             entry = self._write_entry(url, response.text, response.headers.get("ETag"),
                                       response.headers.get("Last-Modified"))

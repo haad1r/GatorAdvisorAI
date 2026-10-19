@@ -83,7 +83,7 @@ def parse_course_index(html: str) -> dict[str, str]:
     return departments
 
 
-def _catalog_year(soup: BeautifulSoup) -> str | None:
+def catalog_year_of(soup: BeautifulSoup) -> str | None:
     """The catalog year printed on the page, or None if absent or ambiguous."""
     years = {f"{a}-{b}" for a, b in _CATALOG_YEAR_RE.findall(soup.get_text(" "))}
     if len(years) == 1:
@@ -111,7 +111,7 @@ def parse_department_page(html: str, dept_slug: str) -> DepartmentPage:
         course = _parse_block(block, dept_slug)
         if course is not None:
             courses.append(course)
-    return DepartmentPage(_catalog_year(soup), courses)
+    return DepartmentPage(catalog_year_of(soup), courses)
 
 
 def _text(el) -> str:
@@ -213,6 +213,9 @@ def _apply_attributes(course: Course, value: str) -> None:
 #   {"type": "program", "code": "EVS_BA"}  or  {"type": "program", "name": "Dance", "kind": "major"}
 #   {"type": "gpa", "min": 3.75, "scope": "upper division"}       (scope optional)
 #   {"type": "credits", "min": 60}
+#        optional: "prefixes": ["enc", "crw"] (credits in those subjects),
+#        "min_level": 3000, "subject": "history" (a subject named in words,
+#        kept verbatim, never mapped to prefixes), "from": [course ids]
 #   {"type": "permission", "who": "instructor" | "department" | "coordinator" | "other", "text": ...}
 #   {"type": "placement", "text": ...}      an exam/test score alternative
 #   {"type": "equivalent"}                  "or equivalent": an advisor's judgment
@@ -226,6 +229,48 @@ _REWRITES = [
     (re.compile(r"\bminimum (\d+) credits earned in enrollment, test, or transfer credit\b", re.IGNORECASE),
      r"\1 credits"),
 ]
+
+# Credits counted within subjects or from a course list (2026-10-18, changed from
+# UF Planner): ~200 of the 550 unparsed prerequisites read "6 credits of ENC or
+# CRW or AML or ENG or ENL", "6 credits of an AFH, AMH, ASH, EUH, LAH, or WOH
+# course", "3 credits EUH or EUS", "six credits of GER credit at the 3000-level"
+# or "6 credits from AFS 2002 or HUM 2420 or ...". The commas and "or"s inside
+# would split them into alternatives, so each becomes ONE opaque word first
+# (lowercase inside, so the case-sensitive course pattern never matches in it)
+# that _classify turns into a credits leaf.
+_NUM_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7,
+              "eight": 8, "nine": 9, "ten": 10, "twelve": 12, "fifteen": 15}
+_CREDIT_N = r"(?P<n>\d+|" + "|".join(_NUM_WORDS) + r")\s+(?:credits?|credit\s+hours|hours)"
+_PFX = r"(?-i:[A-Z]{3})(?!\s?\d)"
+_SUBJECT_CREDITS_RE = re.compile(
+    r"\b" + _CREDIT_N + r"\s+(?:of\s+|in\s+)?(?:an?\s+)?"
+    r"(?P<pfx>" + _PFX + r"(?:\s*(?:,|/|\bor\b|\band\b)\s*(?:or\s+|and\s+)?" + _PFX + r")*)"
+    r"(?:\s+(?:courses?|coursework|credits?))?"
+    r"(?:\s+at\s+the\s+(?P<level>\d)000[-\s]level(?:\s+or\s+(?:above|higher))?)?\b",
+    re.IGNORECASE)
+_COURSE_CREDITS_RE = re.compile(
+    r"\b" + _CREDIT_N + r"\s+(?:from|of|in|among)\s+(?:the\s+following:?\s+)?"
+    r"(?P<codes>(?-i:[A-Z]{3}\s?\d{4}[A-Z]?)(?:\s*(?:,|\bor\b)\s*(?:or\s+)?(?-i:[A-Z]{3}\s?\d{4}[A-Z]?))+)",
+    re.IGNORECASE)
+_CREDITS_TOKEN_RE = re.compile(r"^credits\[(?P<n>\d+):(?P<what>prefixes|from):(?P<items>[a-z0-9|]+)(?::(?P<level>\d+))?\]$")
+
+
+def _credit_count(token: str) -> int:
+    return int(token) if token.isdigit() else _NUM_WORDS[token.lower()]
+
+
+def _collapse_credit_phrases(text: str) -> str:
+    def courses(m: re.Match) -> str:
+        found = [ids.code_to_id(c) for c in re.findall(r"(?-i:[A-Z]{3}\s?\d{4}[A-Z]?)", m.group("codes"))]
+        return f"credits[{_credit_count(m.group('n'))}:from:{'|'.join(found)}]"
+
+    def subjects(m: re.Match) -> str:
+        pfx = [p.lower() for p in re.findall(r"(?-i:[A-Z]{3})", m.group("pfx"))]
+        level = f":{m.group('level')}000" if m.group("level") else ""
+        return f"credits[{_credit_count(m.group('n'))}:prefixes:{'|'.join(pfx)}{level}]"
+
+    text = _COURSE_CREDITS_RE.sub(courses, text)
+    return _SUBJECT_CREDITS_RE.sub(subjects, text)
 
 _TOKEN_RE = re.compile(
     r"""
@@ -257,9 +302,12 @@ _FILLER = {"either", "both", "all", "each", "one", "of", "the", "following", "co
 
 def parse_requisite(raw: str) -> Requisite:
     raw = " ".join(raw.split()).strip()
-    text = raw
+    # Zero-width spaces pasted into 42 history prerequisites ("<U+200B>6 credits of
+    # an AFH, ...") glue onto the first word; raw_text keeps them verbatim.
+    text = raw.replace("\u200b", "").replace("\ufeff", "")
     for pattern, replacement in _REWRITES:
         text = pattern.sub(replacement, text)
+    text = _collapse_credit_phrases(text)
     tokens = _tokenize(text)
     tokens = _attach_grades(tokens)
     tokens = _merge_text(tokens)
@@ -466,7 +514,9 @@ _LEAF_PATTERNS = [
         r"(?P<min>\d\.\d+)(?:\s+or\s+(?:higher|above|better|greater))?$", re.IGNORECASE)),
     ("credits", re.compile(
         r"^(?:(?:a\s+)?minimum\s+(?:of\s+)?|at\s+least\s+)?(?P<min>\d+)\s+(?:credits|credit\s+hours|hours)"
-        r"(?:\s+(?:completed|earned))?(?:\s+or\s+more)?$", re.IGNORECASE)),
+        r"(?:\s+(?:completed|earned))?(?:\s+or\s+more)?"
+        # "6 credits of history": a subject named in words (79 courses), kept as written
+        r"(?:\s+(?:of|in)\s+(?P<subject>(?-i:[a-z]+(?:\s+[a-z]+)?)))?$", re.IGNORECASE)),
     ("equivalent", re.compile(r"^(?:the\s+)?equivalent(?:\s+courses?)?$", re.IGNORECASE)),
 ]
 _PERMISSION_RE = re.compile(r"\b(?:permission|consent|approval)\b", re.IGNORECASE)
@@ -476,6 +526,14 @@ _PLACEMENT_RE = re.compile(r"\bplacement\b|\bscore\b|\bAP\b|\bIB\b|\btest\b|\bex
 def _classify(text: str) -> dict:
     """Turn a phrase into a typed leaf, or an unparsed leaf if we don't know it."""
     text = text.strip(" ,")
+    m = _CREDITS_TOKEN_RE.match(text)
+    if m:  # collapsed by _collapse_credit_phrases
+        leaf: dict = {"type": "credits", "min": int(m.group("n"))}
+        items = m.group("items").split("|")
+        leaf["prefixes" if m.group("what") == "prefixes" else "from"] = items
+        if m.group("level"):
+            leaf["min_level"] = int(m.group("level"))
+        return leaf
     for kind, pattern in _LEAF_PATTERNS:
         m = pattern.match(text)
         if not m:
@@ -492,7 +550,10 @@ def _classify(text: str) -> dict:
                 leaf["scope"] = m.group("scope").lower().replace("-", " ")
             return leaf
         if kind == "credits":
-            return {"type": "credits", "min": int(m.group("min"))}
+            leaf = {"type": "credits", "min": int(m.group("min"))}
+            if m.group("subject"):
+                leaf["subject"] = m.group("subject").lower()
+            return leaf
         return {"type": "equivalent"}
     if _PERMISSION_RE.search(text) and len(text.split()) <= 6:
         low = text.lower()
@@ -541,6 +602,8 @@ def _mentions(tree: dict) -> list[str]:
     for leaf in leaves(tree):
         if leaf["type"] == "course":
             found.append(leaf["course_id"])
+        elif leaf["type"] == "credits":
+            found.extend(leaf.get("from", []))
         elif leaf["type"] == "unparsed":
             found.extend(leaf.get("mentions", []))
     return list(dict.fromkeys(found))
@@ -561,7 +624,11 @@ def _describe(node: dict) -> str:
     if t == "gpa":
         return f"{node.get('scope', '')} GPA {node['min']}".strip()
     if t == "credits":
-        return f"{node['min']} credits"
+        scope = (" of " + " or ".join(p.upper() for p in node["prefixes"]) if "prefixes" in node else
+                 " from " + " or ".join(ids.id_to_code(c) for c in node["from"]) if "from" in node else
+                 " of " + node["subject"] if "subject" in node else "")
+        level = f" at the {node['min_level']} level" if "min_level" in node else ""
+        return f"{node['min']} credits{scope}{level}"
     if t == "equivalent":
         return "equivalent"
     return node["text"]

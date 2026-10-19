@@ -9,9 +9,17 @@ Two kinds of finding:
   on. These are facts about UF's data, not bugs, and the audit engine must be
   able to see them rather than have them silently "fixed".
 
-The one repair made here: UF often cites "COP 3503" when the catalog course is
-"COP 3503C" (lecture+lab combined), or the reverse. When exactly one of the two
-spellings exists, the reference is rewritten to it and counted.
+Repairs made here, each counted in the report:
+- UF often cites "COP 3503" when the catalog course is "COP 3503C" (lecture+lab
+  combined), or the reverse. When exactly one of the two spellings exists, the
+  reference is rewritten to it.
+- Changed from UF Planner (2026-10-18): a reference to a code the catalog no
+  longer has, which the Schedule of Courses shows under the same UF course id as
+  exactly one current catalog course ("LIN 3010" -> LIN 2011, "FOS 3042" -> FOS
+  2040), is rewritten to that course: UF renumbered it. A reference to a course
+  the Schedule offers but the catalog has no page for is counted as
+  schedule-only rather than unknown. Both need data/soc/courses.csv; without it
+  they are skipped.
 """
 
 from __future__ import annotations
@@ -30,7 +38,34 @@ class ValidationError(RuntimeError):
     pass
 
 
-def validate_catalog(courses: dict[str, catalog.Course]) -> dict:
+def soc_index(soc_rows: list[dict], catalog_ids: set[str]) -> dict:
+    """From data/soc/courses.csv rows: {"renumbered": {old id: catalog id},
+    "schedule_only": {ids SOC lists that the catalog lacks}}. A code is mapped
+    only when its UF course id leads to exactly one catalog course."""
+    by_uf: dict[str, set[str]] = {}
+    for r in soc_rows:
+        for uf in filter(None, (r.get("uf_course_ids") or "").split("|")):
+            by_uf.setdefault(uf, set()).add(r["course_id"])
+    renumbered: dict[str, str] = {}
+    schedule_only: set[str] = set()
+    for r in soc_rows:
+        cid = r["course_id"]
+        if cid in catalog_ids:
+            continue
+        twins = {c for uf in filter(None, (r.get("uf_course_ids") or "").split("|"))
+                 for c in by_uf.get(uf, ()) if c != cid and c in catalog_ids}
+        if len(twins) == 1:
+            renumbered[cid] = twins.pop()
+        else:
+            schedule_only.add(cid)
+    return {"renumbered": renumbered, "schedule_only": schedule_only}
+
+
+def validate_catalog(courses: dict[str, catalog.Course], soc: dict | None = None) -> dict:
+    """soc: soc_index(...) of the Schedule of Courses, or None to skip the
+    renumbering and schedule-only checks."""
+    renumbered = (soc or {}).get("renumbered", {})
+    schedule_only = (soc or {}).get("schedule_only", set())
     errors: list[str] = []
     for course in courses.values():
         errors.extend(_vocabulary_errors(course))
@@ -39,6 +74,8 @@ def validate_catalog(courses: dict[str, catalog.Course]) -> dict:
 
     statuses: Counter[str] = Counter()
     resolved: list[str] = []
+    renamed: list[str] = []
+    on_schedule: list[str] = []
     unknown: list[str] = []
     self_refs: list[str] = []
     for course in courses.values():
@@ -47,30 +84,41 @@ def validate_catalog(courses: dict[str, catalog.Course]) -> dict:
                 continue
             statuses[f"{kind}:{req.status}"] += 1
             for leaf in catalog.leaves(req.tree):
+                if leaf["type"] == "credits" and "from" in leaf:
+                    leaf["from"] = [renumbered.get(_resolve(c, courses), _resolve(c, courses)) for c in leaf["from"]]
                 if leaf["type"] != "course":
                     continue
                 target = _resolve(leaf["course_id"], courses)
                 if target != leaf["course_id"]:
                     resolved.append(f"{course.id}: {leaf['course_id']} -> {target}")
                     leaf["course_id"] = target
+                if target not in courses and target in renumbered:
+                    renamed.append(f"{course.id}: {target} -> {renumbered[target]}")
+                    target = leaf["course_id"] = renumbered[target]
                 if target == course.id:
                     self_refs.append(course.id)
+                elif target in schedule_only:
+                    on_schedule.append(f"{course.id} -> {target}")
                 elif target not in courses:
                     unknown.append(f"{course.id} -> {target}")
-            req.mentions = [_resolve(cid, courses) for cid in req.mentions]
+            req.mentions = list(dict.fromkeys(
+                renumbered.get(_resolve(cid, courses), _resolve(cid, courses)) for cid in req.mentions))
 
     no_credits = [c.id for c in courses.values() if c.credits_min is None]
     report = {
         "courses": len(courses),
         "requisites": dict(sorted(statuses.items())),
         "resolved_lab_suffix": {"count": len(resolved), "samples": resolved[:SAMPLE_SIZE]},
+        "resolved_renumbered": {"count": len(renamed), "samples": renamed[:SAMPLE_SIZE]},
+        "schedule_only_references": {"count": len(on_schedule), "samples": on_schedule[:SAMPLE_SIZE]},
         "unknown_course_references": {"count": len(unknown), "samples": unknown[:SAMPLE_SIZE]},
         "self_references": {"count": len(self_refs), "samples": self_refs[:SAMPLE_SIZE]},
         "missing_credits": {"count": len(no_credits), "samples": no_credits[:SAMPLE_SIZE]},
     }
-    log.info("validation: %d courses, %d lab-suffix references resolved, %d references to courses "
-             "not in this catalog, %d self-references, %d courses without credits",
-             len(courses), len(resolved), len(unknown), len(self_refs), len(no_credits))
+    log.info("validation: %d courses, %d lab-suffix and %d renumbered references resolved, %d "
+             "schedule-only, %d references to courses not in this catalog, %d self-references, "
+             "%d courses without credits", len(courses), len(resolved), len(renamed), len(on_schedule),
+             len(unknown), len(self_refs), len(no_credits))
     return report
 
 
