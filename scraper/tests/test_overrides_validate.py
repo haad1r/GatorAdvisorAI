@@ -2,7 +2,7 @@ import pytest
 
 from scraper import catalog
 from scraper.overrides import OverrideError, apply_overrides
-from scraper.validate import ValidationError, validate_catalog
+from scraper.validate import ValidationError, soc_index, validate_catalog
 
 
 def make(cid, prereq=None, **fields):
@@ -38,6 +38,21 @@ def test_unknown_references_are_reported_not_removed():
     report = validate_catalog(courses)
     assert courses["cop3530"].prereq.tree["course_id"] == "xyz9999"
     assert report["unknown_course_references"]["count"] == 1
+
+
+def test_renumbered_and_schedule_only_references_use_the_schedule_of_courses():
+    # SOC lists LIN 3010 and LIN 2011 under one UF course id (a renumbering), and
+    # RTV 3001 with no catalog page at all.
+    soc_rows = [{"course_id": "lin3010", "uf_course_ids": "010911"},
+                {"course_id": "lin2011", "uf_course_ids": "010911"},
+                {"course_id": "rtv3001", "uf_course_ids": "020001"}]
+    courses = {"lin2011": make("lin2011"), "ara4850": make("ara4850", "LIN 3010"),
+               "mmc3203": make("mmc3203", "RTV 3001")}
+    report = validate_catalog(courses, soc_index(soc_rows, set(courses)))
+    assert courses["ara4850"].prereq.tree["course_id"] == "lin2011"
+    assert report["resolved_renumbered"]["count"] == 1
+    assert report["schedule_only_references"]["count"] == 1
+    assert report["unknown_course_references"]["count"] == 0
 
 
 def test_values_outside_the_vocabulary_stop_the_run():

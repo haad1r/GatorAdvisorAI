@@ -82,6 +82,21 @@ def test_unrecognized_text_is_kept_and_marked():
     assert r.mentions == ["mcb2000l", "fos4222"]  # still visible to the dependency graph
 
 
+def test_credits_within_subjects_or_from_a_list_are_one_leaf():
+    # ~200 prerequisites were unparsed: the "or"s and commas split them apart.
+    assert tree("6 credits of ENC or CRW or AML or ENG or ENL.") == {
+        "type": "credits", "min": 6, "prefixes": ["enc", "crw", "aml", "eng", "enl"]}
+    assert tree("\u200b6 credits of an AFH, AMH, ASH, EUH, LAH, or WOH course.") == {
+        "type": "credits", "min": 6, "prefixes": ["afh", "amh", "ash", "euh", "lah", "woh"]}
+    assert tree("Six credits of GER credit at the 3000-level.") == {
+        "type": "credits", "min": 6, "prefixes": ["ger"], "min_level": 3000}
+    # a subject in words is kept as written, never mapped to prefixes
+    assert tree("6 credits of history.") == {"type": "credits", "min": 6, "subject": "history"}
+    r = catalog.parse_requisite("(6 credits from AFS 2002 or HUM 2420 or AFH 2000 ) or (junior standing).")
+    assert r.status == "complete" and r.mentions == ["afs2002", "hum2420", "afh2000"]
+    assert r.tree["items"][0] == {"type": "credits", "min": 6, "from": ["afs2002", "hum2420", "afh2000"]}
+
+
 def test_lowercase_words_are_never_course_codes():
     r = catalog.parse_requisite("3 credits at the 3000 level or above")
     assert r.mentions == []
