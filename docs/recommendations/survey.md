@@ -11,15 +11,21 @@ distinguish hard constraints."
   filtering, cut the question.
 - Only ask a question if the system can act on the answer. That requires data
   the system actually has.
-  - Available now: catalog data (title, credits, level, prerequisites, description).
-  - Available from the academic engine (TEAM-02, Shaun): major-to-subject
-    mapping and requirement-slot / eligibility data. Q3 and Q5 depend on these.
-  - Not available yet: section times and formats (no tracked owner yet; see
-    "Future questions") and professor ratings (a later feature).
+  - Available as source data: catalog fields (title, credits, level,
+    prerequisites, description) and Schedule of Courses sections, including
+    times and delivery formats, in the UF data pipeline (#16).
+  - Available only after the academic-engine handoff (TEAM-02, Shaun):
+    validated eligibility, requirement-slot contribution, and plan-add checks.
+    Q3 and Q5 depend on requirement-slot contribution.
+  - Not yet available as a recommendation-service contract: confirmed,
+    term-specific section availability. Professor ratings are a later feature.
 - Do NOT ask for things we already know: major, class year, completed courses.
   Those come from onboarding / transcript import (the onboarding and storage teams).
 - **Hard constraint** = never violated, used to filter candidates BEFORE ranking.
-  **Preference** = nudges the score, never removes a course.
+  Academic eligibility, completed-course and explicit-dismissal rules come from
+  the academic engine and feedback service, not from this survey. Unknown
+  eligibility is never advertised as eligible. **Preference** = nudges the
+  score, never removes a course. All six survey answers are preferences.
 - **Every question is optional.** A student who skips the whole survey still gets
   useful baseline results (issue #11 cold-start requirement). The survey step has
   a "Skip for now" button and can be retaken later from settings.
@@ -31,8 +37,8 @@ distinguish hard constraints."
 | # | Question (what the student sees) | Answer type | Options | Kind | Used for | Data needed |
 |---|---|---|---|---|---|---|
 | Q1 | Which topics are you most interested in? | Pick any (no cap) | The 22 interest IDs, shown in 6 groups | Preference | Interest-match score (see "Scoring notes") | Course tags |
-| Q2 | Any topics you'd rather not see? | Pick any (no cap) | The 22 interest IDs | Hard constraint | Removes courses whose tags are only in these interests. Warn the student if this leaves few recommendations. An interest can't be picked in both Q1 and Q2. | Course tags (description-based; see "Scoring notes") |
-| Q3 | Do you want suggestions mostly inside your major, or outside it? | Pick one | `inside_major`, `mix`, `outside_major` | Preference | Boosts or lowers courses by whether they fall in the student's major subjects. **Hidden when major is undeclared.** | Major (onboarding) + major-to-subject map (TEAM-02) |
+| Q2 | Which topics interest you less? | Pick any (no cap) | The 22 interest IDs | Preference | Lowers the score for matching description-reviewed tags; never filters or changes eligibility. An interest can't be picked in both Q1 and Q2. | Description-reviewed course tags |
+| Q3 | Do you want suggestions mostly inside your major, or outside it? | Pick one | `inside_major`, `mix`, `outside_major` | Preference | Boosts or lowers courses using verified requirement-slot contribution for the student's program. **Hidden when major is undeclared.** | Major (onboarding) + requirement-slot result (TEAM-02) |
 | Q4 | What course level do you want right now? | Pick one | `intro` (1000-2000), `advanced` (3000-4000), `no_preference` | Preference | Boosts courses by level (from the course number) | Catalog course numbers |
 | Q5 | Should we favor courses that also count toward Gen Ed or degree requirements? | Pick one | `yes`, `no_preference` | Preference | Weights the requirement-progress score in discovery results | Requirement-slot data (TEAM-02) |
 | Q6 | Are you still exploring? | Yes / No | `exploring`, `settled` | Preference | If `exploring`, ranking spreads across more interests (more diversity). **Starts at `exploring` when major is undeclared.** | None |
@@ -55,16 +61,22 @@ If the student skipped Q1, the interest component is skipped, not scored as 0.
 
 ### Q2 and tag quality
 
-Q2 removes courses, so it needs accurate tags. With subject-level tags only,
-excluding `math_physical_sciences` would remove every MAC course. Q2 should only
-filter on tags reviewed from course descriptions (provenance
-`description_reviewed`, see the interest list). Until those exist, treat Q2 as a
-strong penalty instead of a filter.
+Q2 is a preference, even when description-reviewed tags exist. A selected
+interest lowers a course's interest component only when that course has a
+matching `description_reviewed` tag (see the interest list). Subject-level tags
+are too broad for a negative signal. If no reviewed tags are available for a
+course, omit the Q2 component rather than assuming it matches or promising its
+absence. The scoring reason must identify the tag and its provenance whenever
+Q2 changes a score. Academic eligibility and explicit dismissals remain hard
+filters before ranking.
 
 ## Future questions (not in the live survey yet)
 
-Each is held back because the data to act on it doesn't exist. Asking now would
-promise a filter or boost the system can't apply.
+The SOC data pipeline supplies section times and delivery modes, but the
+recommendation service still needs a validated, term-specific availability
+contract and integration smoke check from the academic engine before it can
+enforce them. Workload data is also unavailable. Asking these questions now
+would promise behavior the service cannot guarantee.
 
 ### F1: Are there class times you can't do? (was Q6)
 
@@ -72,14 +84,16 @@ Answer: list of time ranges, each `{days, start, end}` (days Mon to Fri). Kind:
 hard constraint. Removes a course if every one of its sections overlaps a blocked
 range; a partial overlap counts as a conflict.
 
-Needs section times. The original section-data issue (#5) was closed and no open
-issue tracks section data yet (only #14, the scraping pipeline). This may fit
-better as a schedule-builder setting than an interest question.
+The source section times are in `data/soc/sections/`; the question waits for
+TEAM-02 to provide confirmed target-term availability and scheduling semantics.
+This may fit better as a schedule-builder setting than an interest question.
 
 ### F2: How do you want to attend class? (was Q7)
 
 Options: `in_person`, `online`, `hybrid` (pick any). Kind: hard constraint.
-Filters out courses with no section in an allowed format. Needs section formats.
+Filters out courses with no confirmed section in an allowed format. Source
+formats are in `data/soc/sections/`; enforcement waits for the same TEAM-02
+target-term availability contract as F1.
 
 ### F3: How heavy a workload do you want next semester? (was Q9)
 
@@ -136,6 +150,11 @@ Conditional questions carry a `show_if` / `default_if` rule, e.g. Q3:
 { "id": "major_scope", "show_if": { "major_not": "undeclared" } }
 ```
 
+The stable question IDs are `interests` (Q1), `lower_interest_topics` (Q2),
+`major_scope` (Q3), `course_level` (Q4), `requirement_progress` (Q5), and
+`exploration_mode` (Q6). Q1 and Q2 use `multi_choice` with the 22 options from
+`interests_v1`; Q3-Q6 use `single_choice` with the values in the table above.
+Every question has `required: false` and `constraint_kind: "preference"`.
 Question IDs and option values are stable snake_case, like the interest IDs.
 Display text can be reworded freely.
 
@@ -146,7 +165,8 @@ Display text can be reworded freely.
   can reuse it, same as `validateProfile()`.
 - Needs checkbox/chip groups and radio groups; only `NativeSelect` exists today.
   22 chips is a lot for the onboarding card, so give the survey its own step.
-- `validateSurvey()` rejects the same interest in both Q1 and Q2.
+- `validateSurvey()` rejects the same interest in both Q1 and Q2 and unknown
+  IDs or option values for the recorded survey and interest-list versions.
 
 ## What the storage team would need
 
@@ -171,6 +191,11 @@ Per student, one survey response:
 - When answers change, store the new response with its own timestamp so rankings
   can be regenerated. Keep both version fields so old answers can be read after
   the survey or the interest list changes.
+- Maria owns the persistence interface and account-deletion behavior. Alan and
+  Sid provide versioned answer and scoring examples; the frontend must not
+  create an independent survey store. Recommendation impressions and feedback
+  are separate events, with request/scoring versions and idempotency as required
+  by issue #11. No event is written from this design document alone.
 
 ## Changes from v0
 
@@ -179,7 +204,8 @@ Per student, one survey response:
 - Q1 scoring changed from 1 / (number picked) to a normalized 0-1 overlap score.
 - All questions marked optional; skipping the survey is supported.
 - Q3 hidden for undeclared students; Q8 (now Q6) defaults to `exploring` for them.
-- Q2 limited to description-reviewed tags; Q1/Q2 overlap rejected.
+- Q2 is explicitly a preference based only on description-reviewed tags; it
+  never acts as a hard filter. Q1/Q2 overlap is rejected.
 - Data dependencies for Q3 and Q5 on TEAM-02 listed explicitly.
 - Schema options use `{ value, label }` to match the app's `Option` type.
 - Storage format changed to `{question_id, status, value}` plus survey and

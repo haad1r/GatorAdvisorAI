@@ -82,9 +82,10 @@ Each tag records where it came from:
 }
 ```
 
-`source` is `subject_default` or `description_reviewed`. Q2 in the survey (topics
-to avoid) only filters on `description_reviewed` tags, because removing a course
-needs more confidence than boosting one.
+`source` is `subject_default` or `description_reviewed`. Q2 in the survey
+(topics of lower interest) uses only `description_reviewed` tags for its
+preference score. Subject defaults are too broad to justify a negative signal.
+Neither tag source changes academic eligibility.
 
 ---
 
