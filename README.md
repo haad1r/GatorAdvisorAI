@@ -96,6 +96,8 @@ gatoradvisor-ai/
 └── docs/
 ```
 
+Frontend routes, layouts, component folders, and file ownership are in [docs/frontend.md](docs/frontend.md).
+
 ---
 
 ## Getting Started
