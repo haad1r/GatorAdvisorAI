@@ -208,7 +208,7 @@
       "required_credits": 30,
       "required_course_count": 10,
       "sort_order": 5,
-      "section": "Major"
+      "section": "major"
     }
   ]
 }

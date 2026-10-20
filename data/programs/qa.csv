@@ -907,6 +907,7 @@ ughhu-evm_umn_ufo,warning,requirements,generic 'Requirements' group alongside sp
 ughhu-heb_bshe01,warning,requirements-2,unparsed requirement kept as placeholder: 'HSC 5XXX Any non-combined 5000-level course offered within the department',False
 ughhu-heb_bshe02,warning,requirements,unparsed requirement kept as placeholder: 'HSC 5XXX: Any non-combined 5000-level course offered within the department 1-3',False
 ughhu-heb_bshe02,warning,health-studies-coursework,"unparsed requirement kept as placeholder: '~30 cr of HSC/health-science coursework plus pre-health professional prerequisites (biology, chemistry, etc.) for the Health Studies track -- see an HHP advisor.'",False
+ughhu-heb_bshe02,warning,requirements,generic 'Requirements' group alongside specifically-named major requirements — possible mis-parsed non-required block (e.g. 'Recommended Coursework'); review,True
 ughhu-hep_umn_ufo,warning,requirements,generic 'Requirements' group alongside specifically-named major requirements — possible mis-parsed non-required block (e.g. 'Recommended Coursework'); review,True
 ughhu-hhu_uct01,warning,requirements,generic 'Requirements' group alongside specifically-named major requirements — possible mis-parsed non-required block (e.g. 'Recommended Coursework'); review,True
 ughhu-hhu_uct02,warning,requirements,generic 'Requirements' group alongside specifically-named major requirements — possible mis-parsed non-required block (e.g. 'Recommended Coursework'); review,True
