@@ -1,0 +1,16 @@
+{
+  "reason": "Business Administration minor, on campus (ugbus-bus_umn), reviewed 2026-08-18. Structure parsed correctly (ACG 2021 4 cr + select two of BUL 4310 / ECO 2013 / ECO 2023 8 cr + FIN 3403 / MAN 3025 / MAR 3023 12 cr = 24 cr). Renamed only: the page heads the table 'Required Courses', where the parser emitted its generic 'Requirements'. See ugbus-bus_umn_ufo.json for the UF Online variant's stray eligibility table. [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.]",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "c11ee8d0b8a4c6af"
+  },
+  "patch_groups": {
+    "requirements": {
+      "name": "Required Courses"
+    },
+    "requirements-2": {
+      "name": "Required Courses"
+    }
+  }
+}

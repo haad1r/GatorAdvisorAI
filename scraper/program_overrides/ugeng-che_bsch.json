@@ -1,0 +1,11 @@
+{
+  "reason": "Checked 2026-10-18 against https://catalog.ufl.edu/UGRD/colleges-schools/UGENG/CHE_BSCH/ (cached). Under Department Requirements, after the 25-credit course table, the page says 'Any course taken to satisfy a degree requirement (General Education, required course, or technical elective) cannot be taken S/U, with the exception of the following:' over EGN 4912, ECH 4948 and ECH 4949 (0-3 each). That table lists the courses allowed S/U, not a requirement; parsed as one it asked every student for research, an internship AND a co-op. Excluded. It is the only page in the cache with this shape.",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "a619270a2c437820"
+  },
+  "exclude_groups": [
+    "requirements-2"
+  ]
+}

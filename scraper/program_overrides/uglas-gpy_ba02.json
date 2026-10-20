@@ -1,0 +1,22 @@
+{
+  "reason": "s78, punch list items 6+7. The page (https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/GPY_BA_BS/GPY_BA02/, cached, read 2026-09-10) prints under its requirements: 'The same course may not be used to satisfy requirements for more than one bulleted group.' So every major group is one exclusive set. It bites today on GIS 4037 (Major Courses 3 and Major Electives) and GEO 3427/3452/3454 (Major Courses 4 and Major Electives). The UF Online twin (gpy_ba02_ufo) is deliberately NOT given this: its own page does not print the sentence. [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.] [2026-10-18: the parser now ends a chooser at an hour-less subheader that starts the next requirement, and names a chooser opened by a 'Select ...' row after that row, so group keys changed with no change in content: geography-ba-medical-geography-in-global-health-major-courses-4 -> select-two-medical-geography-core-courses. 'And, select one:' (GIS 3001C / GIS 4037) is now its own chooser 'and-select-one'; it was part of major-courses-3 before, so it joins the set.]",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "3ef69790b9ac709d"
+  },
+  "exclusive_sets": {
+    "one-group-per-course": [
+      "geography-ba-medical-geography-in-global-health-major-courses",
+      "select-one",
+      "geography-ba-medical-geography-in-global-health-major-courses-2",
+      "select-one-geoai-course",
+      "geography-ba-medical-geography-in-global-health-major-courses-3",
+      "and-select-one",
+      "select-one-regional-geography-course",
+      "select-two-medical-geography-core-courses",
+      "geography-ba-medical-geography-in-global-health-major-electives",
+      "requirements"
+    ]
+  }
+}

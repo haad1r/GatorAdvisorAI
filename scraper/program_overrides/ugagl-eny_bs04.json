@@ -1,0 +1,9 @@
+{
+  "reason": "Published via override in the 2026-07-16 Phase-4 batch 2 (HANDOFF session 9b). False positive of batch 1's oversized-required_list guard: the 55-cr second table IS the real preprofessional specialization coursework (orgo, physics, entomology core + approved-course placeholder rows), eyeballed against the cached page. 20 + 55 cr major coursework is plausible for this BS track. [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.]",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "c839374f30815c4d"
+  },
+  "status": "published"
+}

@@ -1,0 +1,101 @@
+{
+  "reason": "Economics BA. Published before the 'Recommended Coursework' fix and correctly parsed after it — the parse got BETTER, the score got worse. Dropping the page's phantom 31-cr recommended block (a grad-school-prep math sequence the page suggests for students 'planning to pursue graduate study in economics') removed a group full of real, enumerated course ids, which shrank the enumerated-course coverage ratio the confidence score is built on: 0.905 -> 0.833, just under the 0.85 gate. Remaining issues are two placeholder rows only ('Four economics elective courses', 'Select a maximum of one:'), which the app renders as student-chosen slots. Zero errors, conf >= 0.75 — the documented acceptance bar. Groups verified against the live catalog page: Required Foundation Coursework 14 cr, Major Core 8 cr, Upper-Level Major Electives 15 cr, plus gen-eds and the CLAS language requirement (37 major cr). [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.] [2026-10-18, https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/ECO_BA/ (cached). 'Upper-Level Major Electives' prints 'Four economics elective courses 15-16' (footnote 3: 'Defined as any 3000 or 4000 level course with an ECO, ECP, or ECS prefix; not including ECO 3101, ECO 3203, ECP 3703, ECO 4905, or ECO 4941') then 'Select a maximum of one:' over AEB 3450, AEB 4931, FIN 3403, GEO 3502 (footnote 4: a substitute). Parsed as 'take all four substitutes'. Now one 15-credit, four-course chooser over the 28 catalog ECO/ECP/ECS 3000/4000 courses (less the five excluded) plus the four substitutes, with a count rule allowing at most one AEB/FIN/GEO course. The acceptance above read the two rows as harmless placeholders, but the parse made the four substitutes a 'take all' list.]",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "0881cc1835dddccc"
+  },
+  "status": "published",
+  "patch_groups": {
+    "upper-level-major-electives": {
+      "rtype": "choose_credits",
+      "required_credits": 15.0,
+      "required_course_count": 4,
+      "eligible_course_ids": [
+        "eco3430",
+        "eco3532",
+        "eco3704",
+        "eco3713",
+        "eco4104",
+        "eco4213",
+        "eco4270",
+        "eco4400",
+        "eco4401",
+        "eco4421",
+        "eco4422",
+        "eco4504",
+        "eco4934",
+        "eco4935",
+        "eco4956",
+        "eco4970",
+        "ecp3006",
+        "ecp3203",
+        "ecp3302",
+        "ecp3403",
+        "ecp3510",
+        "ecp3530",
+        "ecp4423",
+        "ecp4451",
+        "ecs3403",
+        "ecs4013",
+        "ecs4110",
+        "ecs4111",
+        "aeb3450",
+        "aeb4931",
+        "fin3403",
+        "geo3502"
+      ],
+      "logic": {
+        "from": [
+          "eco3430",
+          "eco3532",
+          "eco3704",
+          "eco3713",
+          "eco4104",
+          "eco4213",
+          "eco4270",
+          "eco4400",
+          "eco4401",
+          "eco4421",
+          "eco4422",
+          "eco4504",
+          "eco4934",
+          "eco4935",
+          "eco4956",
+          "eco4970",
+          "ecp3006",
+          "ecp3203",
+          "ecp3302",
+          "ecp3403",
+          "ecp3510",
+          "ecp3530",
+          "ecp4423",
+          "ecp4451",
+          "ecs3403",
+          "ecs4013",
+          "ecs4110",
+          "ecs4111",
+          "aeb3450",
+          "aeb4931",
+          "fin3403",
+          "geo3502"
+        ],
+        "credits": 15.0
+      }
+    }
+  },
+  "count_rules": {
+    "upper-level-major-electives": [
+      {
+        "at_most": 1,
+        "unit": "courses",
+        "prefixes": [
+          "aeb",
+          "fin",
+          "geo"
+        ],
+        "text": "Select a maximum of one: AEB 3450, AEB 4931, FIN 3403, GEO 3502"
+      }
+    ]
+  }
+}

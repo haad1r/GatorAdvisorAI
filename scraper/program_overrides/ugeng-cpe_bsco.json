@@ -1,0 +1,64 @@
+{
+  "reason": "Checked 2026-10-18 against https://catalog.ufl.edu/UGRD/colleges-schools/UGENG/CPE_BSCO/ (cached): the page prints 'ENC 2254 Writing in the Disciplines 3'; the catalog has no ENC 2254 and lists Writing in the Disciplines as ENC 2256 (the same title the other engineering pages print under ENC 2256), so the id is replaced (enc2254 -> enc2256).",
+  "patch_groups": {
+    "requirements": {
+      "logic": {
+        "slots": [
+          [
+            "cda3101"
+          ],
+          [
+            "cen3031"
+          ],
+          [
+            "cop3502c"
+          ],
+          [
+            "cop3503c"
+          ],
+          [
+            "cop3504c"
+          ],
+          [
+            "cop3530"
+          ],
+          [
+            "cot3100"
+          ],
+          [
+            "eel3701c"
+          ],
+          [
+            "eel4744c"
+          ],
+          [
+            "enc2256"
+          ],
+          [
+            "enc3246"
+          ]
+        ],
+        "heading": "Computer Engineering Requirements"
+      },
+      "eligible_course_ids": [
+        "cda3101",
+        "cen3031",
+        "cop3502c",
+        "cop3503c",
+        "cop3504c",
+        "cop3530",
+        "cot3100",
+        "eel3701c",
+        "eel4744c",
+        "enc2256",
+        "enc3246"
+      ],
+      "required_course_count": 11
+    }
+  },
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "708a6bbd1398a01b"
+  }
+}

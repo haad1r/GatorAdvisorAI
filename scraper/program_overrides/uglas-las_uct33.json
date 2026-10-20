@@ -1,0 +1,29 @@
+{
+  "reason": "Checked 2026-10-18 against https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/LAS_UCT33/ (cached): the page prints 'SPC 4701 Patterns of Intercultural Communication'; no catalog page exists for either number, and the Schedule of Courses offers 'Patterns of Intercultural Communication' as SPC 4710, so the id is replaced (spc4701 -> spc4710).",
+  "patch_groups": {
+    "intercultural-communication": {
+      "logic": {
+        "from": [
+          "aec3073",
+          "com3225",
+          "com4704",
+          "spc2730",
+          "spc4710"
+        ],
+        "credits": 3.0
+      },
+      "eligible_course_ids": [
+        "aec3073",
+        "com3225",
+        "com4704",
+        "spc2730",
+        "spc4710"
+      ]
+    }
+  },
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "30b3adc54a3902d3"
+  }
+}

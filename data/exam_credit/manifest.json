@@ -1,0 +1,25 @@
+{
+  "source": "https://catalog.ufl.edu/UGRD/academic-advising/exam-credit/",
+  "catalog_year": "2026-2027",
+  "fetched_at": "2026-10-04T01:27:12.428054+00:00",
+  "files": {
+    "awards.csv": 444
+  },
+  "awards_by_family": {
+    "AP": 61,
+    "IB": 104,
+    "AICE": 80,
+    "CLEP": 34,
+    "DSST": 37,
+    "UEXCEL": 32,
+    "CAPE": 28,
+    "DLPT": 68
+  },
+  "credits_source": {
+    "explicit": 169,
+    "table_note": 216,
+    "assumed": 30,
+    "assumed_course": 29
+  },
+  "network_requests": 0
+}

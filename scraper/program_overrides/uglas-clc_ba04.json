@@ -1,0 +1,9 @@
+{
+  "reason": "Classical Studies BA, Classical Civilization track, checked 2026-10-12 against the 2026-2027 page. Concrete courses parse; the beginning-language requirement parses as four complete sequences (Latin A/B, Greek A/B) to pick one from, which replaces UF Planner's flat Latin/Greek/Classics pool patch. The remaining rows ('... on the ancient Graeco-Roman world (in English translation) from the Department of Classics', 'Four courses at the 3000 level or above in Latin or Greek ...') name a curated list, not courses, and stay as reserved slots, as UF Planner's reviewer decided when accepting this track (2026-07-21).",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "e3e1aec043482308"
+  },
+  "status": "published"
+}

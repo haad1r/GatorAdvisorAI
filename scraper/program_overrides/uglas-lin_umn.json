@@ -1,0 +1,74 @@
+{
+  "reason": "Checked 2026-10-18 against https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/LIN_UMN/ (cached). After LIN 2011, LIN 3201 and LIN 3460 the table prints 'Select one: 6' over 'Two LIN courses (4000 level)' and 'One LIN course (4000 level) AND one non-Germanic/non-Romance language course'. The 6 credits now choose from the 25 catalog LIN 4000-level courses; the language route stays a visible alternative (no course list on the page).",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "d44a4bfe51d3e937"
+  },
+  "patch_groups": {
+    "select-one": {
+      "rtype": "choose_credits",
+      "required_credits": 6.0,
+      "eligible_course_ids": [
+        "lin4005",
+        "lin4071",
+        "lin4124",
+        "lin4136",
+        "lin4205",
+        "lin4320",
+        "lin4400",
+        "lin4500",
+        "lin4600",
+        "lin4656",
+        "lin4701",
+        "lin4702c",
+        "lin4721",
+        "lin4760",
+        "lin4761c",
+        "lin4770c",
+        "lin4790",
+        "lin4803",
+        "lin4820",
+        "lin4850",
+        "lin4905",
+        "lin4911",
+        "lin4930",
+        "lin4956",
+        "lin4970"
+      ],
+      "logic": {
+        "from": [
+          "lin4005",
+          "lin4071",
+          "lin4124",
+          "lin4136",
+          "lin4205",
+          "lin4320",
+          "lin4400",
+          "lin4500",
+          "lin4600",
+          "lin4656",
+          "lin4701",
+          "lin4702c",
+          "lin4721",
+          "lin4760",
+          "lin4761c",
+          "lin4770c",
+          "lin4790",
+          "lin4803",
+          "lin4820",
+          "lin4850",
+          "lin4905",
+          "lin4911",
+          "lin4930",
+          "lin4956",
+          "lin4970"
+        ],
+        "credits": 6.0,
+        "placeholders": [
+          "One LIN course (4000 level) AND one non-Germanic/non-Romance language course"
+        ]
+      }
+    }
+  }
+}

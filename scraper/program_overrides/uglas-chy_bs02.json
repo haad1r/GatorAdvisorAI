@@ -1,0 +1,110 @@
+{
+  "reason": "Checked 2026-10-18 against https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/CHY_BS/CHY_BS02/ (cached). Under 'Required Chemistry Major Core Coursework' the page prints 'Select one option: 8' (Option A CHM 2212, CHM 2213, CHM 2211L; Option B CHM 2210, CHM 2211, CHM 2211L), then 'Select one: 4' (CHM 3100 & CHM 3120L, or CHM 3120 & 3120L), then CHM 3218 4, CHM 4130 & 4130L 5, CHM 3610 3, CHM 4411 & CHM 4412 8, CHM 4411L 2 or CHM 4412L, and 'MAP 2302 Elementary Differential Equations (encouraged)' with no hours. The option chooser swallowed the analytical 'Select one' into Option B, so its 4 credits vanished (groups summed to 55 against 'Total Credits 59-64'). Option B loses those courses, the analytical choice is its own 4-credit chooser with one option per pairing, and MAP 2302 leaves the required list: it is encouraged, not required.",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "af7a128b3747810f"
+  },
+  "patch_groups": {
+    "required-chemistry-major-core-coursework": {
+      "eligible_course_ids": [
+        "chm2212",
+        "chm2213",
+        "chm2211l",
+        "chm2210",
+        "chm2211"
+      ],
+      "logic": {
+        "options": [
+          [
+            "chm2212",
+            "chm2213",
+            "chm2211l"
+          ],
+          [
+            "chm2210",
+            "chm2211",
+            "chm2211l"
+          ]
+        ],
+        "option_labels": [
+          "Option A",
+          "Option B"
+        ],
+        "credits": 8.0
+      }
+    },
+    "required-chemistry-major-core-coursework-2": {
+      "eligible_course_ids": [
+        "chm3218",
+        "chm4130",
+        "chm4130l",
+        "chm3610",
+        "chm4411",
+        "chm4412",
+        "chm4411l",
+        "chm4412l"
+      ],
+      "required_course_count": 7,
+      "logic": {
+        "slots": [
+          [
+            "chm3218"
+          ],
+          [
+            "chm4130"
+          ],
+          [
+            "chm4130l"
+          ],
+          [
+            "chm3610"
+          ],
+          [
+            "chm4411"
+          ],
+          [
+            "chm4412"
+          ],
+          [
+            "chm4411l",
+            "chm4412l"
+          ]
+        ]
+      }
+    }
+  },
+  "add_groups": [
+    {
+      "group_key": "select-one-analytical-chemistry",
+      "name": "Select one (analytical chemistry)",
+      "rtype": "choose_credits",
+      "logic": {
+        "options": [
+          [
+            "chm3100",
+            "chm3120l"
+          ],
+          [
+            "chm3120",
+            "chm3120l"
+          ]
+        ],
+        "option_labels": [
+          "CHM 3100 & CHM 3120L",
+          "CHM 3120 & 3120L"
+        ],
+        "credits": 4.0
+      },
+      "eligible_course_ids": [
+        "chm3100",
+        "chm3120l",
+        "chm3120"
+      ],
+      "required_credits": 4.0,
+      "required_course_count": 1,
+      "sort_order": 3,
+      "section": "major"
+    }
+  ]
+}

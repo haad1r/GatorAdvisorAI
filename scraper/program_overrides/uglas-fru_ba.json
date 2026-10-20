@@ -1,0 +1,27 @@
+{
+  "reason": "Language-BA page. The option tables UF Planner excluded here (shared concentration/elective lists) are now parsed as option pools and linked to the Critical Concentration chooser, so no exclusion is needed and the program publishes on its own. Ported rules, each re-checked on the 2026-2027 page 2026-10-12: s80. The elective row (cached page, read 2026-09-11): 'Language, Literature, Culture in Russian: 6 credits. Select 6 credits with at least 3 credits at the 4000 level.' The page's other elective heading (Russian Literature and Culture in English: 9 credits) prints no level rule. 2026-10-12: the page states 'Although courses may appear in more than one group, they may be counted toward only one group' (UF Planner encoded this only for ffr_ba and faf_ba), so the set covers every major group. [2026-10-18: the parser now ends a chooser at an hour-less subheader that starts the next requirement, and names a chooser opened by a 'Select ...' row after that row, so group keys changed with no change in content: language-literature-culture-in-russian-6-credits-2 -> russian-literature-and-culture-in-english-9-credits.]",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "dddcb689b54c481f"
+  },
+  "count_rules": {
+    "language-literature-culture-in-russian-6-credits": [
+      {
+        "at_least": 3,
+        "unit": "credits",
+        "min_level": 4000,
+        "text": "At least 3 credits at the 4000 level"
+      }
+    ]
+  },
+  "exclusive_sets": {
+    "one-group-per-course": [
+      "requirements",
+      "advanced-language",
+      "language-literature-culture-in-russian-6-credits",
+      "russian-literature-and-culture-in-english-9-credits",
+      "critical-concentration-6-credits"
+    ]
+  }
+}

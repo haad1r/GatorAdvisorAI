@@ -1,0 +1,36 @@
+{
+  "reason": "Checked 2026-10-18 against https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/GPY_UFO/GPY_BA02_UFO/ (cached). 'Select two technique courses: 7-9' is followed by GIS 3043, then 'Select one:' over GIS 3001C and GIS 4037: GIS 3043 plus one of the other two (all 4 credits in the catalog, so 8, inside 7-9). The parse left a 7-credit chooser whose only option is GIS 3043 (4 credits), which no one can satisfy, and a credit-less 'pick one'. Now GIS 3043 is a required 4-credit list and the second technique course a 4-credit chooser.",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "56943d1651761f4c"
+  },
+  "patch_groups": {
+    "select-two-technique-courses": {
+      "name": "Technique course: GIS 3043",
+      "rtype": "required_list",
+      "required_credits": 4.0,
+      "required_course_count": 1,
+      "logic": {
+        "slots": [
+          [
+            "gis3043"
+          ]
+        ]
+      }
+    },
+    "select-one-2": {
+      "name": "Technique course: select one",
+      "rtype": "choose_credits",
+      "required_credits": 4.0,
+      "required_course_count": 1,
+      "logic": {
+        "from": [
+          "gis3001c",
+          "gis4037"
+        ],
+        "credits": 4.0
+      }
+    }
+  }
+}

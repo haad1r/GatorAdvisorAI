@@ -1,0 +1,50 @@
+{
+  "reason": "Theatre — Theatre Management (UGART/THE_BA/THE_BA03/), reviewed 2026-10-12 against the 2026-2027 page. The page states this major only as a model semester plan, so requirements are plan-derived and capped at 0.75; accepted on the plan-derived bar: a real spine of 37 catalog courses (12+ required), 120 plan credits, zero errors. Elective rows linked to the page's own lists: Theatre | Select 15 Credits, Business-Oriented | Select 12 Credits, Outside Electives | 15 Credits. The 1 remaining rows are open slots the page names but does not enumerate (gen ed, free or approved electives): Elective. [2026-10-18: the Approved Electives tab prints 'Outside Electives | 15 Credits' as 'HUM 4912 Fine Arts Undergraduate Research (Field Experience in theatre management) 2-3' and 'Outside Electives 12-13', but the pool became 15 credits chosen from HUM 4912 alone, which cannot be met. Now HUM 4912 is its own 3-credit row and the outside electives an open 12-credit slot (15 in all).]",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "538cc388c381ff10"
+  },
+  "status": "published",
+  "patch_groups": {
+    "outside-electives-15-credits": {
+      "name": "Outside Electives",
+      "required_credits": 12.0,
+      "eligible_course_ids": [],
+      "logic": {
+        "from": [],
+        "credits": 12.0,
+        "linked_from": [
+          "Outside elective",
+          "Outside Elective",
+          "Outside electives",
+          "Outside electives"
+        ],
+        "host_group": "plan-derived",
+        "tab": "Approved Electives",
+        "open_electives": true
+      }
+    }
+  },
+  "add_groups": [
+    {
+      "group_key": "outside-electives-field-experience",
+      "name": "Outside Electives: HUM 4912 (Field Experience in theatre management)",
+      "rtype": "required_list",
+      "logic": {
+        "slots": [
+          [
+            "hum4912"
+          ]
+        ]
+      },
+      "eligible_course_ids": [
+        "hum4912"
+      ],
+      "required_credits": 3.0,
+      "required_course_count": 1,
+      "sort_order": 0,
+      "section": "major"
+    }
+  ]
+}

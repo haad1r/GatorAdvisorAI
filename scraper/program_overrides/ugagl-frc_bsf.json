@@ -1,0 +1,9 @@
+{
+  "reason": "Forest Resources and Conservation BSF (UGAGL/FRC_BSF/), checked 2026-10-12 against the 2026-2027 page. The page has no requirement table, only the model plan; the plan-derived spine is 34 catalog courses / 99 credits, which meets UF Planner's acceptance bar for plan-derived majors (a real spine of 12 or more catalog courses). The five remaining placeholder rows are free electives and 'Certificate coursework or advisor-approved electives', which a planner renders as open slots. UF Planner accepted this major in 2026-07 when the page still parsed from a course list.",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "4bf1223604e6f31f"
+  },
+  "status": "published"
+}

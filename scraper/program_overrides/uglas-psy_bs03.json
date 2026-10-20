@@ -1,0 +1,90 @@
+{
+  "reason": "Psychology BS — Integrative Psychology. Sibling of uglas-psy_bs01 (see that file for why the PSY_BS parent hub is not itself a program). Parse is coherent and complete: Introductory, Laboratory, Foundation-level core across four substantive areas, Biological Bases, Developmental, Learning and Cognition, Sociocultural/Individual Differences, 4000-level and additional electives, Statistics, Mathematics, Biological Science — 49 major cr, plus full gen-eds and the CLAS language requirement. conf 0.80 with zero errors; the dent is entirely placeholder rows for prose elective slots, which the app renders as student-chosen slots. s91. The page (UGLAS/PSY_BS/PSY_BS03/, cached 2026-07-25, read 2026-09-23) prints 'Each of the four foundation areas is an introduction to a substantive area of psychology. Select at least one course from each: 12'. The scrape made an empty 12-credit header and four 0-credit required_lists, so a blank board planned all eleven area courses and went infeasible. The header goes; each area is one course of 3 credits. The two empty elective rows are enumerated at build time (build_data _EMPTY_LIST_POOLS). The foundation areas and the electives fill one credit minimum ('to meet the 36-credit minimum requirement'), so a course pays one row: one exclusive set over every psychology row. [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.] [2026-10-18, https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/PSY_BS/PSY_BS03/: 'Mathematics 4-5' over 'Proficiency through precalculus is required.', MAC 1147, and MAC 1140 & MAC 1114 is one choice (MAC 1147 alone is 4 credits; the sibling psy_bs02 page says 'Select ONE option below'), not all three: a 4-credit chooser with two options.]",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "14065596ad36bb92"
+  },
+  "status": "published",
+  "exclude_groups": [
+    "foundation-level-integrative-psychology-core"
+  ],
+  "patch_groups": {
+    "biological-bases-of-psychology": {
+      "rtype": "choose_n",
+      "required_credits": 3,
+      "required_course_count": 1,
+      "logic": {
+        "from": [
+          "cbh3003",
+          "exp3104",
+          "psb3002",
+          "psb3340"
+        ],
+        "n": 1
+      }
+    },
+    "developmental-psychology": {
+      "required_credits": 3,
+      "required_course_count": 1
+    },
+    "learning-and-cognition": {
+      "rtype": "choose_n",
+      "required_credits": 3,
+      "required_course_count": 1,
+      "logic": {
+        "from": [
+          "eab3002",
+          "eab3764",
+          "exp3604"
+        ],
+        "n": 1
+      }
+    },
+    "sociocultural-individual-differences-approaches": {
+      "rtype": "choose_n",
+      "required_credits": 3,
+      "required_course_count": 1,
+      "logic": {
+        "from": [
+          "clp3144",
+          "ppe3003",
+          "sop3004"
+        ],
+        "n": 1
+      }
+    },
+    "mathematics": {
+      "rtype": "choose_credits",
+      "required_course_count": 1,
+      "logic": {
+        "options": [
+          [
+            "mac1147"
+          ],
+          [
+            "mac1140",
+            "mac1114"
+          ]
+        ],
+        "option_labels": [
+          "MAC 1147",
+          "MAC 1140 & MAC 1114"
+        ],
+        "credits": 4.0
+      }
+    }
+  },
+  "exclusive_sets": {
+    "one-row-per-course": [
+      "introductory-level",
+      "laboratory-course",
+      "biological-bases-of-psychology",
+      "developmental-psychology",
+      "learning-and-cognition",
+      "sociocultural-individual-differences-approaches",
+      "4000-level-psychology-electives",
+      "additional-psychology-electives"
+    ]
+  }
+}

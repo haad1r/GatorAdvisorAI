@@ -1,0 +1,17 @@
+{
+  "reason": "Marine Sciences BS (UGLAS/MAR_BS/), ported from UF Planner (s91) and re-checked on the 2026-2027 page 2026-10-12: 'Major Electives: 15-16 credits' is an umbrella row over two Approved Electives tab tables, now linked by the parser as marine-sciences-core-elective (3) and approved-marine-sciences-electives (12). The umbrella row is left with only the section-total note and is excluded. Footnote 1 on both tables: 'These courses cannot count as marine sciences core electives and approved electives', so they form one exclusive set. The 'Additional Electives With Instructor Permission' table stays a reference option pool (UF Planner dropped it): a course that needs permission is not one a plan should pick, but a reader can still see it.",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "667e80322f986e53"
+  },
+  "exclude_groups": [
+    "marine-sciences-major-electives-15-16-credits"
+  ],
+  "exclusive_sets": {
+    "core-or-approved": [
+      "marine-sciences-core-elective",
+      "approved-marine-sciences-electives"
+    ]
+  }
+}

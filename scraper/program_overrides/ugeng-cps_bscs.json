@@ -1,0 +1,20 @@
+{
+  "reason": "CPS BSCS, reviewed by hand 2026-07-06 against https://catalog.ufl.edu/UGRD/colleges-schools/UGENG/CPS_BSCS/. The Interdisciplinary Electives options (A: formal minor / B: concentration outside CISE / C: arranged with a department) are prose outside the requirement table, so the parser correctly emits an empty chooser and flags an error; this override records the requirement as an advisory placeholder and publishes the program. Calibration vs the hand-curated requirements.csv: tests/calibrate_cps.py (9/9 groups, 100%). [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.]",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "1a349e513ab007da"
+  },
+  "status": "published",
+  "patch_groups": {
+    "interdisciplinary-electives": {
+      "logic": {
+        "from": [],
+        "credits": 14,
+        "placeholders": [
+          "14 credits via one option: (A) courses toward a formal minor; (B) a 3000+ concentration outside CISE, prearranged with a CISE advisor; (C) arranged with a department that offers no formal minor (CISE approval required)"
+        ]
+      }
+    }
+  }
+}

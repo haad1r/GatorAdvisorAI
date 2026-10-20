@@ -1,0 +1,70 @@
+{
+  "reason": "Checked 2026-10-18 against https://catalog.ufl.edu/UGRD/colleges-schools/UGAGL/AGL_UCT17/ (cached). Required Courses: 'FNR 3622 & 3622L 3' and 'Electives 12', Total 15. The Approved Electives tab spells the 12 out: 'Ecology / Select one' (FNR 3500C, PCB 3601C, WIS 3401), 'Weather and Climate / Select one' (GEO 2242, GEO 3250, MET 1010) and 'Directed Electives / Select 6 credits in consultation with advisor' (AEC 4031, EVR 3323, FNR 3602, FNR 4905, FNR 4941, JOU 3101, PUR 3000): 3 + 3 + 6. The three tab lists become those requirements and the 'Electives 12' placeholder leaves the required list. The first list was named after its tab ('Approved Electives'); it is the Ecology list.",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "9b1c1fbbfbe4fe27"
+  },
+  "patch_groups": {
+    "requirements": {
+      "required_credits": 3.0,
+      "logic": {
+        "slots": [
+          [
+            "fnr3622"
+          ],
+          [
+            "fnr3622l"
+          ]
+        ],
+        "heading": "Required Courses"
+      }
+    },
+    "options-approved-electives": {
+      "name": "Ecology (select one)",
+      "section": "major",
+      "required_credits": 3.0,
+      "required_course_count": 1,
+      "logic": {
+        "from": [
+          "fnr3500c",
+          "pcb3601c",
+          "wis3401"
+        ],
+        "credits": 3.0
+      }
+    },
+    "options-weather-and-climate": {
+      "name": "Weather and Climate (select one)",
+      "section": "major",
+      "required_credits": 3.0,
+      "required_course_count": 1,
+      "logic": {
+        "from": [
+          "geo2242",
+          "geo3250",
+          "met1010"
+        ],
+        "credits": 3.0
+      }
+    },
+    "options-directed-electives": {
+      "name": "Directed Electives",
+      "section": "major",
+      "required_credits": 6.0,
+      "required_course_count": null,
+      "logic": {
+        "from": [
+          "aec4031",
+          "evr3323",
+          "fnr3602",
+          "fnr4905",
+          "fnr4941",
+          "jou3101",
+          "pur3000"
+        ],
+        "credits": 6.0
+      }
+    }
+  }
+}

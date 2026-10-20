@@ -1,0 +1,392 @@
+{
+  "reason": "Natural Resource Conservation BSF (UGAGL/NRC_BSF/), re-checked on the 2026-2027 page 2026-10-12. Above its Approved Courses table the page says 'students are required to complete at least one course from the following nine content areas' (Professional Seminar, Ecology, Quantitative Analysis and Assessment, Natural History, Human Dimensions, Policy and Economics, Field Applications, Spatial Analysis, Capstone Experience). The parser keeps the model plan's core (plan-derived) and links the plan's 'Approved courses' slots (35 credits) to the whole Approved Courses tab. This override adds the nine area choosers UF Planner's reviewer built (s93: one route per printed row, cheapest-route credits, the plan's own tracking routes first) and takes their 15 credits out of the 35, so a course is counted once. Published: the model-plan core has a 32-course spine and every elective slot now names its courses.",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "7628c885deee0139"
+  },
+  "status": "published",
+  "patch_groups": {
+    "approved-courses": {
+      "required_credits": 20.0,
+      "logic": {
+        "from": [
+          "fnr3002c",
+          "fnr4934",
+          "fas4270",
+          "fas4932",
+          "fnr3500c",
+          "wis3404",
+          "wis4443c",
+          "fnr3410c",
+          "wis4601c",
+          "wis4945",
+          "fas4202c",
+          "fnr3131c",
+          "wis3402",
+          "wis3402l",
+          "fnr3602",
+          "fnr4510",
+          "fnr4660",
+          "fnr4621",
+          "fas4305c",
+          "fnr4070c",
+          "fnr4624c",
+          "fnr3622",
+          "fnr3622l",
+          "fnr4080",
+          "wis4427c",
+          "fnr3400c",
+          "gis3072c",
+          "fas4905",
+          "fnr4905",
+          "fnr4941",
+          "wis4905"
+        ],
+        "credits": 20.0,
+        "linked_from": [
+          "Approved courses",
+          "Approved courses",
+          "Approved courses",
+          "Approved courses"
+        ],
+        "host_group": "plan-derived",
+        "tab": "Approved Courses",
+        "note": "credits left after the nine content-area choosers"
+      }
+    }
+  },
+  "add_groups": [
+    {
+      "group_key": "professional-seminar",
+      "name": "Professional Seminar (at least one course)",
+      "rtype": "choose_credits",
+      "logic": {
+        "options": [
+          [
+            "fnr3002c"
+          ],
+          [
+            "fnr4934"
+          ]
+        ],
+        "option_labels": [
+          "FNR3002C",
+          "FNR4934"
+        ],
+        "credits": 1.0
+      },
+      "eligible_course_ids": [
+        "fnr3002c",
+        "fnr4934"
+      ],
+      "required_credits": 1.0,
+      "required_course_count": 1,
+      "sort_order": 100,
+      "section": "major"
+    },
+    {
+      "group_key": "ecology",
+      "name": "Ecology (at least one course)",
+      "rtype": "choose_credits",
+      "logic": {
+        "options": [
+          [
+            "fnr3500c"
+          ],
+          [
+            "wis3404"
+          ],
+          [
+            "fas4270"
+          ],
+          [
+            "fas4932"
+          ],
+          [
+            "wis4443c"
+          ]
+        ],
+        "option_labels": [
+          "FNR3500C",
+          "WIS3404",
+          "FAS4270",
+          "FAS4932",
+          "WIS4443C"
+        ],
+        "credits": 1.0
+      },
+      "eligible_course_ids": [
+        "fnr3500c",
+        "wis3404",
+        "fas4270",
+        "fas4932",
+        "wis4443c"
+      ],
+      "required_credits": 1.0,
+      "required_course_count": 1,
+      "sort_order": 101,
+      "section": "major"
+    },
+    {
+      "group_key": "quantitative-analysis-and-assessment",
+      "name": "Quantitative Analysis and Assessment (at least one course)",
+      "rtype": "choose_credits",
+      "logic": {
+        "options": [
+          [
+            "fnr3410c"
+          ],
+          [
+            "fas4932"
+          ],
+          [
+            "wis4601c"
+          ],
+          [
+            "wis4945"
+          ]
+        ],
+        "option_labels": [
+          "FNR3410C",
+          "FAS4932",
+          "WIS4601C",
+          "WIS4945"
+        ],
+        "credits": 1.0
+      },
+      "eligible_course_ids": [
+        "fnr3410c",
+        "fas4932",
+        "wis4601c",
+        "wis4945"
+      ],
+      "required_credits": 1.0,
+      "required_course_count": 1,
+      "sort_order": 102,
+      "section": "major"
+    },
+    {
+      "group_key": "natural-history",
+      "name": "Natural History (at least one course)",
+      "rtype": "choose_credits",
+      "logic": {
+        "options": [
+          [
+            "fnr3131c"
+          ],
+          [
+            "fas4202c"
+          ],
+          [
+            "wis3402",
+            "wis3402l"
+          ]
+        ],
+        "option_labels": [
+          "FNR3131C",
+          "FAS4202C",
+          "WIS3402 & WIS3402L"
+        ],
+        "credits": 3.0
+      },
+      "eligible_course_ids": [
+        "fnr3131c",
+        "fas4202c",
+        "wis3402",
+        "wis3402l"
+      ],
+      "required_credits": 3.0,
+      "required_course_count": 1,
+      "sort_order": 103,
+      "section": "major"
+    },
+    {
+      "group_key": "human-dimensions",
+      "name": "Human Dimensions (at least one course)",
+      "rtype": "choose_credits",
+      "logic": {
+        "options": [
+          [
+            "fnr3602"
+          ],
+          [
+            "fnr4510"
+          ],
+          [
+            "fnr4934"
+          ]
+        ],
+        "option_labels": [
+          "FNR3602",
+          "FNR4510",
+          "FNR4934"
+        ],
+        "credits": 1.0
+      },
+      "eligible_course_ids": [
+        "fnr3602",
+        "fnr4510",
+        "fnr4934"
+      ],
+      "required_credits": 1.0,
+      "required_course_count": 1,
+      "sort_order": 104,
+      "section": "major"
+    },
+    {
+      "group_key": "policy-and-economics",
+      "name": "Policy and Economics (at least one course)",
+      "rtype": "choose_credits",
+      "logic": {
+        "options": [
+          [
+            "fnr4660"
+          ],
+          [
+            "fnr4621"
+          ]
+        ],
+        "option_labels": [
+          "FNR4660",
+          "FNR4621"
+        ],
+        "credits": 3.0
+      },
+      "eligible_course_ids": [
+        "fnr4660",
+        "fnr4621"
+      ],
+      "required_credits": 3.0,
+      "required_course_count": 1,
+      "sort_order": 105,
+      "section": "major"
+    },
+    {
+      "group_key": "field-applications",
+      "name": "Field Applications (at least one course)",
+      "rtype": "choose_credits",
+      "logic": {
+        "options": [
+          [
+            "fnr4624c"
+          ],
+          [
+            "fas4305c"
+          ],
+          [
+            "fas4932"
+          ],
+          [
+            "fnr4070c"
+          ],
+          [
+            "fnr3622",
+            "fnr3622l"
+          ],
+          [
+            "fnr4080"
+          ],
+          [
+            "wis4427c"
+          ]
+        ],
+        "option_labels": [
+          "FNR4624C",
+          "FAS4305C",
+          "FAS4932",
+          "FNR4070C",
+          "FNR3622 & FNR3622L",
+          "FNR4080",
+          "WIS4427C"
+        ],
+        "credits": 1.0
+      },
+      "eligible_course_ids": [
+        "fnr4624c",
+        "fas4305c",
+        "fas4932",
+        "fnr4070c",
+        "fnr3622",
+        "fnr3622l",
+        "fnr4080",
+        "wis4427c"
+      ],
+      "required_credits": 1.0,
+      "required_course_count": 1,
+      "sort_order": 106,
+      "section": "major"
+    },
+    {
+      "group_key": "spatial-analysis",
+      "name": "Spatial Analysis (at least one course)",
+      "rtype": "choose_credits",
+      "logic": {
+        "options": [
+          [
+            "fnr3400c"
+          ],
+          [
+            "gis3072c"
+          ]
+        ],
+        "option_labels": [
+          "FNR3400C",
+          "GIS3072C"
+        ],
+        "credits": 3.0
+      },
+      "eligible_course_ids": [
+        "fnr3400c",
+        "gis3072c"
+      ],
+      "required_credits": 3.0,
+      "required_course_count": 1,
+      "sort_order": 107,
+      "section": "major"
+    },
+    {
+      "group_key": "capstone-experience",
+      "name": "Capstone Experience (at least one course)",
+      "rtype": "choose_credits",
+      "logic": {
+        "options": [
+          [
+            "fas4905"
+          ],
+          [
+            "fnr4905"
+          ],
+          [
+            "fnr4934"
+          ],
+          [
+            "fnr4941"
+          ],
+          [
+            "wis4905"
+          ]
+        ],
+        "option_labels": [
+          "FAS4905",
+          "FNR4905",
+          "FNR4934",
+          "FNR4941",
+          "WIS4905"
+        ],
+        "credits": 1.0
+      },
+      "eligible_course_ids": [
+        "fas4905",
+        "fnr4905",
+        "fnr4934",
+        "fnr4941",
+        "wis4905"
+      ],
+      "required_credits": 1.0,
+      "required_course_count": 1,
+      "sort_order": 108,
+      "section": "major"
+    }
+  ]
+}

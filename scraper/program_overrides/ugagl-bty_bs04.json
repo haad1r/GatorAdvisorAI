@@ -1,0 +1,37 @@
+{
+  "reason": "Checked 2026-10-12 against https://catalog.ufl.edu/UGRD/colleges-schools/UGAGL/BTY_BS/BTY_BS04/ (cached 2026-10-04). The parser reads Chemistry 16-18, Mathematics and Physics 8-10 correctly. The 'Biodiversity Breadth' subheader has no hours, so it is absorbed into the Cells and Tissues chooser above it as a placeholder, and the 'Select one: 3-4' list below it is named 'Cells and Tissues' again. Patches drop that placeholder and rename the second group to Biodiversity Breadth. Same exclusive set as BTY_BS02: BOT 2011C sits in both the foundation options and the Biodiversity Breadth list, and BOT 4935 in Cells and Tissues. Chemistry Option A is kept exactly as printed ('CHM 3217; CHM 2045 & 2045L; CHM 2211L'). The page states 'Total Credits 81-91' but its own rows add to 74 at the low end, so the credit-sum warning is the page's, not the parse's. [2026-10-18: the parser now ends a chooser at an hour-less subheader that starts the next requirement, and names a chooser opened by a 'Select ...' row after that row, so group keys changed with no change in content: cells-and-tissues-2 -> biodiversity-breadth. The parse now makes 'Biodiversity Breadth' its own group with no placeholder, so both patches are dropped.] [2026-10-18, https://catalog.ufl.edu/UGRD/colleges-schools/UGAGL/BTY_BS/BTY_BS04/: 'Ecology and Florida Biodiversity / Select two: 6-8' lists PCB 4043C, PCB 3601C, BOT 3151C and BSC 3307C, and only the last carries hours ('4'), so it parsed as a separate required course. It is the fourth option (the Botany BS02 page prints the same list with no hours on it): back into the chooser, and its one-course group goes.]",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "449ed8608afc76ef"
+  },
+  "exclusive_sets": {
+    "one-row-per-course": [
+      "introductory-botany-biology",
+      "cells-and-tissues",
+      "biodiversity-breadth"
+    ]
+  },
+  "patch_groups": {
+    "ecology-and-florida-biodiversity": {
+      "eligible_course_ids": [
+        "pcb4043c",
+        "pcb3601c",
+        "bot3151c",
+        "bsc3307c"
+      ],
+      "logic": {
+        "from": [
+          "pcb4043c",
+          "pcb3601c",
+          "bot3151c",
+          "bsc3307c"
+        ],
+        "credits": 6.0
+      }
+    }
+  },
+  "exclude_groups": [
+    "ecology-and-florida-biodiversity-2"
+  ]
+}

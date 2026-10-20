@@ -1,0 +1,16 @@
+{
+  "reason": "Music Education certificate (UGART/ART_UCT09/), checked 2026-10-12 against the 2026-2027 page: the 'Required Courses' table (24 credits) is the requirement. The second table, under 'Semester-by-Semester Plan' ('Possible sequencing for a student taking only the certification coursework'), is a sample schedule of the same courses printed as a course list; read as requirements it doubled the certificate to 48 credits, so its six semester groups are excluded. The only page with this shape, so an override rather than a parser rule.",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "b9d80b96c2460e27"
+  },
+  "exclude_groups": [
+    "fall-year-1",
+    "select-2",
+    "spring-year-1",
+    "select-one",
+    "fall-year-2",
+    "select-one-2"
+  ]
+}

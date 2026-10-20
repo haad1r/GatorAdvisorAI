@@ -1,0 +1,122 @@
+{
+  "reason": "Checked 2026-10-18 against https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/HY_BA01/ (cached). 'Legal History Major Electives: 30 credits' prints 'Legal History Group A 3000/4000-level course 3', 'Legal History Group B 3000/4000-level course 3', 'Legal History Group A or B 3000/4000-level courses 3', '3000/4000-level History courses 12', '1000 to 4000-level History courses 9'. The table under 'Legal History Specialization Major Electives' lists Group A (AMH 3340, 3551, 3552, 3558, 4316, 4319, 4550) and Group B (ASH 3931, EUH 3033, 3035, 3284, 3931, LAH 3931, WOH 3205, 3931); the Legal History Electives tab repeats a subset (A: 5, B: 3). The parse linked the A and the A-or-B rows both to the tab's Group A (6 credits) and Group B to the tab's 3 courses, and left the specialization table as a credit-less group. Now: Group A 3 and Group B 3 from the specialization lists, a 3-credit Group A or B chooser over both, the duplicate table dropped, and one exclusive set so a course fills one row.",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "a0e97a4344774131"
+  },
+  "exclude_groups": [
+    "legal-history-specialization-major-electives"
+  ],
+  "patch_groups": {
+    "group-a": {
+      "name": "Legal History Group A course",
+      "eligible_course_ids": [
+        "amh3340",
+        "amh3551",
+        "amh3552",
+        "amh3558",
+        "amh4316",
+        "amh4319",
+        "amh4550"
+      ],
+      "required_credits": 3.0,
+      "logic": {
+        "from": [
+          "amh3340",
+          "amh3551",
+          "amh3552",
+          "amh3558",
+          "amh4316",
+          "amh4319",
+          "amh4550"
+        ],
+        "credits": 3.0
+      }
+    },
+    "group-b": {
+      "name": "Legal History Group B course",
+      "eligible_course_ids": [
+        "ash3931",
+        "euh3033",
+        "euh3035",
+        "euh3284",
+        "euh3931",
+        "lah3931",
+        "woh3205",
+        "woh3931"
+      ],
+      "required_credits": 3.0,
+      "logic": {
+        "from": [
+          "ash3931",
+          "euh3033",
+          "euh3035",
+          "euh3284",
+          "euh3931",
+          "lah3931",
+          "woh3205",
+          "woh3931"
+        ],
+        "credits": 3.0
+      }
+    }
+  },
+  "add_groups": [
+    {
+      "group_key": "group-a-or-b",
+      "name": "Legal History Group A or B course",
+      "rtype": "choose_credits",
+      "logic": {
+        "from": [
+          "amh3340",
+          "amh3551",
+          "amh3552",
+          "amh3558",
+          "amh4316",
+          "amh4319",
+          "amh4550",
+          "ash3931",
+          "euh3033",
+          "euh3035",
+          "euh3284",
+          "euh3931",
+          "lah3931",
+          "woh3205",
+          "woh3931"
+        ],
+        "credits": 3.0
+      },
+      "eligible_course_ids": [
+        "amh3340",
+        "amh3551",
+        "amh3552",
+        "amh3558",
+        "amh4316",
+        "amh4319",
+        "amh4550",
+        "ash3931",
+        "euh3033",
+        "euh3035",
+        "euh3284",
+        "euh3931",
+        "lah3931",
+        "woh3205",
+        "woh3931"
+      ],
+      "required_credits": 3.0,
+      "required_course_count": null,
+      "sort_order": 1,
+      "section": "major"
+    }
+  ],
+  "exclusive_sets": {
+    "one-row-per-course": [
+      "group-a",
+      "group-b",
+      "group-a-or-b",
+      "elective-3000-4000-level-history-courses-12",
+      "elective-1000-to-4000-level-history-courses-9"
+    ]
+  }
+}
