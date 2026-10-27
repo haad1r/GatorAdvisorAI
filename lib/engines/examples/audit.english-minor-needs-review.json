@@ -1,0 +1,149 @@
+{
+  "versions": {
+    "contractVersion": "0.1.0",
+    "engineVersion": "0.1.0",
+    "dataVersion": "f6bc5a93004e8cca",
+    "catalogYear": "2026-2027",
+    "recordId": "synthetic-student-001",
+    "recordVersion": "1"
+  },
+  "programId": "uglas-eh_umn",
+  "programName": "English",
+  "programKind": "minor",
+  "programStatus": "needs_review",
+  "overallStatus": "unknown",
+  "reasons": [
+    {
+      "code": "program_needs_review",
+      "message": "The English minor's requirements could not be verified from the catalog page, so no requirement can be confirmed met or unmet. An advisor should check this program by hand.",
+      "sources": [
+        {
+          "kind": "program_page",
+          "label": "English minor (catalog 2026-2027)",
+          "url": "https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/EH_UMN/",
+          "catalogYear": "2026-2027",
+          "fetchedAt": "2026-10-04T01:44:19.143747+00:00",
+          "fingerprint": "476c9c0aac0d8fda"
+        }
+      ]
+    }
+  ],
+  "caveats": [
+    {
+      "code": "grade_minimums_not_checked",
+      "message": "Minimum grades for requirement courses are not in the program data yet, so passing grades are counted as they are."
+    }
+  ],
+  "totals": {
+    "required": { "credits": 34 },
+    "completed": { "credits": 0 },
+    "inProgress": { "credits": 0 }
+  },
+  "requirements": [
+    {
+      "programId": "uglas-eh_umn",
+      "requirementKey": "requirements",
+      "name": "Requirements",
+      "section": "major",
+      "ruleType": "required_list",
+      "countsTowardDegree": true,
+      "status": "unknown",
+      "reasons": [
+        { "code": "program_needs_review", "message": "This program's data needs review; this requirement may not be read correctly." },
+        { "code": "rule_not_modeled", "message": "The page prints \"Of 4000-level courses with an ENC prefix, only the following apply:\" inside this list; what it limits isn't captured." }
+      ],
+      "required": { "credits": 19, "courses": 7 },
+      "completed": { "credits": 0, "courses": 0 },
+      "inProgress": { "credits": 0, "courses": 0 },
+      "appliedCourses": [],
+      "pendingCourses": [],
+      "remainingOptions": {
+        "courseIds": ["enc3250", "enc3310", "enc3312", "enc3414", "enc4212", "enc4260", "enc4956"],
+        "total": 7,
+        "openSlots": [{ "label": "Of 4000-level courses with an ENC prefix, only the following apply:", "credits": null }]
+      },
+      "sources": [
+        {
+          "kind": "program_page",
+          "label": "English minor (catalog 2026-2027)",
+          "url": "https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/EH_UMN/",
+          "catalogYear": "2026-2027",
+          "fetchedAt": "2026-10-04T01:44:19.143747+00:00",
+          "fingerprint": "476c9c0aac0d8fda"
+        }
+      ]
+    },
+    {
+      "programId": "uglas-eh_umn",
+      "requirementKey": "requirements-2",
+      "name": "Requirements",
+      "section": "major",
+      "ruleType": "choose_credits",
+      "countsTowardDegree": true,
+      "status": "unknown",
+      "reasons": [
+        { "code": "program_needs_review", "message": "This program's data needs review; this requirement may not be read correctly." },
+        { "code": "rule_not_modeled", "message": "The page lists subject prefixes (AML, CRW, ENC, ENG, ENL, LIT) rather than courses, and states no level; which of the student's courses count can't be decided." }
+      ],
+      "required": { "credits": 15, "courses": 5 },
+      "completed": { "credits": 0, "courses": 0 },
+      "inProgress": { "credits": 0, "courses": 0 },
+      "appliedCourses": [],
+      "pendingCourses": [],
+      "remainingOptions": {
+        "courseIds": ["spc4680"],
+        "total": 1,
+        "openSlots": [
+          { "label": "AML American Literature", "credits": null },
+          { "label": "CRW Creative Writing", "credits": null },
+          { "label": "ENC English Composition", "credits": null },
+          { "label": "ENG English", "credits": null },
+          { "label": "ENL English Literature", "credits": null },
+          { "label": "LIT Literature", "credits": null }
+        ]
+      },
+      "sources": [
+        {
+          "kind": "program_page",
+          "label": "English minor (catalog 2026-2027)",
+          "url": "https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/EH_UMN/",
+          "catalogYear": "2026-2027",
+          "fetchedAt": "2026-10-04T01:44:19.143747+00:00",
+          "fingerprint": "476c9c0aac0d8fda"
+        }
+      ]
+    }
+  ],
+  "unappliedCourses": [
+    { "courseId": "psy2012", "code": "PSY 2012", "credits": 3, "evidenceId": "a01", "via": "uf", "grade": "A", "term": { "season": "fall", "year": 2025 } },
+    { "courseId": "gly2010c", "code": "GLY 2010C", "credits": 4, "evidenceId": "a02", "via": "uf", "grade": "B+", "term": { "season": "fall", "year": 2025 } },
+    { "courseId": "enc1101", "code": "ENC 1101", "credits": 3, "evidenceId": "a03", "via": "uf", "grade": "B", "term": { "season": "fall", "year": 2025 } },
+    { "courseId": "gly2100c", "code": "GLY 2100C", "credits": 4, "evidenceId": "a05", "via": "uf", "grade": "A-", "term": { "season": "spring", "year": 2026 } },
+    { "courseId": "sta2023", "code": "STA 2023", "credits": 3, "evidenceId": "a06", "via": "uf", "grade": "C", "term": { "season": "spring", "year": 2026 } },
+    { "courseId": "bsc2010", "code": "BSC 2010", "credits": 3, "evidenceId": "a07", "via": "uf", "grade": "B", "term": { "season": "spring", "year": 2026 } },
+    { "courseId": "gly1150l", "code": "GLY 1150L", "credits": 1, "evidenceId": "a09", "via": "uf", "grade": "A", "term": { "season": "summer", "year": 2026 } },
+    { "courseId": "enc1102", "code": "ENC 1102", "credits": 3, "evidenceId": "a14", "via": "dual_enrollment", "grade": "A" },
+    { "courseId": "mac2311", "code": "MAC 2311", "credits": 4, "evidenceId": "e01", "via": "exam" }
+  ],
+  "gpa": [
+    {
+      "kind": "uf_cumulative",
+      "status": "computed",
+      "value": 2.96,
+      "gradePoints": 71,
+      "gpaHours": 24,
+      "attemptIds": ["a01", "a02", "a03", "a04", "a05", "a06", "a07", "a09"],
+      "reasons": []
+    }
+  ],
+  "sources": [
+    {
+      "kind": "program_page",
+      "label": "English minor (catalog 2026-2027)",
+      "url": "https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/EH_UMN/",
+      "catalogYear": "2026-2027",
+      "fetchedAt": "2026-10-04T01:44:19.143747+00:00",
+      "fingerprint": "476c9c0aac0d8fda"
+    }
+  ]
+}

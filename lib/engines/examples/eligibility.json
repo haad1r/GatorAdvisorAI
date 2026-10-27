@@ -1,0 +1,131 @@
+[
+  {
+    "versions": { "contractVersion": "0.1.0", "engineVersion": "0.1.0", "dataVersion": "f6bc5a93004e8cca", "catalogYear": "2026-2027", "recordId": "synthetic-student-001", "recordVersion": "1" },
+    "courseId": "gly3105c",
+    "term": { "season": "spring", "year": 2027 },
+    "status": "eligible",
+    "prerequisite": {
+      "type": "or",
+      "value": "met",
+      "label": "GLY 2010C or GLY 2030C",
+      "children": [
+        { "type": "course", "value": "met", "label": "GLY 2010C", "evidenceIds": ["a02"] },
+        { "type": "course", "value": "not_met", "label": "GLY 2030C" }
+      ]
+    },
+    "corequisite": null,
+    "reasons": [],
+    "sources": [
+      { "kind": "course_catalog", "label": "GLY 3105C (catalog 2026-2027)", "url": "https://catalog.ufl.edu/UGRD/courses/geology/", "catalogYear": "2026-2027", "fetchedAt": "2026-10-03T23:20:31.222011+00:00", "excerpt": "GLY 2010C or GLY 2030C ." }
+    ]
+  },
+  {
+    "versions": { "contractVersion": "0.1.0", "engineVersion": "0.1.0", "dataVersion": "f6bc5a93004e8cca", "catalogYear": "2026-2027", "recordId": "synthetic-student-001", "recordVersion": "1" },
+    "courseId": "gly4043",
+    "term": { "season": "spring", "year": 2027 },
+    "status": "eligible_pending",
+    "prerequisite": {
+      "type": "or",
+      "value": "pending",
+      "label": "GLY 4310C or GLY 3202C",
+      "children": [
+        { "type": "course", "value": "not_met", "label": "GLY 4310C" },
+        { "type": "course", "value": "pending", "label": "GLY 3202C (in progress)", "evidenceIds": ["a10"] }
+      ]
+    },
+    "corequisite": null,
+    "reasons": [
+      { "code": "in_progress_pending", "message": "Eligible once GLY 3202C (in progress, Fall 2026) is passed.", "courseIds": ["gly3202c"] }
+    ],
+    "sources": [
+      { "kind": "course_catalog", "label": "GLY 4043 (catalog 2026-2027)", "url": "https://catalog.ufl.edu/UGRD/courses/geology/", "catalogYear": "2026-2027", "fetchedAt": "2026-10-03T23:20:31.222011+00:00", "excerpt": "GLY 4310C or GLY 3202C ." }
+    ]
+  },
+  {
+    "versions": { "contractVersion": "0.1.0", "engineVersion": "0.1.0", "dataVersion": "f6bc5a93004e8cca", "catalogYear": "2026-2027", "recordId": "synthetic-student-001", "recordVersion": "1" },
+    "courseId": "hsa3111",
+    "term": { "season": "spring", "year": 2027 },
+    "status": "not_eligible",
+    "prerequisite": {
+      "type": "and",
+      "value": "not_met",
+      "label": "Sophomore standing and PSY 2012 (min C) and STA 2023 (min C) and an eligible program",
+      "children": [
+        { "type": "standing", "value": "unknown", "label": "Sophomore standing (UF classification rules not modeled yet)" },
+        { "type": "course", "value": "met", "label": "PSY 2012 with a minimum grade of C", "evidenceIds": ["a01"] },
+        { "type": "course", "value": "met", "label": "STA 2023 with a minimum grade of C", "evidenceIds": ["a06"] },
+        {
+          "type": "or",
+          "value": "not_met",
+          "label": "HES_BHS or CSD_BHS or PBH_UMN",
+          "children": [
+            { "type": "program", "value": "not_met", "label": "HES_BHS" },
+            { "type": "program", "value": "not_met", "label": "CSD_BHS" },
+            { "type": "program", "value": "not_met", "label": "PBH_UMN" }
+          ]
+        }
+      ]
+    },
+    "corequisite": null,
+    "reasons": [
+      { "code": "requisite_not_met", "message": "Restricted to students in HES_BHS, CSD_BHS or PBH_UMN; the record declares none of them. That settles it even though standing couldn't be checked." }
+    ],
+    "sources": [
+      { "kind": "course_catalog", "label": "HSA 3111 (catalog 2026-2027)", "url": "https://catalog.ufl.edu/UGRD/courses/health_science/", "catalogYear": "2026-2027", "fetchedAt": "2026-10-03T23:21:00.970781+00:00", "excerpt": "Sophomore standing and PSY 2012 with a minimum grade of C & STA 2023 with a minimum grade of C & (HES_BHS or CSD_BHS or PBH_UMN))." }
+    ]
+  },
+  {
+    "versions": { "contractVersion": "0.1.0", "engineVersion": "0.1.0", "dataVersion": "f6bc5a93004e8cca", "catalogYear": "2026-2027", "recordId": "synthetic-student-001", "recordVersion": "1" },
+    "courseId": "evs3000",
+    "term": { "season": "spring", "year": 2027 },
+    "status": "unknown",
+    "prerequisite": {
+      "type": "and",
+      "value": "unknown",
+      "label": "(BSC 2005 or BSC 2010, min C-) and (CHM 2045 or CHM 2047 or CHM 2095 or equivalent, min C-)",
+      "children": [
+        {
+          "type": "or",
+          "value": "met",
+          "label": "BSC 2005 or BSC 2010 with minimum grades of C-",
+          "children": [
+            { "type": "course", "value": "not_met", "label": "BSC 2005 (min C-)" },
+            { "type": "course", "value": "met", "label": "BSC 2010 (min C-): the B on the repeat counts; the earlier D does not", "evidenceIds": ["a07"] }
+          ]
+        },
+        {
+          "type": "or",
+          "value": "unknown",
+          "label": "CHM 2045 or CHM 2047 or CHM 2095, or equivalent, with minimum grades of C-",
+          "children": [
+            { "type": "course", "value": "not_met", "label": "CHM 2045 (min C-)" },
+            { "type": "course", "value": "not_met", "label": "CHM 2047 (min C-)" },
+            { "type": "course", "value": "not_met", "label": "CHM 2095 (min C-)" },
+            { "type": "equivalent", "value": "unknown", "label": "or equivalent (an advisor's judgment)" }
+          ]
+        }
+      ]
+    },
+    "corequisite": null,
+    "reasons": [
+      { "code": "requisite_unverifiable", "message": "The chemistry prerequisite accepts \"or equivalent\", which only an advisor can judge; the record has none of the listed chemistry courses." }
+    ],
+    "sources": [
+      { "kind": "course_catalog", "label": "EVS 3000 (catalog 2026-2027)", "url": "https://catalog.ufl.edu/UGRD/courses/environmental_science/", "catalogYear": "2026-2027", "fetchedAt": "2026-10-03T23:19:32.952321+00:00", "excerpt": "( BSC 2005 or BSC 2010 with minimum grades of C-) and ( CHM 2045 or CHM 2047 or CHM 2095 , or equivalent with minimum grades of C-)." }
+    ]
+  },
+  {
+    "versions": { "contractVersion": "0.1.0", "engineVersion": "0.1.0", "dataVersion": "f6bc5a93004e8cca", "catalogYear": "2026-2027", "recordId": "synthetic-student-001", "recordVersion": "1" },
+    "courseId": "gly4900",
+    "term": { "season": "spring", "year": 2027 },
+    "status": "unknown",
+    "prerequisite": { "type": "unparsed", "value": "unknown", "label": "Six GLY credits" },
+    "corequisite": null,
+    "reasons": [
+      { "code": "requisite_unparsed", "message": "The prerequisite \"Six GLY credits\" is not parsed into a rule yet, so it isn't evaluated. Never read this as eligible." }
+    ],
+    "sources": [
+      { "kind": "course_catalog", "label": "GLY 4900 (catalog 2026-2027)", "url": "https://catalog.ufl.edu/UGRD/courses/geology/", "catalogYear": "2026-2027", "fetchedAt": "2026-10-03T23:20:31.222011+00:00", "excerpt": "Six GLY credits." }
+    ]
+  }
+]

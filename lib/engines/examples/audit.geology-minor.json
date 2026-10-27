@@ -1,0 +1,194 @@
+{
+  "versions": {
+    "contractVersion": "0.1.0",
+    "engineVersion": "0.1.0",
+    "dataVersion": "f6bc5a93004e8cca",
+    "catalogYear": "2026-2027",
+    "recordId": "synthetic-student-001",
+    "recordVersion": "1"
+  },
+  "programId": "uglas-gly_umn",
+  "programName": "Geology",
+  "programKind": "minor",
+  "programStatus": "published",
+  "overallStatus": "not_satisfied",
+  "reasons": [
+    {
+      "code": "requirements_remaining",
+      "message": "GLY courses (3000/4000 level) is still 3 credits short after counting current courses."
+    }
+  ],
+  "caveats": [
+    {
+      "code": "program_rules_not_captured",
+      "message": "The page's prose rules are not checked: UF residency credits, upper-division credits, independent-study limit and credits exclusive to the minor.",
+      "sources": [
+        {
+          "kind": "program_page",
+          "label": "Geology minor (catalog 2026-2027)",
+          "url": "https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/GLY_UMN/",
+          "catalogYear": "2026-2027",
+          "fetchedAt": "2026-10-04T01:47:41.079925+00:00",
+          "fingerprint": "8745e5cbe5d1cfdf",
+          "excerpt": "A minimum of nine credits must be completed at UF and nine credits must be at the 3000/4000 level. No more than one credit of independent study will be accepted. Students must complete a minimum of six credits of coursework exclusive to the minor that cannot count toward the major(s) or other minors"
+        }
+      ]
+    },
+    {
+      "code": "grade_minimums_not_checked",
+      "message": "Minimum grades for requirement courses are not in the program data yet, so passing grades are counted as they are."
+    }
+  ],
+  "totals": {
+    "required": { "credits": 17 },
+    "completed": { "credits": 9 },
+    "inProgress": { "credits": 6 }
+  },
+  "requirements": [
+    {
+      "programId": "uglas-gly_umn",
+      "requirementKey": "requirements",
+      "name": "Requirements",
+      "section": "major",
+      "ruleType": "required_list",
+      "countsTowardDegree": true,
+      "status": "in_progress",
+      "reasons": [
+        {
+          "code": "in_progress_pending",
+          "message": "GLY 3202C (in progress, Fall 2026) completes this requirement when passed.",
+          "courseIds": ["gly3202c"]
+        }
+      ],
+      "required": { "credits": 8, "courses": 3 },
+      "completed": { "credits": 5, "courses": 2 },
+      "inProgress": { "credits": 3, "courses": 1 },
+      "appliedCourses": [
+        { "courseId": "gly2100c", "code": "GLY 2100C", "credits": 4, "evidenceId": "a05", "via": "uf", "grade": "A-", "term": { "season": "spring", "year": 2026 } },
+        { "courseId": "gly1150l", "code": "GLY 1150L", "credits": 1, "evidenceId": "a09", "via": "uf", "grade": "A", "term": { "season": "summer", "year": 2026 } }
+      ],
+      "pendingCourses": [
+        { "courseId": "gly3202c", "code": "GLY 3202C", "credits": 3, "evidenceId": "a10", "via": "uf", "term": { "season": "fall", "year": 2026 } }
+      ],
+      "remainingOptions": { "courseIds": [], "total": 0, "openSlots": [] },
+      "sources": [
+        {
+          "kind": "program_page",
+          "label": "Geology minor (catalog 2026-2027)",
+          "url": "https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/GLY_UMN/",
+          "catalogYear": "2026-2027",
+          "fetchedAt": "2026-10-04T01:47:41.079925+00:00",
+          "fingerprint": "8745e5cbe5d1cfdf",
+          "excerpt": "GLY 2100C Historical Geology or GLY 3105C Evolution of Earth and Life (4); GLY 3202C & GLY 1150L Earth Materials and Florida Geology Laboratory (4)"
+        }
+      ]
+    },
+    {
+      "programId": "uglas-gly_umn",
+      "requirementKey": "approved-electives",
+      "name": "Approved Electives",
+      "section": "major",
+      "ruleType": "choose_credits",
+      "countsTowardDegree": true,
+      "status": "satisfied",
+      "reasons": [],
+      "required": { "credits": 3, "courses": null },
+      "completed": { "credits": 4, "courses": 1 },
+      "inProgress": { "credits": 0, "courses": 0 },
+      "appliedCourses": [
+        { "courseId": "gly2010c", "code": "GLY 2010C", "credits": 4, "evidenceId": "a02", "via": "uf", "grade": "B+", "term": { "season": "fall", "year": 2025 } }
+      ],
+      "pendingCourses": [],
+      "remainingOptions": { "courseIds": [], "total": 0, "openSlots": [] },
+      "sources": [
+        {
+          "kind": "program_page",
+          "label": "Geology minor (catalog 2026-2027)",
+          "url": "https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/GLY_UMN/",
+          "catalogYear": "2026-2027",
+          "fetchedAt": "2026-10-04T01:47:41.079925+00:00",
+          "fingerprint": "8745e5cbe5d1cfdf",
+          "excerpt": "Approved elective (3): ESC 1000, GLY 1000, GLY 1102, GLY 1880, GLY 2010C, GLY 2030C, GLY 2038, OCE 1001"
+        }
+      ]
+    },
+    {
+      "programId": "uglas-gly_umn",
+      "requirementKey": "elective-gly-courses-3000-4000-level-6",
+      "name": "GLY courses (3000/4000 level) 6",
+      "section": "major",
+      "ruleType": "choose_credits",
+      "countsTowardDegree": true,
+      "status": "not_satisfied",
+      "reasons": [
+        {
+          "code": "in_progress_pending",
+          "message": "GLY 4155C (in progress, Fall 2026) would bring this to 3 of 6 credits.",
+          "courseIds": ["gly4155c"]
+        },
+        {
+          "code": "counted_elsewhere",
+          "message": "GLY 3202C is on this list but already counts toward Requirements; a course counts toward one requirement unless the catalog allows overlap.",
+          "courseIds": ["gly3202c"]
+        }
+      ],
+      "required": { "credits": 6, "courses": null },
+      "completed": { "credits": 0, "courses": 0 },
+      "inProgress": { "credits": 3, "courses": 1 },
+      "appliedCourses": [],
+      "pendingCourses": [
+        { "courseId": "gly4155c", "code": "GLY 4155C", "credits": 3, "evidenceId": "a11", "via": "uf", "term": { "season": "fall", "year": 2026 } }
+      ],
+      "remainingOptions": {
+        "courseIds": ["gly3045", "gly3074", "gly3083c", "gly3105c", "gly3163", "gly3200c", "gly3603c", "gly3882c"],
+        "total": 28,
+        "openSlots": []
+      },
+      "sources": [
+        {
+          "kind": "program_page",
+          "label": "Geology minor (catalog 2026-2027)",
+          "url": "https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/GLY_UMN/",
+          "catalogYear": "2026-2027",
+          "fetchedAt": "2026-10-04T01:47:41.079925+00:00",
+          "fingerprint": "8745e5cbe5d1cfdf",
+          "excerpt": "GLY courses (3000/4000 level) 6"
+        }
+      ]
+    }
+  ],
+  "unappliedCourses": [
+    { "courseId": "psy2012", "code": "PSY 2012", "credits": 3, "evidenceId": "a01", "via": "uf", "grade": "A", "term": { "season": "fall", "year": 2025 } },
+    { "courseId": "enc1101", "code": "ENC 1101", "credits": 3, "evidenceId": "a03", "via": "uf", "grade": "B", "term": { "season": "fall", "year": 2025 } },
+    { "courseId": "sta2023", "code": "STA 2023", "credits": 3, "evidenceId": "a06", "via": "uf", "grade": "C", "term": { "season": "spring", "year": 2026 } },
+    { "courseId": "bsc2010", "code": "BSC 2010", "credits": 3, "evidenceId": "a07", "via": "uf", "grade": "B", "term": { "season": "spring", "year": 2026 } },
+    { "courseId": "enc1102", "code": "ENC 1102", "credits": 3, "evidenceId": "a14", "via": "dual_enrollment", "grade": "A" },
+    { "courseId": "mac2311", "code": "MAC 2311", "credits": 4, "evidenceId": "e01", "via": "exam" }
+  ],
+  "gpa": [
+    {
+      "kind": "uf_cumulative",
+      "status": "computed",
+      "value": 2.96,
+      "gradePoints": 71,
+      "gpaHours": 24,
+      "attemptIds": ["a01", "a02", "a03", "a04", "a05", "a06", "a07", "a09"],
+      "reasons": []
+    }
+  ],
+  "sources": [
+    {
+      "kind": "program_page",
+      "label": "Geology minor (catalog 2026-2027)",
+      "url": "https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/GLY_UMN/",
+      "catalogYear": "2026-2027",
+      "fetchedAt": "2026-10-04T01:47:41.079925+00:00",
+      "fingerprint": "8745e5cbe5d1cfdf"
+    },
+    {
+      "kind": "university_policy",
+      "label": "UF grades and grading policies",
+      "url": "https://catalog.ufl.edu/UGRD/academic-regulations/grades-grading-policies/"
+    }
+  ]
+}

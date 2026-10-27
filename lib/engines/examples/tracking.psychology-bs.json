@@ -1,0 +1,81 @@
+{
+  "versions": { "contractVersion": "0.1.0", "engineVersion": "0.1.0", "dataVersion": "f6bc5a93004e8cca", "catalogYear": "2026-2027", "recordId": "synthetic-student-001", "recordVersion": "1" },
+  "programId": "uglas-psy_bs01",
+  "currentSemester": 3,
+  "status": "unknown",
+  "milestones": [
+    {
+      "semester": 1, "kind": "courses", "status": "met", "rawText": "Complete MAC 1147 or MAC 2311",
+      "required": 1, "satisfiedBy": ["mac2311"], "pendingCourses": [], "missing": [], "reasons": []
+    },
+    {
+      "semester": 2, "kind": "courses", "status": "met", "rawText": "Complete MAC 2311",
+      "required": 1, "satisfiedBy": ["mac2311"], "pendingCourses": [], "missing": [], "reasons": []
+    },
+    {
+      "semester": 2, "kind": "courses", "status": "met", "rawText": "Complete PSY 2012",
+      "required": 1, "satisfiedBy": ["psy2012"], "pendingCourses": [], "missing": [], "reasons": []
+    },
+    {
+      "semester": 3, "kind": "count", "status": "unknown",
+      "rawText": "Complete 2 of the following critical-tracking courses with a 2.6 critical-tracking GPA: BSC 2010 , PSB 3340 , or PSY 3213L Students should take PSY 3213L in semester 3 or 4 before taking any additional 3000-level or above psychology courses.",
+      "required": 2, "satisfiedBy": ["bsc2010"], "pendingCourses": ["psb3340", "psy3213l"], "missing": ["PSB 3340", "PSY 3213L"],
+      "reasons": [
+        { "code": "gpa_rule_not_captured", "message": "UF requires a 2.6 critical-tracking GPA for this milestone; that threshold is only in the text, so it isn't checked." },
+        { "code": "in_progress_pending", "message": "The course part is met if PSB 3340 or PSY 3213L (in progress, Fall 2026) is passed.", "courseIds": ["psb3340", "psy3213l"] }
+      ]
+    },
+    {
+      "semester": 4, "kind": "count", "status": "upcoming",
+      "rawText": "Complete 1 tracking course from BSC 2010 , PSB 3340 , PSY 3213L or STA 2023 with a 2.75 critical-tracking GPA",
+      "required": 1, "satisfiedBy": ["bsc2010", "sta2023"], "pendingCourses": ["psb3340"], "missing": ["PSB 3340"],
+      "reasons": [
+        { "code": "gpa_rule_not_captured", "message": "UF requires a 2.75 critical-tracking GPA for this milestone; it isn't checked." },
+        { "code": "rule_not_modeled", "message": "UF means one MORE tracking course than semester 3 (three in all). The data stores \"1 of the pool\", which completed work already meets, so the cumulative count isn't checked." }
+      ]
+    },
+    {
+      "semester": 5, "kind": "courses", "status": "upcoming",
+      "rawText": "Complete the final tracking course ( BSC 2010 , PSB 3340 , PSY 3213L or STA 2023 ) with a 2.75 critical-tracking GPA. Additional psychology courses taken in semesters 1-5 are included in the critical-tracking GPA.",
+      "required": 1, "satisfiedBy": ["bsc2010"], "pendingCourses": [], "missing": [],
+      "reasons": [
+        { "code": "gpa_rule_not_captured", "message": "UF requires a 2.75 critical-tracking GPA for this milestone; it isn't checked." },
+        { "code": "rule_not_modeled", "message": "\"The final tracking course\" means all four by semester 5; the data stores it as any one of the four, so the cumulative count isn't checked." }
+      ]
+    },
+    {
+      "semester": 6, "kind": "note", "status": "upcoming", "rawText": "Complete 2 of the remaining PSY 3XXX/4XXX required courses",
+      "required": null, "satisfiedBy": [], "pendingCourses": [], "missing": [],
+      "reasons": [{ "code": "rule_not_modeled", "message": "Prose only; no course list to check." }]
+    },
+    {
+      "semester": 6, "kind": "courses", "status": "upcoming", "rawText": "Complete STA 3024",
+      "required": 1, "satisfiedBy": [], "pendingCourses": [], "missing": ["STA 3024"], "reasons": []
+    },
+    {
+      "semester": 7, "kind": "note", "status": "upcoming", "rawText": "Complete 2 of the remaining PSY 3XXX/4XXX required courses",
+      "required": null, "satisfiedBy": [], "pendingCourses": [], "missing": [],
+      "reasons": [{ "code": "rule_not_modeled", "message": "Prose only; no course list to check." }]
+    },
+    {
+      "semester": 7, "kind": "courses", "status": "upcoming", "rawText": "Complete neuroscience lab: PSB 4343C , EAB 4714C , EXP 4174C",
+      "required": 1, "satisfiedBy": [], "pendingCourses": [], "missing": ["PSB 4343C or EAB 4714C or EXP 4174C"], "reasons": []
+    },
+    {
+      "semester": 8, "kind": "note", "status": "upcoming", "rawText": "Complete all remaining PSY 3XXX/4XXX required courses and/or neuroscience relevant courses.",
+      "required": null, "satisfiedBy": [], "pendingCourses": [], "missing": [],
+      "reasons": [{ "code": "rule_not_modeled", "message": "Prose only; no course list to check." }]
+    }
+  ],
+  "reasons": [
+    { "code": "gpa_rule_not_captured", "message": "The semester-3 milestone (due now) requires a 2.6 critical-tracking GPA, which isn't checked, so tracking can't be confirmed." },
+    { "code": "in_progress_pending", "message": "Its courses are on track if PSB 3340 or PSY 3213L (in progress) is passed.", "courseIds": ["psb3340", "psy3213l"] }
+  ],
+  "caveats": [
+    { "code": "gpa_rule_not_captured", "message": "Critical-tracking GPA thresholds appear only in milestone text; none are checked yet." },
+    { "code": "rule_not_modeled", "message": "Milestones worded as \"1 more\" or \"the final\" course are stored per semester, not cumulatively." }
+  ],
+  "sources": [
+    { "kind": "program_page", "label": "Psychology BS, Behavioral and Cognitive Neuroscience (catalog 2026-2027)", "url": "https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/PSY_BS/PSY_BS01/", "catalogYear": "2026-2027", "fetchedAt": "2026-10-04T02:08:51.146647+00:00", "fingerprint": "5aff09f662306a6c" }
+  ]
+}
