@@ -5,10 +5,9 @@ and planning (issue #8). The AI layer explains these results and the frontend
 renders them. Neither recomputes them, and the AI never decides eligibility
 on its own.
 
-**Status: checkpoint 1 (contracts).** The JSON shapes, their runtime
-validation, the catalog loader and hand-built examples are here. The engines
-that produce the results come next (checkpoint 2: audit, eligibility,
-tracking; checkpoint 3: planner, what-if). Build against the examples now; the
+**Status: checkpoint 2 in progress.** The contracts (checkpoint 1) and the
+eligibility engine are here. Audit and Critical Tracking come next, then the
+planner and what-if (checkpoint 3). Build against the examples for those; the
 engines will return the same shapes.
 
 ## Layout
@@ -22,6 +21,9 @@ lib/engines/
     results.ts  AuditResult, EligibilityResult, TrackingResult (engine output)
     plan.ts     Plan, RequirementSlot (engine output; draft)
   status.ts     status vocabularies and the rules that combine them
+  history.ts    what a record says about courses: grade rules, credit, GPA
+  eligibility.ts  evaluateEligibility: requisite trees -> EligibilityResult
+  versions.ts   the versions block results carry
   catalog/      CSV reader and loader: data/*.csv -> validated Catalog
   examples/     synthetic record + one example of every result type
   __tests__/    vitest
@@ -51,6 +53,34 @@ import { AuditResult, AcademicRecord } from "@/lib/engines/schemas";
 const record = AcademicRecord.parse(json);      // throws with a precise path
 const check = AuditResult.safeParse(response);  // { success, data | error }
 ```
+
+### Eligibility
+
+```ts
+import { evaluateEligibility } from "@/lib/engines/eligibility";
+
+const result = evaluateEligibility(catalog, record, "gly4043", { season: "spring", year: 2027 });
+// result.status: "eligible_pending"; result.prerequisite is the evaluated tree
+
+// Courses taken in the same term satisfy corequisites (as pending):
+evaluateEligibility(catalog, record, "chm2045", term, { concurrent: ["chm2045l"] });
+```
+
+The term must be after the record's `currentTerm`. Evaluating many courses
+for one record? Build one `new CourseHistory(record, catalog)` and pass it as
+the last argument. The whole catalog takes about 150 ms.
+
+How leaves are decided:
+
+| leaf | rule |
+|---|---|
+| course | Best holding: a completed attempt meeting `min_grade` (any passing grade without one, D included) is met, an in-progress one pending, a completed one with no grade unknown. Exam credit counts as met. A failed first attempt doesn't block a passed repeat. |
+| credits | Earned credit (each course once) filtered by prefixes / list / level; unfiltered counts elective credit too. A `subject` ("credits of history") is unknown. |
+| program | A code (`HES_BHS`) is compared with declared programs, ignoring track numbers and the UF Online suffix; a code no catalog program has is unknown. A name is met only on an exact match, otherwise unknown (names come from prose and are often fragments). |
+| gpa | No scope: the UF cumulative GPA. A scope ("upper division") is unknown. |
+| standing | Unknown (`rule_not_modeled`). |
+| permission, placement, equivalent | Unknown (`requisite_unverifiable`). |
+| unparsed | Unknown (`requisite_unparsed`). |
 
 Every schema exports a type with the same name (`AuditResult` is both). The
 objects are strict: an unknown or misspelled field is an error, not silently
@@ -203,9 +233,15 @@ data: course and program ids, requirement definitions, record evidence,
 one-course-one-requirement, the GPA arithmetic, requisite trees and the
 published schedule.
 
-## Known limitations (checkpoint 1)
+## Known limitations
 
-- The engines don't exist yet; the examples are hand-built to the contract.
+- Audit, tracking and the planner don't exist yet; their examples are
+  hand-built to the contract. The eligibility engine reproduces its examples
+  exactly (`__tests__/eligibility.test.ts`).
+- For the synthetic student, 56% of courses with requisites evaluate
+  `unknown` (about 1,950 unverifiable leaves, 1,870 unparsed, 770 standing).
+  Modeling class standing and typing the common prose restrictions are the
+  biggest wins.
 - Requirement-level minimum grades aren't in the program data
   (`grade_minimums_not_checked`). **Prerequisite** minimum grades are: 2,216
   requisite leaves carry `min_grade`.
@@ -214,8 +250,6 @@ published schedule.
 - Critical-tracking GPA thresholds exist only in milestone text, and
   milestones worded incrementally ("1 more", "the final") are stored per
   semester rather than cumulatively (see the Psychology example).
-- Class standing (freshman ... senior) isn't modeled; standing leaves
-  evaluate `unknown`.
 - Summer sessions A/B/C aren't distinguished. The plan's 18-credit cap is a
   default to verify against UF's registration policy.
 - 29 of 483 programs are `needs_review` and audit as `unknown`.

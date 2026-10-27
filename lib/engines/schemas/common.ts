@@ -16,6 +16,10 @@ import { z } from "zod";
  *  can tell which shape it was handed. */
 export const CONTRACT_VERSION = "0.1.0";
 
+/** Version of the rules implementation (the engines). Bump it when a rule
+ *  changes what a result says, so stored results can be recognised as stale. */
+export const ENGINE_VERSION = "0.1.0";
+
 const SEMVER = /^\d+\.\d+\.\d+$/;
 export const SemVer = z.string().regex(SEMVER, "expected a version like 0.1.0");
 
