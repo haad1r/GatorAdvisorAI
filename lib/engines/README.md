@@ -5,10 +5,15 @@ and planning (issue #8). The AI layer explains these results and the frontend
 renders them. Neither recomputes them, and the AI never decides eligibility
 on its own.
 
-**Status: checkpoint 2 in progress.** The contracts (checkpoint 1) and the
-eligibility engine are here. Audit and Critical Tracking come next, then the
-planner and what-if (checkpoint 3). Build against the examples for those; the
-engines will return the same shapes.
+**Status: checkpoint 2 in progress.** The contracts (checkpoint 1), the
+eligibility engine and the degree audit are here. Critical Tracking comes
+next, then the planner and what-if (checkpoint 3). Build against the examples
+for those; the engines will return the same shapes.
+
+| engine | entry point | docs |
+|---|---|---|
+| course eligibility | `evaluateEligibility` in `eligibility.ts` | [Eligibility](#eligibility) below |
+| degree audit | `auditProgram` in `audit/` | [audit/README.md](audit/README.md) |
 
 ## Layout
 
@@ -23,6 +28,7 @@ lib/engines/
   status.ts     status vocabularies and the rules that combine them
   history.ts    what a record says about courses: grade rules, credit, GPA
   eligibility.ts  evaluateEligibility: requisite trees -> EligibilityResult
+  audit/        auditProgram: program + record -> AuditResult (own README)
   versions.ts   the versions block results carry
   catalog/      CSV reader and loader: data/*.csv -> validated Catalog
   examples/     synthetic record + one example of every result type
@@ -235,9 +241,12 @@ published schedule.
 
 ## Known limitations
 
-- Audit, tracking and the planner don't exist yet; their examples are
-  hand-built to the contract. The eligibility engine reproduces its examples
-  exactly (`__tests__/eligibility.test.ts`).
+- Tracking and the planner don't exist yet; their examples are hand-built
+  to the contract. The eligibility and audit engines reproduce their examples
+  (`__tests__/eligibility.test.ts`, `__tests__/audit.test.ts`).
+- The audit counts a course toward one requirement of the major (gen ed may
+  overlap with it); see [audit/README.md](audit/README.md#counting-domains)
+  for why, and for the audit's own limits.
 - For the synthetic student, 56% of courses with requisites evaluate
   `unknown` (about 1,950 unverifiable leaves, 1,870 unparsed, 770 standing).
   Modeling class standing and typing the common prose restrictions are the
