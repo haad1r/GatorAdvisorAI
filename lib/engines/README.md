@@ -5,15 +5,36 @@ and planning (issue #8). The AI layer explains these results and the frontend
 renders them. Neither recomputes them, and the AI never decides eligibility
 on its own.
 
-**Status: checkpoint 2 in progress.** The contracts (checkpoint 1), the
-eligibility engine and the degree audit are here. Critical Tracking comes
-next, then the planner and what-if (checkpoint 3). Build against the examples
-for those; the engines will return the same shapes.
+**Status: checkpoint 2 in progress.** The contracts (checkpoint 1) and three
+engines are here: eligibility, the degree audit and Critical Tracking. The
+planner and what-if come in checkpoint 3. Until then, build against
+`examples/plan.geology-minor.json`; the planner will return the same shape.
 
-| engine | entry point | docs |
-|---|---|---|
-| course eligibility | `evaluateEligibility` in `eligibility.ts` | [Eligibility](#eligibility) below |
-| degree audit | `auditProgram` in `audit/` | [audit/README.md](audit/README.md) |
+| engine | entry point | question it answers | docs |
+|---|---|---|---|
+| course eligibility | `evaluateEligibility` in `eligibility.ts` | Can this student take this course in this term? | [Eligibility](#eligibility) below |
+| degree audit | `auditProgram` in `audit/` | How far through this program is the student? | [audit/README.md](audit/README.md) |
+| Critical Tracking | `evaluateTracking` in `tracking.ts` | Is the student on track for the program's semester milestones? | [Critical Tracking](#critical-tracking) below |
+
+## What the engine is for
+
+The engine is meant to run in the background, behind the advisor. Its
+results are the facts the advisor talks about. When the advisor proposes a
+course, a plan or "you're on track", the claim is checked against these
+results; nothing is recomputed in a prompt. Four properties make that safe:
+
+- **Deterministic.** The same catalog, record and arguments always give the
+  same result. The engine reads no clock (`record.currentTerm` is "now"),
+  no network and no randomness. Tests check this for every program.
+- **Self-checking.** Every result is validated by its zod schema before
+  it's returned, including the status logic: a "satisfied" with 5 of 8
+  credits can't leave the engine.
+- **Honest about gaps.** Anything the data can't decide is `unknown`, with a
+  machine `code` and a human `message`. `caveats` list what wasn't checked
+  at all. A consumer must never round `unknown` up to a yes.
+- **Citable.** Results name their evidence, both the record entries (`evidenceId:
+  "a07"`) and the catalog pages (`sources`), and carry `versions`, so a
+  stored answer can be detected as stale.
 
 ## Layout
 
@@ -29,6 +50,7 @@ lib/engines/
   history.ts    what a record says about courses: grade rules, credit, GPA
   eligibility.ts  evaluateEligibility: requisite trees -> EligibilityResult
   audit/        auditProgram: program + record -> AuditResult (own README)
+  tracking.ts   evaluateTracking: milestones + record -> TrackingResult
   versions.ts   the versions block results carry
   catalog/      CSV reader and loader: data/*.csv -> validated Catalog
   examples/     synthetic record + one example of every result type
@@ -51,7 +73,7 @@ npx eslint lib/engines
 444 exam awards) and validates every row, so a scraper change that breaks the
 contract fails here.
 
-## Using the schemas
+## Using the engines
 
 ```ts
 import { AuditResult, AcademicRecord } from "@/lib/engines/schemas";
@@ -59,6 +81,14 @@ import { AuditResult, AcademicRecord } from "@/lib/engines/schemas";
 const record = AcademicRecord.parse(json);      // throws with a precise path
 const check = AuditResult.safeParse(response);  // { success, data | error }
 ```
+
+Every schema exports a type with the same name (`AuditResult` is both). The
+objects are strict: an unknown or misspelled field is an error, not silently
+dropped.
+
+Each result schema also checks its own logic. A result whose status
+contradicts its numbers (for example, "satisfied" with 5 of 8 credits) fails
+validation, so a bug can't reach a student looking valid.
 
 ### Eligibility
 
@@ -88,13 +118,66 @@ How leaves are decided:
 | permission, placement, equivalent | Unknown (`requisite_unverifiable`). |
 | unparsed | Unknown (`requisite_unparsed`). |
 
-Every schema exports a type with the same name (`AuditResult` is both). The
-objects are strict: an unknown or misspelled field is an error, not silently
-dropped.
+### Critical Tracking
 
-Each result schema also checks its own logic. A result whose status
-contradicts its numbers (for example, "satisfied" with 5 of 8 credits) fails
-validation, so a bug can't reach a student looking valid.
+```ts
+import { evaluateTracking } from "@/lib/engines/tracking";
+
+const t = evaluateTracking(catalog, record, "uglas-psy_bs01");
+// t.currentSemester: 3; t.status: "unknown" (a due GPA rule can't be checked)
+// t.milestones[i]: one result per catalog milestone, in the page's order
+```
+
+It throws `RangeError` for a program with no milestones (every minor and
+certificate, and 9 majors whose pages have no tracking tab). Check
+`catalog.programs[id].milestones.length` first.
+
+**Semesters.** `currentSemester` counts fall and spring terms from
+`record.firstTerm` through `record.currentTerm`. Summers don't count, as in
+UF's tracking language, and a student who starts in summer is in semester 1.
+Continuous enrollment is assumed. A milestone is **due** when its semester is
+the current one or earlier.
+
+**Checked as of today.** Milestones are judged against the record as it
+stands now, not as it stood when each semester ended. A course finished a
+semester late counts as met. The question answered is "is this student on
+track now?", which is what an advisor acts on. (UF itself reviews tracking at
+the end of each term.)
+
+How each kind of milestone is decided:
+
+| kind | rule |
+|---|---|
+| `courses` | Every slot held. A slot is a list of " or " alternatives, and each alternative is an AND-set (a lecture and its lab). An alternative is met when all its courses are passed at the line's `minGrade`, and pending when that rests on courses in progress. |
+| `count` | At least `required` slots held, counting completed work first: met, then pending, then unknown (a completed course with no grade). With no slots listed, the pool is the model plan's tracking courses scheduled up to that semester; a lab joins its lecture, and the plan's "or" choices make one slot. |
+| `gpa`, scope `uf` | The UF cumulative GPA (`history.ts`) against `gpa.min`. Met once due and at or above it. Below it, due this semester, and grades still to come: `pending` (it rests on this term). Below it and past: `not_met` (`gpa_below_minimum`). A later semester's GPA is `upcoming` either way, because it can still change. |
+| `gpa`, other scopes | `unknown` when due, `upcoming` before (`gpa_rule_not_checked`). Critical-tracking, upper-division and program GPAs use course sets and attempt rules that differ by page ("all attempts", "best of two attempts", "excluding ECO 3101"). The threshold is still reported in `gpa.min`. |
+| `note` | Prose ("2 of the remaining PSY 3XXX/4XXX courses"): `unknown` when due. |
+
+Anything not yet met whose semester is still ahead is `upcoming`, whatever
+the reason.
+
+**Minimum grades.** `minGrade` comes from the line itself ("with a minimum
+grade of C"). A minimum of `S` means S, or C or better (UF: "a grade of S is
+equal to a C (2.0) or better"). A grade the page gives to one course inside
+a line is not applied to the others ("( ACG 2071 must be completed with a
+minimum grade of B)"). Those are left unchecked, and the result carries the
+`grade_minimums_not_checked` caveat.
+
+**A milestone weaker than an earlier one isn't trusted.** UF states tracking
+cumulatively, so a later milestone over the same courses never asks for
+fewer. Psychology BS01's semester 3 asks for 2 of BSC 2010, PSB 3340 and PSY
+3213L. Its semester 4 says "1 tracking course from" those plus STA 2023,
+which the data stores as 1 of 4. UF meant one *more*, and semester 5's
+"the final tracking course" means all four. Read as stored, completed work
+would always meet them. So a milestone that demands fewer slots than an
+earlier one whose courses it contains is `unknown` when due (`upcoming`
+before), with a `rule_not_modeled` reason naming the earlier semester. It
+stays `not_met` if even the weak reading fails. Across the catalog this
+fires only on those two Psychology lines.
+
+Evaluating many programs for one record? Pass one `CourseHistory` as the
+last argument. All 224 programs with milestones take about 50 ms.
 
 ## Statuses
 
@@ -151,9 +234,12 @@ words:
 | `not_met` | A milestone was missed. |
 | `unknown` | A due milestone can't be checked. |
 
-Semesters count enrolled fall/spring terms (summers don't count, as in UF's
-tracking language). Upcoming milestones don't affect the status: being in
-semester 3 with a semester-5 course untaken is normal.
+The status is decided in that order: any `not_met` milestone gives
+`not_met`, then any due `unknown` gives `unknown`, then any due `pending`
+gives `at_risk` (`combineMilestones` in `status.ts`). Upcoming milestones
+don't affect it: being in semester 3 with a semester-5 course untaken is
+normal. How each milestone is decided is in
+[Critical Tracking](#critical-tracking) above.
 
 ## Reasons, caveats and sources
 
@@ -176,11 +262,12 @@ a machine `code` and a human `message`.
 | `count_rule_unmet` | Enough credits, but a rule like "at least one 4000-level" fails. |
 | `counted_elsewhere` | The course already counts toward another requirement. |
 | `waived` / `substitution_applied` / `overlap_allowed` | An advisor exception from the record applied. |
+| `gpa_below_minimum` | A GPA the engine computed (the UF cumulative GPA) is below a milestone's threshold. |
 | `offering_unconfirmed` | A planned course isn't in a published schedule for that term. |
 | `credit_cap` / `prerequisite_chain` / `deadline_unreachable` / `locked_conflict` | Planner blockers. |
 | `program_rules_not_captured` | Caveat: page prose rules (residency, upper-division credits, exclusivity) not checked. |
-| `grade_minimums_not_checked` | Caveat: requirement-level minimum grades aren't in the program data. |
-| `gpa_rule_not_captured` | Caveat: a GPA threshold that's only in text. |
+| `grade_minimums_not_checked` | Caveat: a minimum grade the data doesn't carry (requirement-level grades; a tracking grade given to one course in a line). |
+| `gpa_rule_not_checked` | A GPA threshold the engine reports but doesn't compute (critical-tracking, upper-division, program GPAs). |
 
 `SourceReference` points at the evidence: catalog URL, catalog year, fetch
 time and, for program pages, the fingerprint of the requirement tables (it
@@ -231,7 +318,7 @@ in progress.
 | `audit.geology-minor.json` | all three rule types; satisfied, in_progress and not_satisfied; a course on two lists counted once; prose rules as caveats; UF cumulative GPA |
 | `audit.english-minor-needs-review.json` | a `needs_review` program: everything `unknown`, with why |
 | `eligibility.json` | every eligibility status: a met OR, a pending prerequisite, a program restriction that settles an AND, "or equivalent", unparsed text |
-| `tracking.psychology-bs.json` | Critical Tracking in semester 3, with GPA thresholds not yet captured |
+| `tracking.psychology-bs.json` | Critical Tracking in semester 3: met course and UF GPA milestones, a count resting on current courses, an unchecked critical-tracking GPA, two incremental lines not trusted, prose notes |
 | `plan.geology-minor.json` | a one-term plan with a confirmed Spring 2027 offering (draft shape) |
 
 `__tests__/examples.test.ts` checks every claim in them against the real
@@ -241,9 +328,9 @@ published schedule.
 
 ## Known limitations
 
-- Tracking and the planner don't exist yet; their examples are hand-built
-  to the contract. The eligibility and audit engines reproduce their examples
-  (`__tests__/eligibility.test.ts`, `__tests__/audit.test.ts`).
+- The planner doesn't exist yet; its example is hand-built to the contract.
+  The other engines reproduce their examples (`__tests__/eligibility.test.ts`,
+  `audit.test.ts`, `tracking.test.ts`).
 - The audit counts a course toward one requirement of the major (gen ed may
   overlap with it); see [audit/README.md](audit/README.md#counting-domains)
   for why, and for the audit's own limits.
@@ -256,9 +343,13 @@ published schedule.
   requisite leaves carry `min_grade`.
 - Page prose rules (UF residency credits, upper-division minimums, credits
   exclusive to a minor) aren't captured (`program_rules_not_captured`).
-- Critical-tracking GPA thresholds exist only in milestone text, and
-  milestones worded incrementally ("1 more", "the final") are stored per
-  semester rather than cumulatively (see the Psychology example).
+- Critical Tracking computes only the UF cumulative GPA. Of 2,625 GPA rules
+  on tracking tabs, 1,589 are UF GPA rules and are checked. The other 1,036
+  (critical-tracking, upper-division, all-institution and program GPAs) are
+  reported with their thresholds but not checked (`gpa_rule_not_checked`).
+- Tracking attempt limits ("within two attempts") and per-course grades
+  inside a line aren't checked, and 816 tracking lines are prose notes.
+  For the synthetic student, 48 of 224 programs track as `unknown`.
 - Summer sessions A/B/C aren't distinguished. The plan's 18-credit cap is a
   default to verify against UF's registration policy.
 - 29 of 483 programs are `needs_review` and audit as `unknown`.
