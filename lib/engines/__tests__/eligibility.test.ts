@@ -79,9 +79,46 @@ describe("leaf rules", () => {
   it("a declared program satisfies a program-code leaf; others are not met", () => {
     const r = withRecord((x) => x.programs.push({ programId: "ugpbh-hes_bhs02" }));
     const got = evaluateEligibility(catalog, r, "hsa3111", SPRING_2027);
-    // Program now met, standing still unknown: the AND is unknown.
-    expect(got.status).toBe("unknown");
-    expect(got.reasons.map((x) => x.code)).toEqual(["rule_not_modeled"]);
+    // Program now met, and every other leaf is met too (31 earned credits).
+    expect(got.status).toBe("eligible");
+  });
+
+  describe("class standing (UF: sophomore 30, junior 60, senior 90 earned credits)", () => {
+    // A course whose whole prerequisite is one standing leaf.
+    const onlyStanding = (level: string) =>
+      Object.values(catalog.courses).find((c) => {
+        const t = c.prerequisite?.tree as { type?: string; level?: string } | undefined;
+        return t?.type === "standing" && t.level === level && !c.corequisite;
+      })!.id;
+    const credit = (credits: number) => withRecord((x) =>
+      x.electiveCredits.push({ entryId: "x99", label: "Transfer elective", credits, source: "transfer", institution: "Test College" }));
+
+    it("counts earned credit once per course, transfer, exam and elective credit included", () => {
+      // 21 UF (BSC 2010 once; the W earns nothing) + 3 dual enrollment + 4 AP
+      // + 3 elective = 31.
+      const sophomore = evaluateEligibility(catalog, record, onlyStanding("sophomore"), SPRING_2027);
+      expect(sophomore.status).toBe("eligible");
+      expect(sophomore.prerequisite!.label).toContain("31 earned, 12 in progress");
+    });
+
+    it("current courses can complete it: pending, not met", () => {
+      // 31 + 17 = 48 earned, + 12 in progress = 60.
+      expect(evaluateEligibility(catalog, credit(17), onlyStanding("junior"), SPRING_2027).status).toBe("eligible_pending");
+      expect(evaluateEligibility(catalog, credit(16), onlyStanding("junior"), SPRING_2027).status).toBe("not_eligible");
+      expect(evaluateEligibility(catalog, credit(29), onlyStanding("junior"), SPRING_2027).status).toBe("eligible");
+    });
+
+    it("an ungraded course that could decide it makes it unknown", () => {
+      // GLY 2100C ungraded: 27 + 17 = 44 earned, + 12 in progress = 56; its
+      // 4 credits, if earned, would make 60.
+      const r = withRecord((x) => {
+        x.electiveCredits.push({ entryId: "x99", label: "Transfer elective", credits: 17, source: "transfer", institution: "Test College" });
+        delete x.attempts.find((a) => a.attemptId === "a05")!.grade;
+      });
+      const got = evaluateEligibility(catalog, r, onlyStanding("junior"), SPRING_2027);
+      expect(got.status).toBe("unknown");
+      expect(got.reasons.map((x) => x.code)).toEqual(["missing_grade"]);
+    });
   });
 
   it("a concurrent course satisfies a corequisite but never a prerequisite", () => {

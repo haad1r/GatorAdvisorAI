@@ -51,7 +51,7 @@
       "value": "not_met",
       "label": "Sophomore standing and PSY 2012 (min C) and STA 2023 (min C) and an eligible program",
       "children": [
-        { "type": "standing", "value": "unknown", "label": "Sophomore standing (UF classification rules not modeled yet)" },
+        { "type": "standing", "value": "met", "label": "Sophomore standing (30+ earned credits; 31 earned, 12 in progress)" },
         { "type": "course", "value": "met", "label": "PSY 2012 with a minimum grade of C", "evidenceIds": ["a01"] },
         { "type": "course", "value": "met", "label": "STA 2023 with a minimum grade of C", "evidenceIds": ["a06"] },
         {
@@ -68,7 +68,7 @@
     },
     "corequisite": null,
     "reasons": [
-      { "code": "requisite_not_met", "message": "Restricted to students in HES_BHS, CSD_BHS or PBH_UMN; the record declares none of them. That settles it even though standing couldn't be checked." }
+      { "code": "requisite_not_met", "message": "Restricted to students in HES_BHS, CSD_BHS or PBH_UMN; the record declares none of them. Standing is met (31 earned credits), the grades are met, and the restriction alone settles it." }
     ],
     "sources": [
       { "kind": "course_catalog", "label": "HSA 3111 (catalog 2026-2027)", "url": "https://catalog.ufl.edu/UGRD/courses/health_science/", "catalogYear": "2026-2027", "fetchedAt": "2026-10-03T23:21:00.970781+00:00", "excerpt": "Sophomore standing and PSY 2012 with a minimum grade of C & STA 2023 with a minimum grade of C & (HES_BHS or CSD_BHS or PBH_UMN))." }

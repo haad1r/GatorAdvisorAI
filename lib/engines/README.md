@@ -114,7 +114,7 @@ How leaves are decided:
 | credits | Earned credit (each course once) filtered by prefixes / list / level; unfiltered counts elective credit too. A `subject` ("credits of history") is unknown. |
 | program | A code (`HES_BHS`) is compared with declared programs, ignoring track numbers and the UF Online suffix; a code no catalog program has is unknown. A name is met only on an exact match, otherwise unknown (names come from prose and are often fragments). |
 | gpa | No scope: the UF cumulative GPA. A scope ("upper division") is unknown. |
-| standing | Unknown (`rule_not_modeled`). |
+| standing | Credits earned against UF's classification: sophomore 30, junior 60, senior 90 ([Student Classifications](https://catalog.ufl.edu/UGRD/academic-regulations/student-classifications/)). Earned credit is each course once (transfer included, which UF accepts "as hours earned"), exam credit (an assumption: the page doesn't say) and elective credit. Met on completed credit, pending if current courses would reach it, unknown if an ungraded course would decide it. "Junior standing" means junior or higher; no requisite in the data sets a ceiling. |
 | permission, placement, equivalent | Unknown (`requisite_unverifiable`). |
 | unparsed | Unknown (`requisite_unparsed`). |
 
@@ -334,10 +334,14 @@ published schedule.
 - The audit counts a course toward one requirement of the major (gen ed may
   overlap with it); see [audit/README.md](audit/README.md#counting-domains)
   for why, and for the audit's own limits.
-- For the synthetic student, 56% of courses with requisites evaluate
-  `unknown` (about 1,950 unverifiable leaves, 1,870 unparsed, 770 standing).
-  Modeling class standing and typing the common prose restrictions are the
-  biggest wins.
+- For the synthetic student, 45% of the 6,742 courses with requisites
+  evaluate `unknown` (down from 56% before class standing was modeled). The
+  unknown leaves are mostly unparsed text (3,796), instructor permission
+  (1,169), program names from prose (749) and "or equivalent" (473). Typing
+  the common prose restrictions is the next win.
+- Eligibility is judged on the record as it stands (completed work, then
+  current courses). For a term two or more terms out, courses the student
+  takes in between aren't known; the planner (checkpoint 3) will supply them.
 - Requirement-level minimum grades aren't in the program data
   (`grade_minimums_not_checked`). **Prerequisite** minimum grades are: 2,216
   requisite leaves carry `min_grade`.

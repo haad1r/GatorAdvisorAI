@@ -42,6 +42,11 @@ type Ctx = {
   concurrent: ReadonlySet<string>;
 };
 
+/** Earned credits each class starts at (UF catalog, Student Classifications:
+ *  "Students who have earned 60 credits and have fewer than 90 credits" is a
+ *  junior). https://catalog.ufl.edu/UGRD/academic-regulations/student-classifications/ */
+const STANDING_CREDITS: Record<string, number> = { freshman: 0, sophomore: 30, junior: 60, senior: 90 };
+
 const leaf = (
   type: string,
   value: RequisiteValue,
@@ -126,12 +131,35 @@ function judge(node: RequisiteNode, ctx: Ctx): Judged {
       });
     }
 
-    case "standing":
-      // UF classifies students by earned hours, but which hours count
-      // (transfer, exam, repeats) isn't modeled yet.
-      return leaf("standing", "unknown", `${capitalize(node.level)} standing${node.or_higher ? " or higher" : ""}`, {
-        why: "rule_not_modeled",
+    case "standing": {
+      // UF classifies by credits EARNED (catalog, Student Classifications,
+      // read 2026-11-03): sophomore 30, junior 60, senior 90. Earned hours are
+      // every course's credit once (transfer included, which UF accepts "as
+      // hours earned"; exam credit too, an assumption the page doesn't
+      // state) plus elective credit. "Junior standing" is read as junior or
+      // higher, the catalog convention; no leaf in the data sets a ceiling.
+      const need = STANDING_CREDITS[node.level];
+      if (need === undefined)
+        return leaf("standing", "unknown", `${capitalize(node.level)} standing`, { why: "rule_not_modeled" });
+      const earned = ctx.history.earnedByCourse();
+      const sum = (hs: { credits: number }[]) => hs.reduce((s, h) => s + h.credits, 0);
+      const completed = sum(earned.completed) + ctx.history.electiveCredits();
+      const total = completed + sum(earned.pending);
+      // A completed attempt with no grade may or may not have earned credit.
+      const counted = new Set([...earned.completed, ...earned.pending].map((h) => h.courseId));
+      const ungraded = ctx.record.attempts.filter((a) => a.status === "completed" && !a.grade && !counted.has(a.courseId));
+      const value: RequisiteValue =
+        completed >= need ? "met"
+        : total >= need ? "pending"
+        : total + sum(ungraded) >= need ? "unknown"
+        : "not_met";
+      const label = `${capitalize(node.level)} standing (${need}+ earned credits; ${completed} earned${total > completed ? `, ${total - completed} in progress` : ""})`;
+      return leaf("standing", value, label, {
+        evidenceIds: value === "met" ? undefined : ungraded.map((a) => a.attemptId),
+        why: value === "unknown" ? "missing_grade" : undefined,
+        courseIds: value === "pending" ? earned.pending.map((h) => h.courseId) : undefined,
       });
+    }
 
     case "program": {
       const declared = ctx.record.programs.map((p) => ctx.catalog.programs[p.programId]).filter(Boolean);
