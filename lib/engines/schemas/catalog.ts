@@ -212,17 +212,32 @@ export type RequirementGroup = z.infer<typeof RequirementGroup>;
 
 /** A Critical Tracking row: what must be done by enrolled fall/spring
  *  semester `semester` (summers don't count, matching how UF states it).
- *  `courses`: every slot held. `count`: at least `count` slots held.
- *  `note`: prose only, nothing to evaluate. A slot is a list of " or "
- *  alternatives; each alternative is an AND-set (a lecture with its lab). */
-export const Milestone = z.strictObject({
-  semester: z.int().min(1),
-  kind: z.enum(["courses", "count", "note"]),
-  slots: z.array(z.array(z.array(z.string()))),
-  count: z.int().nullable(),
-  pool: z.array(z.string()),
-  rawText: z.string(),
-});
+ *  `courses`: every slot held. `count`: at least `count` slots held (-1:
+ *  all of them; no slots: the model plan's tracking rows). `gpa`: a GPA of at
+ *  least `gpaMin` over `gpaScope`. `note`: prose only, nothing to evaluate.
+ *  A slot is a list of " or " alternatives; each alternative is an AND-set (a
+ *  lecture with its lab). */
+export const Milestone = z
+  .strictObject({
+    semester: z.int().min(1),
+    kind: z.enum(["courses", "count", "gpa", "note"]),
+    slots: z.array(z.array(z.array(z.string()))),
+    count: z.int().nullable(),
+    pool: z.array(z.string()),
+    rawText: z.string(),
+    /** The line's minimum grade for ALL its courses ("with a minimum grade
+     *  of C"). Null: any passing grade, or a grade the line gives only one of
+     *  its courses (not checked). "S" means S, or C or better. */
+    minGrade: Grade.nullable(),
+    gpaMin: z.number().min(0).max(4).nullable(),
+    /** uf: the UF cumulative GPA. The others are GPAs over a subset of
+     *  courses or institutions whose rules vary by page (see
+     *  scraper/programs.py `_gpa_scope`). */
+    gpaScope: z.enum(["uf", "critical_tracking", "upper_division", "all_institutions", "other"]).nullable(),
+  })
+  .refine((m) => (m.kind === "gpa") === (m.gpaMin !== null && m.gpaScope !== null), {
+    message: "a gpa milestone (and only one) has gpaMin and gpaScope",
+  });
 export type Milestone = z.infer<typeof Milestone>;
 
 /** One cell of UF's suggested semester grid (the "model plan"). */

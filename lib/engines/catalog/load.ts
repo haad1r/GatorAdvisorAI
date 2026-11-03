@@ -213,6 +213,9 @@ export function buildCatalog(files: Record<CatalogFile, string>): Catalog {
       count: int(r.count),
       pool: json(r.pool, []),
       rawText: r.raw_text,
+      minGrade: (text(r.min_grade) as Milestone["minGrade"]) ?? null,
+      gpaMin: r.gpa_min ? Number(r.gpa_min) : null,
+      gpaScope: (text(r.gpa_scope) as Milestone["gpaScope"]) ?? null,
     };
     programOf(r.program_id, "milestones.csv").milestones.push(m);
   }

@@ -137,6 +137,7 @@ export const ReasonCode = z.enum([
   "waived",
   "substitution_applied",
   "overlap_allowed",
+  "gpa_below_minimum",
   // planner
   "offering_unconfirmed",
   "credit_cap",
@@ -146,7 +147,7 @@ export const ReasonCode = z.enum([
   // caveats: limits of what was checked at all
   "program_rules_not_captured",
   "grade_minimums_not_checked",
-  "gpa_rule_not_captured",
+  "gpa_rule_not_checked",
 ]);
 export type ReasonCode = z.infer<typeof ReasonCode>;
 

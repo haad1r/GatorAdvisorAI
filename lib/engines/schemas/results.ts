@@ -303,12 +303,25 @@ export const MilestoneResult = z
   .strictObject({
     /** Enrolled fall/spring semester it is due by. */
     semester: z.int().min(1),
-    kind: z.enum(["courses", "count", "note"]),
+    kind: z.enum(["courses", "count", "gpa", "note"]),
     status: MilestoneStatus,
     /** UF's own sentence for it. */
     rawText: z.string(),
-    /** Slots that must be held (all of them for `courses`, `count` for count). */
+    /** Slots that must be held (all of them for `courses`, `count` for
+     *  count). Null for gpa and note milestones. */
     required: z.int().nonnegative().nullable(),
+    /** The minimum grade a course needed to count here (null: any passing
+     *  grade). */
+    minGrade: Grade.nullable(),
+    /** For a gpa milestone: which GPA, the threshold, and the student's value
+     *  when the engine can compute it (only the UF cumulative GPA today). */
+    gpa: z
+      .strictObject({
+        scope: z.enum(["uf", "critical_tracking", "upper_division", "all_institutions", "other"]),
+        min: z.number(),
+        value: z.number().nullable(),
+      })
+      .nullable(),
     /** Courses that hold a slot from completed work / from current enrollment. */
     satisfiedBy: z.array(CourseId),
     pendingCourses: z.array(CourseId),
@@ -321,6 +334,8 @@ export const MilestoneResult = z
       ctx.addIssue({ code: "custom", path: ["reasons"], message: "an unknown milestone needs a reason" });
     if (m.status === "pending" && m.pendingCourses.length === 0)
       ctx.addIssue({ code: "custom", path: ["pendingCourses"], message: "a pending milestone needs pending courses" });
+    if ((m.kind === "gpa") !== (m.gpa !== null))
+      ctx.addIssue({ code: "custom", path: ["gpa"], message: "a gpa milestone (and only one) says which GPA it checked" });
   });
 export type MilestoneResult = z.infer<typeof MilestoneResult>;
 
