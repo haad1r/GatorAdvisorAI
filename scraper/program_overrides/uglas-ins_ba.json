@@ -1,0 +1,12 @@
+{
+  "reason": "International Studies BA (uglas-ins_ba), hand-authored 2026-07-21 from the cached UF catalog page. The parser extracts the real major structure correctly from the course-list table: international-studies-core-courses (INS 2004 + INS 4930, 6 cr), category-a-regional (15 cr of approved regional INT electives, kept as placeholder slots), category-b-global (15 cr of approved outside-region/global INT electives, placeholder slots) = 36 cr major. The advisor-approved INT electives are a cross-department list keyed to the student's chosen region (there is NO 'INT' subject prefix), so they correctly remain reserved slots. The region-linked foreign language is carried by clas-foreign-language. The phantom 'Total ... credits' summary rows are now dropped by programs.py's TOTAL_HEADER_RE guard (previously excluded here). This override only drops the redundant related-coursework FL restatement and force-publishes. [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.]",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "b1ae713cce488035"
+  },
+  "status": "published",
+  "exclude_groups": [
+    "related-coursework"
+  ]
+}

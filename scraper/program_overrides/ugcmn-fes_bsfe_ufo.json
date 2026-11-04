@@ -1,0 +1,76 @@
+{
+  "reason": "Emergency Services BSFE (UF Online), checked 2026-10-12 against the 2026-2027 page: 'Students should meet with an advisor ... to choose their specialization'. The page prints three 21-credit 'Core Coursework by Specialization' tables headed Fire Management, EMS Management and Emergency Management, then 'Required Coursework for All Specializations'. The three specialization tables are alternatives (pick one), not three requirements, so they become one 21-credit chooser with each specialization as an option. A summary table ('Required Coursework for All Specializations 21', 'Core Coursework by Specialization 21', 'Electives 18') restates those groups and is excluded; its 'Electives 18' becomes the credits of the Electives table (60 credits in all). [2026-10-18: the parser now reads 'Select six: 18' as a chooser (it only knew one..five), so the Electives table parses as an 18-credit, six-course major chooser on its own and the summary table is dropped as a restatement; the override keeps only the specialization chooser and drops its two duplicate tables.]",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "4987fc16afef7fca"
+  },
+  "exclude_groups": [
+    "core-coursework-by-specialization-2",
+    "core-coursework-by-specialization-3"
+  ],
+  "patch_groups": {
+    "core-coursework-by-specialization": {
+      "name": "Core Coursework by Specialization (choose one)",
+      "rtype": "choose_credits",
+      "required_credits": 21.0,
+      "required_course_count": null,
+      "eligible_course_ids": [
+        "fes3004",
+        "fes3533",
+        "fes3782",
+        "fes4003",
+        "fes4045",
+        "fes4585",
+        "fes3815",
+        "fes3223",
+        "fes3233",
+        "fes3284",
+        "fes4244",
+        "fes4274",
+        "fes4234",
+        "fes4224",
+        "fes3822",
+        "fes4014",
+        "fes4884"
+      ],
+      "logic": {
+        "credits": 21.0,
+        "options": [
+          [
+            "fes3004",
+            "fes3533",
+            "fes3782",
+            "fes4003",
+            "fes4045",
+            "fes4585",
+            "fes3815"
+          ],
+          [
+            "fes3223",
+            "fes3233",
+            "fes3284",
+            "fes4244",
+            "fes4274",
+            "fes4234",
+            "fes4224"
+          ],
+          [
+            "fes3533",
+            "fes3822",
+            "fes4003",
+            "fes4014",
+            "fes4045",
+            "fes4884",
+            "fes3815"
+          ]
+        ],
+        "option_labels": [
+          "Fire Management",
+          "EMS Management",
+          "Emergency Management"
+        ]
+      }
+    }
+  }
+}

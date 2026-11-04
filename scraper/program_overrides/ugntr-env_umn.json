@@ -1,0 +1,109 @@
+{
+  "reason": "Environmental Science minor (UGNTR/ENV_UMN/), checked 2026-10-12 against the 2026-2027 page: 'Subject Areas: Select one course from three of five Subject Areas 9-12', then the five areas (Environmental Ethics, Organic Chemistry, Earth and Soil Science, Environmental Policy, Natural Resource Management) as course lists. Parsed as requirements, the areas asked for 116 credits in a 15-credit minor. The Subject Areas chooser takes their courses (9 credits); the five areas stay as named option pools so the 'three different areas' rule, which the group model cannot count, is still visible. Ecology and Subject Areas form one exclusive set, ported from UF Planner (s91).",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "e3825fd84cac2e14"
+  },
+  "patch_groups": {
+    "subject-areas": {
+      "rtype": "choose_credits",
+      "eligible_course_ids": [
+        "aeb4126",
+        "phm3032",
+        "pot3503",
+        "rel2104",
+        "rel3492",
+        "bch3023",
+        "chm2200",
+        "ees4203",
+        "geo2200",
+        "geo2200l",
+        "gly1000",
+        "gly2010c",
+        "gly2030c",
+        "gly2100c",
+        "sws3022",
+        "sws3022l",
+        "sws4231c",
+        "aeb4123",
+        "aeb3450",
+        "aeb4283",
+        "ecp3302",
+        "fnr4660",
+        "inr3034",
+        "inr3502",
+        "pos4931",
+        "agg3501",
+        "ees3008",
+        "fas4305c",
+        "fnr3002c",
+        "fnr3004",
+        "fnr4621",
+        "pls3004c",
+        "sws4932"
+      ],
+      "required_credits": 9.0,
+      "logic": {
+        "from": [
+          "aeb4126",
+          "phm3032",
+          "pot3503",
+          "rel2104",
+          "rel3492",
+          "bch3023",
+          "chm2200",
+          "ees4203",
+          "geo2200",
+          "geo2200l",
+          "gly1000",
+          "gly2010c",
+          "gly2030c",
+          "gly2100c",
+          "sws3022",
+          "sws3022l",
+          "sws4231c",
+          "aeb4123",
+          "aeb3450",
+          "aeb4283",
+          "ecp3302",
+          "fnr4660",
+          "inr3034",
+          "inr3502",
+          "pos4931",
+          "agg3501",
+          "ees3008",
+          "fas4305c",
+          "fnr3002c",
+          "fnr3004",
+          "fnr4621",
+          "pls3004c",
+          "sws4932"
+        ],
+        "credits": 9.0,
+        "note": "one course from each of three of the five subject areas (see the options-section area lists)"
+      }
+    },
+    "environmental-ethics": {
+      "section": "options"
+    },
+    "organic-chemistry": {
+      "section": "options"
+    },
+    "earth-and-soil-science": {
+      "section": "options"
+    },
+    "environmental-policy": {
+      "section": "options"
+    },
+    "natural-resource-management": {
+      "section": "options"
+    }
+  },
+  "exclusive_sets": {
+    "one-row-per-course": [
+      "ecology",
+      "subject-areas"
+    ]
+  }
+}

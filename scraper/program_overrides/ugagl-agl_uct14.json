@@ -1,0 +1,42 @@
+{
+  "reason": "Checked 2026-10-18 against https://catalog.ufl.edu/UGRD/colleges-schools/UGAGL/AGL_UCT14/ (cached): the page prints 'PLP 4101 Applied Plant Disease Management 3'; the catalog has no PLP 4101 and lists Applied Plant Disease Management as PLP 4104, so the id is replaced (plp4101 -> plp4104).",
+  "patch_groups": {
+    "approved-electives": {
+      "logic": {
+        "from": [
+          "eny3225c",
+          "eny3510c",
+          "eny4202",
+          "fas4932",
+          "fos4202",
+          "ipm3022",
+          "ipm4114",
+          "plp4104",
+          "sws4307"
+        ],
+        "credits": 2.0,
+        "linked_from": [
+          "Approved electives 2-3"
+        ],
+        "host_group": "requirements",
+        "tab": null
+      },
+      "eligible_course_ids": [
+        "eny3225c",
+        "eny3510c",
+        "eny4202",
+        "fas4932",
+        "fos4202",
+        "ipm3022",
+        "ipm4114",
+        "plp4104",
+        "sws4307"
+      ]
+    }
+  },
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "dda508d611dc21da"
+  }
+}

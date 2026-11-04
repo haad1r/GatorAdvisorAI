@@ -1,0 +1,33 @@
+{
+  "reason": "Language-BA page. The option tables UF Planner excluded here (shared concentration/elective lists) are now parsed as option pools and linked to the Critical Concentration chooser, so no exclusion is needed and the program publishes on its own. Ported rules, each re-checked on the 2026-2027 page 2026-10-12: s80. The elective row (cached page, read 2026-09-11): 'Advanced German Major Elective Coursework: 18 credits. Select 18 credits (at least 6 credits with GER or GEW prefix at the 4000 level).' 2026-10-12: the page states 'Although courses may appear in more than one group, they may be counted toward only one group' (UF Planner encoded this only for ffr_ba and faf_ba), so the set covers every major group. The 'Critical Concentration: 6 credits' header row parses as a note-only group (its only row is the counted-toward-one-group footnote, now the exclusive set); it is excluded, and the real 6-credit concentration chooser follows it.",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "c110b9b0f237c931"
+  },
+  "count_rules": {
+    "advanced-german-major-elective-coursework-18-credits": [
+      {
+        "at_least": 6,
+        "unit": "credits",
+        "min_level": 4000,
+        "prefixes": [
+          "ger",
+          "gew"
+        ],
+        "text": "At least 6 credits with a GER or GEW prefix at the 4000 level"
+      }
+    ]
+  },
+  "exclusive_sets": {
+    "one-group-per-course": [
+      "requirements",
+      "advanced-language-and-culture-core-coursework-6-credits",
+      "advanced-german-major-elective-coursework-18-credits",
+      "select-6-credits-from-one-concentration"
+    ]
+  },
+  "exclude_groups": [
+    "critical-concentration-6-credits"
+  ]
+}

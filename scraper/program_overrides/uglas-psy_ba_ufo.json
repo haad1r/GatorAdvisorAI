@@ -1,0 +1,66 @@
+{
+  "reason": "s91. The page (UGLAS/PSY_BA_UFO/, cached 2026-07-25, read 2026-09-23) prints 'Foundation Level Core: Select at least one course from each of the four foundation areas: 12', each area a list. The scrape made an empty 12-credit header and four 0-credit required_lists, so a blank board planned all nine area courses and counted them again as 'Additional Psychology Major Electives'. The header goes; each area is one course of 3 credits. The foundation areas and the electives fill one credit minimum ('to meet the 30-credit minimum requirement'), so a course pays one row: one exclusive set over every psychology row. [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.]",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "a6e7c2d181d23d8c"
+  },
+  "exclude_groups": [
+    "psychology-ba-foundation-level-core"
+  ],
+  "patch_groups": {
+    "biological-bases-of-psychology": {
+      "rtype": "choose_n",
+      "required_credits": 3,
+      "required_course_count": 1,
+      "logic": {
+        "from": [
+          "cbh3003",
+          "exp3104",
+          "psb3002"
+        ],
+        "n": 1
+      }
+    },
+    "developmental-psychology": {
+      "required_credits": 3,
+      "required_course_count": 1
+    },
+    "learning-and-cognition": {
+      "rtype": "choose_n",
+      "required_credits": 3,
+      "required_course_count": 1,
+      "logic": {
+        "from": [
+          "eab3002",
+          "exp3604"
+        ],
+        "n": 1
+      }
+    },
+    "sociocultural-individual-differences-approaches": {
+      "rtype": "choose_n",
+      "required_credits": 3,
+      "required_course_count": 1,
+      "logic": {
+        "from": [
+          "clp3144",
+          "ppe3003",
+          "sop3004"
+        ],
+        "n": 1
+      }
+    }
+  },
+  "exclusive_sets": {
+    "one-row-per-course": [
+      "introductory-level",
+      "laboratory-course",
+      "biological-bases-of-psychology",
+      "developmental-psychology",
+      "learning-and-cognition",
+      "sociocultural-individual-differences-approaches",
+      "additional-psychology-major-electives"
+    ]
+  }
+}

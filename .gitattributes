@@ -1,0 +1,3 @@
+# Generated data is written with LF line endings; keep it LF on every checkout
+# so a fresh clone matches what a scraper run writes, byte for byte.
+data/** text eol=lf

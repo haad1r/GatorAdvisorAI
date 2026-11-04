@@ -1,0 +1,19 @@
+{
+  "reason": "Business Administration minor, UF Online (ugbus-bus_umn_ufo), reviewed 2026-08-18 against https://catalog.ufl.edu/UGRD/colleges-schools/UGBUS/BUS_UMN_UFO/. The page carries TWO tables: an unheaded 'Course List' naming BUL 4310 / FIN 3403 / MAN 3025 / MAR 3023 — which states PETITIONING ELIGIBILITY, not requirements — and 'Required Courses' (ACG 2021, select two of BUL 4310 / ECO 2013 / ECO 2023, then FIN 3403, MAN 3025, MAR 3023) totalling 24 credits. The parser read the eligibility list as a required 16-cr group, duplicating FIN/MAN/MAR and taking the minor to 40 cr. Excluded; the remaining three groups total the page's 24. This is the stray-table signature GENERIC_GROUP_NAME already warns about in qa.py. [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.]",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "f9a8919d07485510"
+  },
+  "exclude_groups": [
+    "requirements"
+  ],
+  "patch_groups": {
+    "requirements-2": {
+      "name": "Required Courses"
+    },
+    "requirements-3": {
+      "name": "Required Courses"
+    }
+  }
+}

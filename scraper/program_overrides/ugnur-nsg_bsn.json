@@ -1,0 +1,9 @@
+{
+  "reason": "Published via override in the 2026-07-16 Phase-4 triage (HANDOFF session 9): high-demand major whose page has only a model plan grid (no sc_courselist), so requirements are plan-derived and capped at 0.75 confidence by design. Derived group eyeballed against the cached page: coherent whole-degree course spine + gen-ed placeholder rows, 120 cr. build_data keeps plan-derived required_lists (sanitizer exception, logic.derived_from == plangrid). [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.]",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "d67f8bea45879278"
+  },
+  "status": "published"
+}

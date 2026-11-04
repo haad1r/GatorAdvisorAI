@@ -91,7 +91,8 @@ gatoradvisor-ai/
 │   └── db/             # Prisma client and queries
 ├── prisma/             # Database schema and seed data
 ├── ml/                 # Python recommendation service
-├── data/               # UF catalog and requirement data
+├── data/               # UF catalog and requirement data (generated; see scraper/README.md)
+├── scraper/            # Python scraper that builds data/
 ├── tests/
 └── docs/
 ```

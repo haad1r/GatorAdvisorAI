@@ -1,0 +1,16 @@
+{
+  "reason": "Ported from UF Planner; every quoted sentence re-checked on the 2026-2027 page 2026-10-12. s91. The page (https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/RLN_BA/, cached 2026-07-25, read 2026-09-23) prints the elective credits as tiers that ADD UP to the total: 'Religion Major Electives: 24 credits: 1000-level or higher Religion courses 9, 3000-level or higher Religion courses 12, 4000-level Religion course 3', beside REL 3931 and REL 4933, and 'The remaining 8 classes are electives. No more than three of the electives can be 2000-level courses or below. At least one elective must be 4000-level.' The tiers are a partition, not overlapping pools, and the required core sits inside them too, so without a set one course paid into several rows and a blank board under-planned (18 REL credits planned of 30). One exclusive set over the core and every tier. The 4000-level row is renamed from the table's heading, which it inherited from the scrape and which named the whole 24 credits. 2026-10-12: UF Planner's rename of the 'Religion Major Electives: 24 credits' header is dropped: every row under it (including '4000-level Religion course 3') now expands into its own REL pool, so the empty header is gone.",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "0dd9041ac19905d5"
+  },
+  "exclusive_sets": {
+    "one-tier-per-course": [
+      "requirements",
+      "elective-1000-level-or-higher-religion-courses-9",
+      "elective-3000-level-or-higher-religion-courses-12",
+      "elective-4000-level-religion-course-3"
+    ]
+  }
+}

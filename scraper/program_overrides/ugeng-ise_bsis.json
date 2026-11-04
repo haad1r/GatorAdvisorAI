@@ -1,0 +1,171 @@
+{
+  "reason": "Industrial and Systems Engineering (UGENG/ISE_BSIS/), reviewed 2026-10-12 against the 2026-2027 page. The page states this major only as a model semester plan, so requirements are plan-derived and capped at 0.75; accepted on the plan-derived bar: a real spine of 39 catalog courses (12+ required), 125 plan credits, zero errors. Elective rows linked to the page's own lists: Restricted Electives. The 4 remaining rows are open slots the page names but does not enumerate (gen ed, free or approved electives): Engineering elective; Financial accounting course; General elective; Technical elective. [2026-10-18, https://catalog.ufl.edu/UGRD/colleges-schools/UGENG/ISE_BSIS/: the plan prints 'COP 2271C Computer Programming for Engineers'; the catalog splits it into COP 2271 (2-3 credits) and COP 2271L, whose description reads 'Optional laboratory for COP 2271. Required for ISE majors.', so cop2271c -> cop2271, cop2271l.]",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "b55f302db36b29b3"
+  },
+  "status": "published",
+  "patch_groups": {
+    "plan-derived": {
+      "logic": {
+        "slots": [
+          [
+            "chm2045",
+            "chm2095"
+          ],
+          [
+            "ein2002"
+          ],
+          [
+            "enc1101"
+          ],
+          [
+            "mac2311"
+          ],
+          [
+            "egn2020c"
+          ],
+          [
+            "eco2013"
+          ],
+          [
+            "phy2048"
+          ],
+          [
+            "mac2312"
+          ],
+          [
+            "cop2271",
+            "cop2271l",
+            "cop2273"
+          ],
+          [
+            "enc2256"
+          ],
+          [
+            "mac2313"
+          ],
+          [
+            "mas3114"
+          ],
+          [
+            "phy2049"
+          ],
+          [
+            "eco2023"
+          ],
+          [
+            "egm2511"
+          ],
+          [
+            "ein3354"
+          ],
+          [
+            "esi3327c"
+          ],
+          [
+            "cgn2328",
+            "eml2023"
+          ],
+          [
+            "egs4034"
+          ],
+          [
+            "esi4356"
+          ],
+          [
+            "esi3215c"
+          ],
+          [
+            "esi3312"
+          ],
+          {
+            "placeholder": "Engineering elective",
+            "credits": 3.0,
+            "semester": 5
+          },
+          [
+            "ein4451"
+          ],
+          [
+            "esi4313"
+          ],
+          [
+            "ein3241"
+          ],
+          [
+            "esi4523"
+          ],
+          [
+            "esi4610"
+          ],
+          {
+            "placeholder": "Technical elective",
+            "credits": 3.0,
+            "semester": 7
+          },
+          {
+            "placeholder": "Financial accounting course",
+            "credits": 3.0,
+            "semester": 7
+          },
+          [
+            "ein4335"
+          ],
+          {
+            "placeholder": "Technical elective",
+            "credits": 3.0,
+            "semester": 8
+          },
+          {
+            "placeholder": "General elective"
+          }
+        ],
+        "derived_from": "plangrid",
+        "placeholders": [
+          "Engineering elective",
+          "Technical elective",
+          "Financial accounting course",
+          "Technical elective",
+          "General elective"
+        ]
+      },
+      "eligible_course_ids": [
+        "chm2045",
+        "chm2095",
+        "ein2002",
+        "enc1101",
+        "mac2311",
+        "egn2020c",
+        "eco2013",
+        "phy2048",
+        "mac2312",
+        "cop2271",
+        "cop2271l",
+        "cop2273",
+        "enc2256",
+        "mac2313",
+        "mas3114",
+        "phy2049",
+        "eco2023",
+        "egm2511",
+        "ein3354",
+        "esi3327c",
+        "cgn2328",
+        "eml2023",
+        "egs4034",
+        "esi4356",
+        "esi3215c",
+        "esi3312",
+        "ein4451",
+        "esi4313",
+        "ein3241",
+        "esi4523",
+        "esi4610",
+        "ein4335"
+      ],
+      "required_course_count": 28
+    }
+  }
+}

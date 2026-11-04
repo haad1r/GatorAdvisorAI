@@ -1,0 +1,15 @@
+{
+  "reason": "Biology BS (Preprofessional), ported from UF Planner (s91), quotes re-checked on the 2026-2027 page 2026-10-12: 'Additional approved life sciences courses (Minimum; a maximum of 6 credits of approved research may be applied to this requirement) 12' and 'Any additional credits remaining after completion of the required core coursework must be met by taking courses from the approved BS preprofessional electives'. A course counts toward only one of the core choosers and the 12-credit approved-electives requirement. The 12-credit group is now linked to the 'Approved Biology Preprofessional Life Science Electives' tab by the parser (UF Planner's key required-biology-bs-preprofessional-major-coursework-4 is approved-biology-preprofessional-life-science-electives here). [2026-10-18: the parser now ends a chooser at an hour-less subheader that starts the next requirement, and names a chooser opened by a 'Select ...' row after that row, so group keys changed with no change in content: required-biology-bs-preprofessional-major-coursework-2 -> select-one-of-the-following.]",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "94f635faf7363c4f"
+  },
+  "exclusive_sets": {
+    "core-or-additional": [
+      "select-one",
+      "select-one-of-the-following",
+      "approved-biology-preprofessional-life-science-electives"
+    ]
+  }
+}

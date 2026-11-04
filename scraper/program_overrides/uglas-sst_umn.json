@@ -1,0 +1,139 @@
+{
+  "reason": "Sustainability Studies minor (15 cr), ported from UF Planner and re-checked on the 2026-2027 page 2026-10-12: the Required Courses table is IDS 2154 (3) + 'Two Foundations courses' (6) + 'Two Theories and Applications courses' (6). The parser links the Foundations row to its table; the Theories and Applications table is split by its four cluster areaheaders (Built Futures and Design; Culture, Ethics, and Human Meaning; Law, Governance, and Economy; Living Systems and Resilient Landscapes) under 'Specialize within one cluster or mix courses from various clusters', so the four become one 6-credit chooser over their courses and the row is removed from the required list. DCP 4XXX (no course id) is dropped, as in UF Planner. DCP 4213 is listed in the Built Futures cluster but exists in neither the catalog nor any Schedule of Courses term since Fall 2021, so it is left out of the chooser.",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "c61b7511dcdde21c"
+  },
+  "exclude_groups": [
+    "built-futures-and-design",
+    "options-culture-ethics-and-human-meaning",
+    "options-law-governance-and-economy",
+    "options-living-systems-and-resilient-landscapes"
+  ],
+  "patch_groups": {
+    "requirements": {
+      "rtype": "required_list",
+      "logic": {
+        "slots": [
+          [
+            "ids2154"
+          ]
+        ]
+      },
+      "eligible_course_ids": [
+        "ids2154"
+      ],
+      "required_credits": 3.0,
+      "required_course_count": 1
+    }
+  },
+  "add_groups": [
+    {
+      "group_key": "theories-and-applications",
+      "name": "Theories and Applications",
+      "rtype": "choose_credits",
+      "logic": {
+        "from": [
+          "aeb4126",
+          "als3030c",
+          "bcn4105",
+          "dcp3210",
+          "geo4700",
+          "urp4000",
+          "urp4640",
+          "amh3630",
+          "ant4930",
+          "eng3503",
+          "phm3032",
+          "rel3082",
+          "rel4188",
+          "wst3610",
+          "wst3663",
+          "wst3720",
+          "wst4630",
+          "wst4349",
+          "aeb3450",
+          "aeb4123",
+          "aeb4283",
+          "aec3322",
+          "cpo4793",
+          "ecp3302",
+          "evr3004",
+          "pot3503",
+          "pup4224",
+          "ees4102",
+          "env4601",
+          "fnr3500c",
+          "geo3334",
+          "geo3352",
+          "geo3372",
+          "geo4034",
+          "geo4060",
+          "geo4285",
+          "geo4300",
+          "gly3074",
+          "pcb4043c",
+          "sws4245",
+          "sws4303c",
+          "wis4523",
+          "wis4551",
+          "wis4554",
+          "zoo4403c"
+        ],
+        "credits": 6.0
+      },
+      "eligible_course_ids": [
+        "aeb4126",
+        "als3030c",
+        "bcn4105",
+        "dcp3210",
+        "geo4700",
+        "urp4000",
+        "urp4640",
+        "amh3630",
+        "ant4930",
+        "eng3503",
+        "phm3032",
+        "rel3082",
+        "rel4188",
+        "wst3610",
+        "wst3663",
+        "wst3720",
+        "wst4630",
+        "wst4349",
+        "aeb3450",
+        "aeb4123",
+        "aeb4283",
+        "aec3322",
+        "cpo4793",
+        "ecp3302",
+        "evr3004",
+        "pot3503",
+        "pup4224",
+        "ees4102",
+        "env4601",
+        "fnr3500c",
+        "geo3334",
+        "geo3352",
+        "geo3372",
+        "geo4034",
+        "geo4060",
+        "geo4285",
+        "geo4300",
+        "gly3074",
+        "pcb4043c",
+        "sws4245",
+        "sws4303c",
+        "wis4523",
+        "wis4551",
+        "wis4554",
+        "zoo4403c"
+      ],
+      "required_credits": 6.0,
+      "required_course_count": null,
+      "sort_order": 2,
+      "section": "major"
+    }
+  ]
+}

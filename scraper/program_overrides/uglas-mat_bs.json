@@ -1,0 +1,77 @@
+{
+  "reason": "Ported from UF Planner; every quoted sentence re-checked on the 2026-2027 page 2026-10-12. Major Electives parsed as an open elective slot (12 cr, zero options) because the approved list lives in a separate table the parser reads as prose. The page states: 'Select four electives, 12 credits minimum, from the approved electives; at least three must be a course offered by the Department of Mathematics at the 4000 level or above.' The 49 ids below are that table, read off https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/MAT_BA_BS/MAT_BS/ on 2026-08-05 and checked to resolve against courses.csv. The 'three at MATH 4000+' half of the rule is a within-group constraint the group model can't express yet; the credit ask is unchanged and every option here is genuinely approved, so a plan built from it is valid, not a superset. Also not enumerable: 'any mathematics course at the 5000 level or above' (GRAD catalog, uncrawled). s78, punch list item 6. Identical to uglas-mat_ba (see that file): the BS page prints the same five sequence pairs and the same footnote 1, 'If this option is selected, MAA 4402 or MAA 5404 cannot be used to satisfy the mathematics elective requirement' (cached page, read 2026-09-10). Five logic.options bundles, and an exclusive set so a course spent on the sequence is not also an elective. s80. The electives row's own sentence (cached page, re-read 2026-09-11): 'Select four electives, 12 credits minimum, from the approved electives; at least three must be a course offered by the Department of Mathematics at the 4000 level or above.' THREE, not one as on the BA. Same department prefixes as uglas-mat_ba.json. The 'mathematics-bs-major-electives' patch is not ported: the parser now links that chooser to the Approved Electives tab and lists the same 49 courses UF Planner's patch did.",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "31e39f5c01a08ceb"
+  },
+  "patch_groups": {
+    "select-one-sequence": {
+      "logic": {
+        "from": [
+          "maa4102",
+          "maa4103",
+          "maa4402",
+          "maa4211",
+          "maa4212"
+        ],
+        "credits": 6.0,
+        "options": [
+          [
+            "maa4102",
+            "maa4103"
+          ],
+          [
+            "maa4102",
+            "maa4402"
+          ],
+          [
+            "maa4211",
+            "maa4103"
+          ],
+          [
+            "maa4211",
+            "maa4212"
+          ],
+          [
+            "maa4211",
+            "maa4402"
+          ]
+        ],
+        "option_labels": [
+          "Intro Real Analysis 1 and 2",
+          "Intro Real Analysis 1 and Functions of a Complex Variable",
+          "Real Analysis and Advanced Calculus 1, Intro Real Analysis 2",
+          "Real Analysis and Advanced Calculus 1 and 2",
+          "Real Analysis and Advanced Calculus 1, Functions of a Complex Variable"
+        ],
+        "curated": "program_overrides/uglas-mat_bs.json"
+      }
+    }
+  },
+  "count_rules": {
+    "mathematics-bs-major-electives": [
+      {
+        "at_least": 3,
+        "unit": "courses",
+        "min_level": 4000,
+        "prefixes": [
+          "maa",
+          "mad",
+          "map",
+          "mas",
+          "mat",
+          "mhf",
+          "mtg"
+        ],
+        "text": "At least three must be a course offered by the Department of Mathematics at the 4000 level or above"
+      }
+    ]
+  },
+  "exclusive_sets": {
+    "sequence-or-elective": [
+      "select-one-sequence",
+      "mathematics-bs-major-electives"
+    ]
+  }
+}

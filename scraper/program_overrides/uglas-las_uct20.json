@@ -1,0 +1,90 @@
+{
+  "reason": "s91. The page (UGLAS/LAS_UCT20/, cached 2026-07-25, read 2026-09-23) prints 'Group A course 3', 'Group B course 3' and 'Group A or Group B course 3'. The third row's pool is the first two lists (build_data _TAB_LIST_POOLS); one course pays one row, so the three are one exclusive set. [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.] [2026-10-18, https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/LAS_UCT20/: this repo has no build-time pool step, so 'Group A course 3' and 'Group B course 3' were 'take all' lists of 7 and 12 rows. Each is now a 3-credit chooser over its own list, and 'Group A or Group B course 1 3' (an empty open slot) chooses from both lists.]",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "f472846677f0911c"
+  },
+  "exclusive_sets": {
+    "one-row-per-course": [
+      "group-a-course",
+      "group-b-course",
+      "group-a-or-group-b-course"
+    ]
+  },
+  "patch_groups": {
+    "group-a-course": {
+      "rtype": "choose_credits",
+      "required_course_count": 1,
+      "logic": {
+        "from": [
+          "amh3340",
+          "amh3551",
+          "amh3552",
+          "amh3558",
+          "amh4316",
+          "amh4319",
+          "amh4550"
+        ],
+        "credits": 3.0
+      }
+    },
+    "group-b-course": {
+      "rtype": "choose_credits",
+      "required_course_count": 1,
+      "logic": {
+        "from": [
+          "ash3931",
+          "euh3033",
+          "euh3035",
+          "euh3284",
+          "euh3931",
+          "lah3931",
+          "woh3205",
+          "woh3931"
+        ],
+        "credits": 3.0
+      }
+    },
+    "group-a-or-group-b-course": {
+      "eligible_course_ids": [
+        "amh3340",
+        "amh3551",
+        "amh3552",
+        "amh3558",
+        "amh4316",
+        "amh4319",
+        "amh4550",
+        "ash3931",
+        "euh3033",
+        "euh3035",
+        "euh3284",
+        "euh3931",
+        "lah3931",
+        "woh3205",
+        "woh3931"
+      ],
+      "required_course_count": 1,
+      "logic": {
+        "from": [
+          "amh3340",
+          "amh3551",
+          "amh3552",
+          "amh3558",
+          "amh4316",
+          "amh4319",
+          "amh4550",
+          "ash3931",
+          "euh3033",
+          "euh3035",
+          "euh3284",
+          "euh3931",
+          "lah3931",
+          "woh3205",
+          "woh3931"
+        ],
+        "credits": 3.0
+      }
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "reason": "Accepted in the 2026-07-16 Phase-4 needs_review triage batch (HANDOFF session 9). Fresh full harvest reproduced the committed CSVs exactly; this program parsed with confidence >= 0.75, zero error-severity issues, and only placeholder-row / phantom-id warnings (the app renders placeholder rows as advisory slots). Guard applied: no oversized (>30 cr) secondary required_list tables (the language-page shape where elective lists parse as required was excluded). Sample of 7 batch programs eyeballed against cached pages before acceptance. s91. The page (UGLAS/CHY_UMN/, cached 2026-07-25, read 2026-09-23) prints 'General Chemistry Sequence: Select Option A or Option B: 5-8', Option A being one each of 'Chemistry 1 lecture' (CHM 2045, 2050, 2095), 'Chemistry 1 lab' (2045L, 2095L), 'Chemistry 2 lecture' (2046, 2051, 2096) and 'Chemistry 2 lab' (2046L, 2096L), and Option B 'CHM 2047 & 2047L'. The scrape kept Option A as four rows under an empty 5-credit header and lost Option B, so a board reserved 5 blank credits beside Option A and a student with CHM 2047 counted nothing. One options group now: one route per sequence as UF pairs them (regular, honors, applied) plus Option B. Mixing lectures across routes is a hand attribution. [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.]",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "f2b11b6e7e1037c0"
+  },
+  "status": "published",
+  "exclude_groups": [
+    "option-a",
+    "select-one-chemistry-1-lab",
+    "select-one-chemistry-2-lecture",
+    "select-one-chemistry-2-lab"
+  ],
+  "patch_groups": {
+    "general-chemistry-sequence": {
+      "rtype": "choose_credits",
+      "required_credits": 5,
+      "required_course_count": 0,
+      "logic": {
+        "options": [
+          [
+            "chm2045",
+            "chm2045l",
+            "chm2046",
+            "chm2046l"
+          ],
+          [
+            "chm2050",
+            "chm2045l",
+            "chm2051",
+            "chm2046l"
+          ],
+          [
+            "chm2095",
+            "chm2095l",
+            "chm2096",
+            "chm2096l"
+          ],
+          [
+            "chm2047",
+            "chm2047l"
+          ]
+        ],
+        "option_labels": [
+          "Option A: CHM 2045/2046",
+          "Option A: CHM 2050/2051 (honors)",
+          "Option A: CHM 2095/2096 (applied)",
+          "Option B: CHM 2047"
+        ],
+        "credits": 5
+      },
+      "eligible_course_ids": [
+        "chm2045",
+        "chm2045l",
+        "chm2046",
+        "chm2046l",
+        "chm2050",
+        "chm2051",
+        "chm2095",
+        "chm2095l",
+        "chm2096",
+        "chm2096l",
+        "chm2047",
+        "chm2047l"
+      ]
+    }
+  }
+}

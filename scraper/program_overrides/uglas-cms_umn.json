@@ -1,0 +1,101 @@
+{
+  "reason": "Checked 2026-10-18 against https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/CMS_UMN/ (cached). The table prints 'COM or SPC courses within the Dial Center (1000/2000 level) 9' and '(3000/4000 level) 9', Total 18; the notes say 'SPC 4680 is not accepted for the Communication Studies minor', 'No more than three credits of SPC 4905, SPC 2594, or RTV 2405 may substitute for a 3000-level course', and 'Three credits of a Dial Center Quest 1 or Quest 2 course (with IDS, COM, or SPC prefixes) may be counted towards the 9 lower-level credits'. 'Within the Dial Center' is the catalog's own department field (dept_slug dial_center_for_written_and_oral_communication), which excludes the Advertising COM and English SPC courses: 7 lower- and 23 upper-level courses, SPC 4680 left out (both rows were one parsed list; the upper-level row is added as its own group). The substitution and Quest notes are left to the advisor.",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "9732e2bae5449e8c"
+  },
+  "patch_groups": {
+    "requirements": {
+      "name": "COM or SPC courses within the Dial Center (1000/2000 level)",
+      "rtype": "choose_credits",
+      "required_credits": 9.0,
+      "required_course_count": null,
+      "eligible_course_ids": [
+        "com1000",
+        "com2382",
+        "spc2300",
+        "spc2351",
+        "spc2594",
+        "spc2608",
+        "spc2730"
+      ],
+      "logic": {
+        "from": [
+          "com1000",
+          "com2382",
+          "spc2300",
+          "spc2351",
+          "spc2594",
+          "spc2608",
+          "spc2730"
+        ],
+        "credits": 9.0
+      }
+    }
+  },
+  "add_groups": [
+    {
+      "group_key": "dial-center-3000-4000-level",
+      "name": "COM or SPC courses within the Dial Center (3000/4000 level)",
+      "rtype": "choose_credits",
+      "required_credits": 9.0,
+      "required_course_count": null,
+      "eligible_course_ids": [
+        "com3120",
+        "com3225",
+        "com3252",
+        "com3305",
+        "com3462",
+        "com3465",
+        "com3491",
+        "com3943",
+        "com3953",
+        "com4013",
+        "com4022",
+        "com4704",
+        "com4706",
+        "com4911",
+        "com4930",
+        "spc3331",
+        "spc3513",
+        "spc3602",
+        "spc4301",
+        "spc4425",
+        "spc4734",
+        "spc4905",
+        "spc4911"
+      ],
+      "logic": {
+        "from": [
+          "com3120",
+          "com3225",
+          "com3252",
+          "com3305",
+          "com3462",
+          "com3465",
+          "com3491",
+          "com3943",
+          "com3953",
+          "com4013",
+          "com4022",
+          "com4704",
+          "com4706",
+          "com4911",
+          "com4930",
+          "spc3331",
+          "spc3513",
+          "spc3602",
+          "spc4301",
+          "spc4425",
+          "spc4734",
+          "spc4905",
+          "spc4911"
+        ],
+        "credits": 9.0
+      },
+      "sort_order": 1,
+      "section": "major"
+    }
+  ]
+}

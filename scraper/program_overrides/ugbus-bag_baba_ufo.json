@@ -1,0 +1,9 @@
+{
+  "reason": "Business Administration, General Studies (UF Online), reviewed 2026-10-12 against the 2026-2027 page. Confidence 0.786 with zero errors (UF Planner's acceptance bar: 0.75+, no errors, warnings only for open slots). The core (8 courses), professional communication chooser and internship parse concretely; the remaining rows are open slots the page does not enumerate: '3000/4000-level courses in a chosen discipline 12' (the student's area of specialization), 'Approved business electives', and 'Similar course with prior approval'. The on-campus twin (ugbus-bag_baba) publishes on its own.",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "d3abfaf81684ef3e"
+  },
+  "status": "published"
+}

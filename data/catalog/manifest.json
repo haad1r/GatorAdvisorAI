@@ -1,0 +1,134 @@
+{
+  "source": "catalog.ufl.edu",
+  "catalog_year": "2026-2027",
+  "department_pages": 134,
+  "fetched_from": "2026-10-03T23:16:58.564720+00:00",
+  "fetched_to": "2026-10-03T23:26:07.080250+00:00",
+  "files": {
+    "courses.csv": 5022,
+    "requisites.csv": 4474
+  },
+  "network_requests": 0,
+  "repeat_listings": 895,
+  "validation": {
+    "courses": 5022,
+    "requisites": {
+      "coreq:complete": 199,
+      "coreq:partial": 8,
+      "coreq:unparsed": 12,
+      "prereq:complete": 3280,
+      "prereq:partial": 663,
+      "prereq:unparsed": 312
+    },
+    "resolved_lab_suffix": {
+      "count": 56,
+      "samples": [
+        "ans3043: ans3006c -> ans3006",
+        "chm4412: chm2046c -> chm2046",
+        "cap3027: cop3504 -> cop3504c",
+        "cap3027: cop3503 -> cop3503c",
+        "cap4174: cop3503 -> cop3503c",
+        "cda3101: cop3504 -> cop3504c",
+        "cda3101: cop3503 -> cop3503c",
+        "cgs4853c: cop3502 -> cop3502c",
+        "cgs4853c: cop3503 -> cop3503c",
+        "cis4301: cop3504 -> cop3504c",
+        "cis4301: cop3503 -> cop3503c",
+        "cis4715: cop3502 -> cop3502c",
+        "cop3530: cop3504 -> cop3504c",
+        "cop3530: cop3503 -> cop3503c",
+        "cot3100: cop3504 -> cop3504c",
+        "cot3100: cop3503 -> cop3503c",
+        "cot4501: cop3504 -> cop3504c",
+        "cot4501: cop3503 -> cop3503c",
+        "dig3793: cop3502 -> cop3502c",
+        "dig3878: cop3502 -> cop3502c"
+      ]
+    },
+    "resolved_renumbered": {
+      "count": 54,
+      "samples": [
+        "ans4635c: fos3042 -> fos2040",
+        "geb3931: geb3213 -> geb2216",
+        "geb3931: geb3219 -> geb2219",
+        "cen4908c: cen3907c -> cen4907c",
+        "com4704: lin3010 -> lin2011",
+        "lin4400: lin3010 -> lin2011",
+        "die4125: fos3042 -> fos2040",
+        "fos4290: fos3042 -> fos2040",
+        "fos4731: fos3042 -> fos2040",
+        "ara4822: lin3010 -> lin2011",
+        "ara4850: lin3010 -> lin2011",
+        "chi4850: lin3010 -> lin2011",
+        "jpn3730: lin3010 -> lin2011",
+        "fnr4623c: for3162c -> fnr3003c",
+        "fnr4624c: for3153c -> fnr3500c",
+        "fnr4624c: for3162c -> fnr3003c",
+        "hsc4290: hsc3102 -> hsc2103",
+        "laa4357: laa4353c -> laa3353c",
+        "lin3201: lin3010 -> lin2011",
+        "lin3460: lin3010 -> lin2011"
+      ]
+    },
+    "schedule_only_references": {
+      "count": 18,
+      "samples": [
+        "adv4950 -> vic3001",
+        "com4492 -> rtv3001",
+        "mmc3203 -> rtv3001",
+        "abe4662 -> abe2062",
+        "als3133 -> abe2062",
+        "arc4220 -> arc6241",
+        "arc4620 -> arc6241",
+        "bsc4892 -> bsc6451",
+        "bme4503c -> bme4503l",
+        "eny4823 -> abe2062",
+        "jpn3943 -> jpn3416",
+        "rtv3106 -> rtv2100",
+        "eas4412 -> map5304",
+        "eas4510 -> map5304",
+        "pur4800 -> vic3001",
+        "pur4802 -> vic3001",
+        "sta4702 -> sta6167",
+        "mvv4341 -> mvv3331"
+      ]
+    },
+    "unknown_course_references": {
+      "count": 94,
+      "samples": [
+        "adv4101 -> mar3203",
+        "adv4801 -> mar3203",
+        "afs4365 -> afs4260",
+        "afs4365 -> afs4350",
+        "hos3305 -> apb2150",
+        "abe3612c -> esi4327c",
+        "agr4512 -> agr3005",
+        "ans4245 -> ans3613l",
+        "apk3110c -> pcb3703c",
+        "apk3113c -> zoo3733c",
+        "apk3113c -> pcb3703c",
+        "apk3163 -> pcb3703c",
+        "apk3220c -> zoo3733x",
+        "apk4101 -> pcb3703c",
+        "apk4940c -> pcb3703c",
+        "atr4315 -> atr4314c",
+        "atr4432 -> atr4822",
+        "atr4832 -> atr4822",
+        "art4402c -> art3443c",
+        "pgy4420c -> pgy3421c"
+      ]
+    },
+    "self_references": {
+      "count": 3,
+      "samples": [
+        "chm2045l",
+        "ecp3703",
+        "spt2520"
+      ]
+    },
+    "missing_credits": {
+      "count": 0,
+      "samples": []
+    }
+  }
+}

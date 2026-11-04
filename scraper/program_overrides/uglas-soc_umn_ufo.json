@@ -1,0 +1,15 @@
+{
+  "reason": "s91. The page (https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/SOC_UMN_UFO/, cached 2026-07-25, read 2026-09-23) prints the elective credits as tiers that ADD UP to the total: 'SYG 2000 3, Sociology courses (2000 level or above) 3, Sociology courses (3000 level or above) 9, Total Credits 15'. The tiers are a partition, not overlapping pools, and the required core sits inside them too, so without a set one course paid into several rows and a blank board under-planned (12 of 15). One exclusive set over the core and every tier. [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.]",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "74217774a35431d0"
+  },
+  "exclusive_sets": {
+    "one-tier-per-course": [
+      "requirements",
+      "elective-sociology-courses-2000-level-or-above-3",
+      "elective-sociology-courses-3000-level-or-above-9"
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "reason": "Language-BA page. The option tables UF Planner excluded here (shared concentration/elective lists) are now parsed as option pools and linked to the Critical Concentration chooser, so no exclusion is needed and the program publishes on its own. Ported rules, each re-checked on the 2026-2027 page 2026-10-12: s78, punch list items 6+7. The page prints, under Critical Concentration and again as footnote 1: 'Although courses may appear in more than one group, they may be counted toward only one group' (cached page, read 2026-09-10). The rule is stated of groups in general, so the set is every major group that survives the exclusions above. It bites today on FRE 4501/4780/4822/4850, which sit in both Linguistics and Major Electives. s80. The Major Electives row (cached page, read 2026-09-11): 'Select 9 credits, at least 6 must be at 4000-level.' [2026-10-18: the parser now ends a chooser at an hour-less subheader that starts the next requirement, and names a chooser opened by a 'Select ...' row after that row, so group keys changed with no change in content: culture-2 -> literature, linguistics-2 -> senior-seminar.]",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "4af3b69681b52cd9"
+  },
+  "count_rules": {
+    "major-electives": [
+      {
+        "at_least": 6,
+        "unit": "credits",
+        "min_level": 4000,
+        "text": "At least 6 credits must be at the 4000 level"
+      }
+    ]
+  },
+  "exclusive_sets": {
+    "one-group-per-course": [
+      "requirements",
+      "advanced-language-and-culture-core-courses-3-credits",
+      "culture",
+      "literature",
+      "linguistics",
+      "senior-seminar",
+      "major-electives",
+      "critical-concentration-6-credits"
+    ]
+  }
+}

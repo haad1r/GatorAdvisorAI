@@ -1,0 +1,33 @@
+{
+  "reason": "Psychology BS — Behavioral and Cognitive Neuroscience. One of the three specialization subpages of PSY_BS, first scraped 2026-07-25. The PSY_BS parent is a true hub ('Required coursework will depend on the program the student chooses'), so these track pages carry the real curriculum; the parent previously reached the app with its optional individual-work courses (PSY 4905/4949/4970) mis-read as the major. Parse is coherent and complete: Introductory, Laboratory, Foundation-level core, Biological Bases, Learning and Cognition, Advanced BCN Laboratory (4-course chooser), electives, Statistics, Mathematics, Biological Science — 52 major cr, plus full gen-eds and the CLAS language requirement. conf 0.765 with zero errors; the dent is entirely placeholder rows for prose elective slots ('PSB or EXP prefixed electives at the 4000-level'), which the app renders as student-chosen slots. s91. The page (UGLAS/PSY_BS/PSY_BS01/, cached 2026-07-25, read 2026-09-23) prints the 6-credit foundation core as two areas of one course each (PSB 3340, EXP 3604). The scrape made an empty 6-credit header beside them, which reserved 6 blank credits for courses the board already held. The header goes and each area carries its 3 credits. The two empty elective rows are enumerated at build time. The foundation areas and the electives fill one credit minimum ('to meet the 36-credit minimum requirement'), so a course pays one row: one exclusive set over every psychology row. [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.]",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "5aff09f662306a6c"
+  },
+  "status": "published",
+  "exclude_groups": [
+    "foundation-level-behavioral-and-cognitive-neuroscience-core"
+  ],
+  "patch_groups": {
+    "biological-bases-of-neuroscience": {
+      "required_credits": 3,
+      "required_course_count": 1
+    },
+    "learning-and-cognition": {
+      "required_credits": 3,
+      "required_course_count": 1
+    }
+  },
+  "exclusive_sets": {
+    "one-row-per-course": [
+      "introductory-level",
+      "laboratory-course",
+      "biological-bases-of-neuroscience",
+      "learning-and-cognition",
+      "advanced-bcn-laboratory",
+      "psychology-behavioral-and-cognitive-neuroscience-major-electives",
+      "additional-bcn-electives"
+    ]
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "reason": "Checked 2026-10-18 against https://catalog.ufl.edu/UGRD/colleges-schools/UGLAS/BIO_BA_BS/BIO_BS03/ (cached). The core table prints 'Taxonomic Diversity requirement. Select at least one course from two of three groups: 7-8' over Animal Diversity (ZOO 4205C, 4307C, 4405, 4462C, 4472C, 4485), Plant and Fungal Diversity (BOT 2011C, 2710C, 3151C, PLP 4653C) and Microorganisms and Microbial Diversity (MCB 3020 & 3020L), then 'Additional major course (If needed to complete 27 credits of core courses) 4-0'. Parsed as a 'take all' list of 12 courses for 11 credits. Now a 7-credit chooser whose options are the three pairs of groups, so the courses come from two groups; one course from EACH of the two is not enforced (the pair is the closest the model holds). The 'Additional major course' row tops the core up to 27 credits: the core rows' low ends add to 23 (2 + 4 + 3 + 4 + 3 + 7), so at the low end it is 4 credits, a chooser over the core lists' courses.",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "b123d1959cf0fcf4"
+  },
+  "patch_groups": {
+    "required-biology-integrative-major-core-courses-2": {
+      "name": "Taxonomic Diversity requirement",
+      "rtype": "choose_credits",
+      "required_credits": 7.0,
+      "required_course_count": 2,
+      "logic": {
+        "options": [
+          [
+            "zoo4205c",
+            "zoo4307c",
+            "zoo4405",
+            "zoo4462c",
+            "zoo4472c",
+            "zoo4485",
+            "bot2011c",
+            "bot2710c",
+            "bot3151c",
+            "plp4653c"
+          ],
+          [
+            "zoo4205c",
+            "zoo4307c",
+            "zoo4405",
+            "zoo4462c",
+            "zoo4472c",
+            "zoo4485",
+            "mcb3020",
+            "mcb3020l"
+          ],
+          [
+            "bot2011c",
+            "bot2710c",
+            "bot3151c",
+            "plp4653c",
+            "mcb3020",
+            "mcb3020l"
+          ]
+        ],
+        "option_labels": [
+          "Animal + Plant and Fungal",
+          "Animal + Microbial",
+          "Plant and Fungal + Microbial"
+        ],
+        "credits": 7.0
+      }
+    }
+  },
+  "add_groups": [
+    {
+      "group_key": "additional-major-course",
+      "name": "Additional major course (to complete 27 core credits)",
+      "rtype": "choose_credits",
+      "logic": {
+        "from": [
+          "pcb3063",
+          "agr3303",
+          "pcb4522",
+          "bot3503",
+          "bot3503l",
+          "pcb3713c",
+          "pcb4723c",
+          "pcb3134",
+          "zoo3713c",
+          "zoo3603c",
+          "zoo4205c",
+          "zoo4307c",
+          "zoo4405",
+          "zoo4462c",
+          "zoo4472c",
+          "zoo4485",
+          "bot2011c",
+          "bot2710c",
+          "bot3151c",
+          "plp4653c",
+          "mcb3020",
+          "mcb3020l"
+        ],
+        "credits": 4.0
+      },
+      "eligible_course_ids": [
+        "pcb3063",
+        "agr3303",
+        "pcb4522",
+        "bot3503",
+        "bot3503l",
+        "pcb3713c",
+        "pcb4723c",
+        "pcb3134",
+        "zoo3713c",
+        "zoo3603c",
+        "zoo4205c",
+        "zoo4307c",
+        "zoo4405",
+        "zoo4462c",
+        "zoo4472c",
+        "zoo4485",
+        "bot2011c",
+        "bot2710c",
+        "bot3151c",
+        "plp4653c",
+        "mcb3020",
+        "mcb3020l"
+      ],
+      "required_credits": 4.0,
+      "required_course_count": null,
+      "sort_order": 6,
+      "section": "major"
+    }
+  ]
+}

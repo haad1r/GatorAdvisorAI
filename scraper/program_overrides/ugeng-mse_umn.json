@@ -1,0 +1,131 @@
+{
+  "reason": "Checked 2026-10-18 against https://catalog.ufl.edu/UGRD/colleges-schools/UGENG/MSE_UMN/ (cached). The table prints 'EMA 3010 Materials 3' and 'EMA courses (approved by undergraduate coordinator) 12', Total 15. EMA 3010 stays required (it shared one parsed list with the row); the 12 credits are now an added group that chooses from the 44 catalog undergraduate EMA courses other than EMA 3010; the coordinator's approval is left to the advisor.",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "ceb229d419957c07"
+  },
+  "patch_groups": {
+    "requirements": {
+      "rtype": "required_list",
+      "required_credits": 3.0,
+      "required_course_count": 1,
+      "eligible_course_ids": [
+        "ema3010"
+      ],
+      "logic": {
+        "slots": [
+          [
+            "ema3010"
+          ]
+        ]
+      }
+    }
+  },
+  "add_groups": [
+    {
+      "group_key": "approved-ema-courses",
+      "name": "EMA courses (approved by undergraduate coordinator)",
+      "rtype": "choose_credits",
+      "required_credits": 12.0,
+      "required_course_count": null,
+      "eligible_course_ids": [
+        "ema1004",
+        "ema3000l",
+        "ema3011",
+        "ema3013c",
+        "ema3050",
+        "ema3066",
+        "ema3080c",
+        "ema3413",
+        "ema3513c",
+        "ema3800",
+        "ema4020l",
+        "ema4041l",
+        "ema4061",
+        "ema4061l",
+        "ema4062",
+        "ema4120",
+        "ema4121",
+        "ema4125",
+        "ema4144",
+        "ema4145",
+        "ema4161",
+        "ema4161l",
+        "ema4223",
+        "ema4224",
+        "ema4314",
+        "ema4324",
+        "ema4414l",
+        "ema4450",
+        "ema4462",
+        "ema4535",
+        "ema4614",
+        "ema4615",
+        "ema4623",
+        "ema4645",
+        "ema4666",
+        "ema4714",
+        "ema4716",
+        "ema4905",
+        "ema4913",
+        "ema4914",
+        "ema4915",
+        "ema4916",
+        "ema4935",
+        "ema4949"
+      ],
+      "logic": {
+        "from": [
+          "ema1004",
+          "ema3000l",
+          "ema3011",
+          "ema3013c",
+          "ema3050",
+          "ema3066",
+          "ema3080c",
+          "ema3413",
+          "ema3513c",
+          "ema3800",
+          "ema4020l",
+          "ema4041l",
+          "ema4061",
+          "ema4061l",
+          "ema4062",
+          "ema4120",
+          "ema4121",
+          "ema4125",
+          "ema4144",
+          "ema4145",
+          "ema4161",
+          "ema4161l",
+          "ema4223",
+          "ema4224",
+          "ema4314",
+          "ema4324",
+          "ema4414l",
+          "ema4450",
+          "ema4462",
+          "ema4535",
+          "ema4614",
+          "ema4615",
+          "ema4623",
+          "ema4645",
+          "ema4666",
+          "ema4714",
+          "ema4716",
+          "ema4905",
+          "ema4913",
+          "ema4914",
+          "ema4915",
+          "ema4916",
+          "ema4935",
+          "ema4949"
+        ],
+        "credits": 12.0
+      },
+      "sort_order": 1,
+      "section": "major"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "reason": "Language-BA page. The option tables UF Planner excluded here (shared concentration/elective lists) are now parsed as option pools and linked to the Critical Concentration chooser, so no exclusion is needed and the program publishes on its own. Ported rules, each re-checked on the 2026-2027 page 2026-10-12: s78, punch list items 6+7. The page prints, under Critical Concentration and again as footnote 1: 'Although courses may appear in more than one group they may be counted toward only one group' (cached page, read 2026-09-10). The rule is stated of groups in general, so the set is every major group that survives the exclusions above. It bites today on SSA 4930, which is both a named slot of Additional Language and Culture coursework and an option in the Advanced African Languages electives. s80. The elective row's heading (cached page, read 2026-09-11): 'Advanced African Languages Major Elective Coursework: 9 credits. Select 9 credits (with at least 6 credits at the 4000 level).' [2026-10-18: the parser now ends a chooser at an hour-less subheader that starts the next requirement, and names a chooser opened by a 'Select ...' row after that row, so group keys changed with no change in content: requirements-2 -> select-one-in-the-same-language, requirements-3 -> select-one-in-the-same-language-2, requirements-4 -> select-one-in-the-same-language-3, requirements-5 -> additional-foundation-coursework, advanced-language-and-culture-coursework-core-courses-15-credits-2 -> select-one.]",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "0e73d3f21f51cc75"
+  },
+  "count_rules": {
+    "advanced-african-languages-major-elective-coursework-9-credits": [
+      {
+        "at_least": 6,
+        "unit": "credits",
+        "min_level": 4000,
+        "text": "At least 6 credits at the 4000 level"
+      }
+    ]
+  },
+  "exclusive_sets": {
+    "one-group-per-course": [
+      "requirements",
+      "select-one-in-the-same-language",
+      "select-one-in-the-same-language-2",
+      "select-one-in-the-same-language-3",
+      "additional-foundation-coursework",
+      "advanced-language-and-culture-coursework-core-courses-15-credits",
+      "select-one",
+      "additional-language-and-culture-major-coursework",
+      "advanced-african-languages-major-elective-coursework-9-credits",
+      "critical-concentration-6-credits"
+    ]
+  }
+}

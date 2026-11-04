@@ -1,0 +1,9 @@
+{
+  "reason": "Aerospace Engineering BSAE (UGENG/ARO_BSAE/), checked 2026-10-12 against the 2026-2027 page. The page states its requirements only as the 8-semester model plan; its course-list tables are the by-department Technical Electives dump. The plan-derived spine is 38 catalog courses / 101 credits (the same 38-course spine UF Planner's reviewer verified as the real BSAE curriculum), and every elective row now names its courses: 'Approved Aerospace elective' x2 -> Aerospace Electives | Select Two (7 courses, 6 cr), 'Approved Technical electives' -> Technical Electives (6 cr). Plan-derived programs are capped at 0.75 and publish only by review; accepted.",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "6849c98df05f0532"
+  },
+  "status": "published"
+}

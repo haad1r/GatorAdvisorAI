@@ -1,0 +1,33 @@
+{
+  "source": "catalog.ufl.edu program pages",
+  "catalog_year": "2026-2027",
+  "fetched_from": "2026-10-04T01:34:19.083187+00:00",
+  "fetched_to": "2026-10-12T17:44:29.788880+00:00",
+  "files": {
+    "programs.csv": 483,
+    "requirements.csv": 2967,
+    "plans.csv": 10671,
+    "milestones.csv": 2165,
+    "qa.csv": 1420
+  },
+  "status": {
+    "published": 454,
+    "needs_review": 29
+  },
+  "status_by_kind": {
+    "major": {
+      "published": 231,
+      "needs_review": 2
+    },
+    "minor": {
+      "published": 154,
+      "needs_review": 13
+    },
+    "certificate": {
+      "needs_review": 14,
+      "published": 69
+    }
+  },
+  "network_requests": 0,
+  "schedule_only_course_ids": 244
+}

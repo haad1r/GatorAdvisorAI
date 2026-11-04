@@ -1,0 +1,89 @@
+{
+  "reason": "Ported from UF Planner; every quoted sentence re-checked on the 2026-2027 page 2026-10-12. s91. The page (UGLAS/GLY_BA_UFO/, cached 2026-07-25, read 2026-09-23) prints 'Geology BA Major Electives: 19-21 credits: Additional Geology courses at the 3000 level or higher 17 (excluding GLY 3105C), 1000-4000 level Geology course 2-4'. Two tiers of one elective total, like Religion's: a 3000-level GLY course fits both, and the introductory and core rows list GLY courses too, so every GLY row is one exclusive set. The 2-4 credit row is enumerated at build time (build_data _EMPTY_LIST_POOLS) and takes the row's own words as its name; it inherited the table's heading, which named the whole 19-21 credits. The 3000+ tier's footnote reads 'Excluding GLY 3105C; minimum 17 credits.', which the subject/level expansion does not read, so GLY 3105C is patched out of that tier's list (it stays in the historical-geology row it belongs to). Without it, the engine credited GLY 3105C to the tier while the audit's claim pass gave it to the other row, and the board planned 13 of 17. The page says 'Excluding GLY 3105C; minimum 17 credits.', so GLY 3105C is removed from today's expanded 3000+ GLY pool (rather than restoring UF Planner's 2025-2026 list). UF Planner's rename of the 19-21 credit header is dropped: that header no longer parses as a group. [2026-10-18: the parser now ends a chooser at an hour-less subheader that starts the next requirement, and names a chooser opened by a 'Select ...' row after that row, so group keys changed with no change in content: requirements-2 -> select-one-historical-geology-course.]",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "93f9642c09362d28"
+  },
+  "patch_groups": {
+    "elective-additional-geology-courses-at-the-3000-level-or-higher-17": {
+      "eligible_course_ids": [
+        "gly3045",
+        "gly3074",
+        "gly3083c",
+        "gly3163",
+        "gly3200c",
+        "gly3202c",
+        "gly3603c",
+        "gly3882c",
+        "gly3901",
+        "gly4041",
+        "gly4043",
+        "gly4155c",
+        "gly4310c",
+        "gly4400c",
+        "gly4450",
+        "gly4552c",
+        "gly4700",
+        "gly4726",
+        "gly4734",
+        "gly4750l",
+        "gly4790",
+        "gly4822",
+        "gly4862",
+        "gly4870",
+        "gly4900",
+        "gly4905",
+        "gly4911",
+        "gly4930",
+        "gly4956"
+      ],
+      "logic": {
+        "from": [
+          "gly3045",
+          "gly3074",
+          "gly3083c",
+          "gly3163",
+          "gly3200c",
+          "gly3202c",
+          "gly3603c",
+          "gly3882c",
+          "gly3901",
+          "gly4041",
+          "gly4043",
+          "gly4155c",
+          "gly4310c",
+          "gly4400c",
+          "gly4450",
+          "gly4552c",
+          "gly4700",
+          "gly4726",
+          "gly4734",
+          "gly4750l",
+          "gly4790",
+          "gly4822",
+          "gly4862",
+          "gly4870",
+          "gly4900",
+          "gly4905",
+          "gly4911",
+          "gly4930",
+          "gly4956"
+        ],
+        "credits": 17.0,
+        "derived_from": "subject_level_wildcard",
+        "host_group": "geology-ba-major-electives-19-21-credits",
+        "note": "3000-level or higher courses in GLY"
+      }
+    }
+  },
+  "exclusive_sets": {
+    "one-tier-per-course": [
+      "requirements",
+      "select-one-historical-geology-course",
+      "geology-ba-core-courses-3-4-credits",
+      "capstone-course-3-credits",
+      "elective-additional-geology-courses-at-the-3000-level-or-higher-17"
+    ]
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "reason": "Checked 2026-10-18 against https://catalog.ufl.edu/UGRD/colleges-schools/UGDCP/ARC_UMN/ (cached). The Required Courses table is 'ARC 1000 3, ARC 1720 3, Approved electives 9, Total Credits 15'. The Approved Electives table lists ARC 1101 ... DCP 4300 and then 'Approved Quest 1 Course 3' over ARC 1101, IDS 2935 (What is a City?) and IDS 2935 (Globalization Cities Cinema): an approved Quest 1 course is one more way to fill the 9 elective credits, not a 3-credit requirement of its own (that would make 18 against the stated 15). Its courses join the electives pool and the group goes.",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "0e3eaa554418c74d"
+  },
+  "exclude_groups": [
+    "approved-quest-1-course"
+  ],
+  "patch_groups": {
+    "approved-electives": {
+      "eligible_course_ids": [
+        "arc1101",
+        "arc3291",
+        "arc3743",
+        "arc3880",
+        "arc4220",
+        "arc4930",
+        "dcp4300",
+        "ids2935"
+      ],
+      "logic": {
+        "from": [
+          "arc1101",
+          "arc3291",
+          "arc3743",
+          "arc3880",
+          "arc4220",
+          "arc4930",
+          "dcp4300",
+          "ids2935"
+        ],
+        "credits": 9.0,
+        "linked_from": [
+          "Approved electives 9"
+        ],
+        "host_group": "requirements",
+        "tab": null
+      }
+    }
+  }
+}

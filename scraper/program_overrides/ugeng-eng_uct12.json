@@ -1,0 +1,108 @@
+{
+  "reason": "Checked 2026-10-18 against https://catalog.ufl.edu/UGRD/colleges-schools/UGENG/ENG_UCT12/ (cached). The table prints EEL 3872 3, PHI 3681 3, then 'College-specific course (select one): 3' over nine college headers (Agricultural and Life Sciences: ALS 3200C; Business: QMB 3302; ... Public Health and Health Professions: PHC 3793, PHC 4796C), Total Credits 9. The nine college lists are the options of that one 3-credit choice, not nine required lists, so they fold into the chooser as options (one per college) and their own groups go.",
+  "reviewed": {
+    "date": "2026-10-18",
+    "catalog_year": "2026-2027",
+    "fingerprint": "02d861c6ca191a2d"
+  },
+  "exclude_groups": [
+    "agricultural-and-life-sciences",
+    "business",
+    "design-construction-and-planning",
+    "education",
+    "engineering",
+    "health-and-human-performance",
+    "journalism-and-communication",
+    "liberal-arts-and-sciences",
+    "public-health-and-health-professions"
+  ],
+  "patch_groups": {
+    "college-specific-course-select-one": {
+      "name": "College-specific course (select one)",
+      "rtype": "choose_credits",
+      "eligible_course_ids": [
+        "als3200c",
+        "qmb3302",
+        "dcp4300",
+        "edp3211",
+        "bme4760",
+        "cap3032",
+        "cap4641",
+        "eee4773",
+        "esi4610",
+        "apk4720",
+        "hft4442",
+        "hsc4063",
+        "adv3330",
+        "adv4331",
+        "jou3365",
+        "bsc4892",
+        "cla3811",
+        "gis4123c",
+        "ids3750",
+        "wst4002",
+        "phc3793",
+        "phc4796c"
+      ],
+      "required_credits": 3.0,
+      "required_course_count": 1,
+      "logic": {
+        "options": [
+          [
+            "als3200c"
+          ],
+          [
+            "qmb3302"
+          ],
+          [
+            "dcp4300"
+          ],
+          [
+            "edp3211"
+          ],
+          [
+            "bme4760",
+            "cap3032",
+            "cap4641",
+            "eee4773",
+            "esi4610"
+          ],
+          [
+            "apk4720",
+            "hft4442",
+            "hsc4063"
+          ],
+          [
+            "adv3330",
+            "adv4331",
+            "jou3365"
+          ],
+          [
+            "bsc4892",
+            "cap3032",
+            "cla3811",
+            "gis4123c",
+            "ids3750",
+            "wst4002"
+          ],
+          [
+            "phc3793",
+            "phc4796c"
+          ]
+        ],
+        "option_labels": [
+          "Agricultural and Life Sciences",
+          "Business",
+          "Design, Construction, and Planning",
+          "Education",
+          "Engineering",
+          "Health and Human Performance",
+          "Journalism and Communication",
+          "Liberal Arts and Sciences",
+          "Public Health and Health Professions"
+        ],
+        "credits": 3.0
+      }
+    }
+  }
+}

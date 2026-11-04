@@ -1,0 +1,28 @@
+{
+  "reason": "Accepted in the 2026-07-16 Phase-4 needs_review triage batch (HANDOFF session 9). Fresh full harvest reproduced the committed CSVs exactly; this program parsed with confidence >= 0.75, zero error-severity issues, and only placeholder-row / phantom-id warnings (the app renders placeholder rows as advisory slots). Guard applied: no oversized (>30 cr) secondary required_list tables (the language-page shape where elective lists parse as required was excluded). Sample of 7 batch programs eyeballed against cached pages before acceptance. [Ported from UF Planner, whose reviewer checked the 2025-2026 page. 2026-10-12: this parse of the 2026-2027 page lists exactly the requirement courses that reviewer accepted, so the review carries over.] [2026-10-12, https://catalog.ufl.edu/UGRD/colleges-schools/UGAGL/PLB_UMN/: the parser now splits 'Electives 9' out of the 'Plant breeding - select one: 3' chooser (it used to be absorbed as a placeholder, so the 9 elective credits were never required). Footnote 1 on AGR 4320 / HOS 4241C: 'One of these courses if not taken for plant breeding requirement' -> exclusive set over the two groups. Footnote 2 on FOR 4934, PLP 3002C, PLP 4600: 'Only one of these courses can be counted towards the minor' -> count rule (they are the pool's only FOR/PLP courses).]",
+  "reviewed": {
+    "date": "2026-10-12",
+    "catalog_year": "2026-2027",
+    "fingerprint": "cc27bebef2700b73"
+  },
+  "status": "published",
+  "exclusive_sets": {
+    "one-group-per-course": [
+      "plant-breeding-select-one",
+      "electives"
+    ]
+  },
+  "count_rules": {
+    "electives": [
+      {
+        "at_most": 1,
+        "unit": "courses",
+        "prefixes": [
+          "for",
+          "plp"
+        ],
+        "text": "Only one of these courses can be counted towards the minor"
+      }
+    ]
+  }
+}
