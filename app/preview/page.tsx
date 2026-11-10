@@ -3,11 +3,15 @@ import { EmptyState } from "@/components/feedback/empty-state";
 import { ErrorPanel } from "@/components/feedback/error-panel";
 import { LoadingBlock } from "@/components/feedback/loading-block";
 import { StatusBadge } from "@/components/feedback/status-badge";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 export default function PreviewPage() {
   return (
     <main className="mx-auto flex min-h-full max-w-lg flex-col gap-8 p-8">
-      <h1 className="text-xl font-semibold">Component preview</h1>
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-xl font-semibold">Component preview</h1>
+        <ThemeToggle />
+      </div>
       <p className="text-sm text-muted-foreground">
         Static examples of shared loading, empty, error, and status UI. Not
         wired to APIs or sign-in.

@@ -38,6 +38,7 @@ Import from the `@/` aliases in `components.json`. New UI follows the folder it 
 | `components/feedback/` | `LoadingBlock`, `EmptyState`, `ErrorPanel`, `StatusBadge`. | Braydin |
 | `components/forms/` | `FormField`, `FormErrorSummary`, `SubmitButton`. | Zain |
 | `components/auth/` | `AuthShell` and other auth chrome. | Zain |
+| `components/theme/` | `ThemeScript` (in the root layout's `<head>`, sets `.dark` before first paint) and `ThemeToggle`. With no saved choice the theme follows the OS setting. | Braydin (was Nav) |
 | `components/onboarding/` | The onboarding wizard. | Zain |
 | `lib/forms.ts` | The `FormState` contract every form returns. | Zain |
 | `lib/onboarding.ts` | Placeholder profile fields. Swap the option lists for Shaun's schema when it exists. Do not add more placeholder majors here. | Zain |

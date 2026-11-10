@@ -35,7 +35,7 @@ import { toFormState } from "../../lib/api/errors"
 
 /** Matches the raised, frosted card Clerk uses for sign-in and sign-up. */
 const clerkCardClass =
-  "w-full max-w-[25rem] rounded-2xl border border-black/8 bg-white/80 p-8 backdrop-blur-[20px] dark:border-white/10 dark:bg-neutral-900/80"
+  "w-full max-w-[25rem] rounded-2xl border border-black/8 bg-white/80 p-8 backdrop-blur-[20px] dark:border-white/10 dark:bg-card/80"
 
 const clerkCardStyle = {
   boxShadow:
