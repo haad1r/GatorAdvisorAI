@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { MoonIcon, SunIcon } from "lucide-react"
+import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { THEME_STORAGE_KEY } from "./theme-script"
 
@@ -13,7 +14,7 @@ function subscribe(onChange: () => void) {
 
 const isDark = () => document.documentElement.classList.contains("dark")
 
-export function ThemeToggle() {
+export function ThemeToggle({ className, iconClassName }: { className?: string; iconClassName?: string }) {
   const dark = React.useSyncExternalStore(subscribe, isDark, () => false)
   const label = dark ? "Switch to light theme" : "Switch to dark theme"
 
@@ -28,8 +29,8 @@ export function ThemeToggle() {
   }
 
   return (
-    <Button variant="outline" size="icon" onClick={toggle} aria-label={label} title={label}>
-      {dark ? <SunIcon aria-hidden="true" /> : <MoonIcon aria-hidden="true" />}
+    <Button variant="outline" size="icon" className={cn(className)} onClick={toggle} aria-label={label} title={label}>
+      {dark ? <SunIcon aria-hidden="true" className={iconClassName} /> : <MoonIcon aria-hidden="true" className={iconClassName} />}
     </Button>
   )
 }

@@ -6,11 +6,14 @@ Screens stay presentation-only until Maria's Clerk setup and Shaun's fixture sch
 
 ## Routes
 
-The `(auth)` group does not appear in the URL. `/sign-in`, `/sign-up`, and `/onboarding` share `app/(auth)/layout.tsx`.
+Route groups in brackets do not appear in the URL. `/sign-in`, `/sign-up`, and `/onboarding` share `app/(auth)/layout.tsx`. The signed-in pages share `app/(app)/layout.tsx`.
 
 | Path | File | What it is now | Owner |
 | --- | --- | --- | --- |
-| `/` | `app/page.tsx` | Next.js starter page. Nav replaces this with the app shell. | Nav |
+| `/` | `app/(app)/page.tsx` | Home. Placeholder `EmptyState` until the audit and schedule APIs exist. | Braydin |
+| `/audit` | `app/(app)/audit/page.tsx` | Degree audit placeholder. | Braydin |
+| `/schedule` | `app/(app)/schedule/page.tsx` | Schedule placeholder. | Braydin |
+| `/calendar` | `app/(app)/calendar/page.tsx` | Calendar placeholder. The weekly calendar/agenda shell goes here next. | Braydin |
 | `/preview` | `app/preview/page.tsx` | Gallery of loading, empty, error, and status states, plus a mock API demo. Always uses the mocks, never a real backend, and needs no sign-in. | Braydin |
 | `/sign-in` | `app/(auth)/sign-in/[[...sign-in]]/page.tsx` | Clerk `<SignIn />`. A redirect here is not access control. | Zain |
 | `/sign-up` | `app/(auth)/sign-up/[[...sign-up]]/page.tsx` | Clerk `<SignUp />`. | Zain |
@@ -18,7 +21,7 @@ The `(auth)` group does not appear in the URL. `/sign-in`, `/sign-up`, and `/onb
 
 `proxy.ts` runs Clerk middleware and does not protect any route yet. Leave route protection until Maria's publishable key, allowed URLs, and setup notes are in place. Signed-out users must be sent to `/sign-in` by the backend-approved Clerk config, not by a frontend-only check.
 
-Later app routes (audit, schedule, calendar) wait for Nav's shell and for the API contracts. Add them to this table when they exist.
+The app pages are placeholders. Real content waits for the API contracts. New signed-in routes go in `app/(app)/` and get a link in `components/nav/nav-links.tsx`.
 
 ## Layouts
 
@@ -26,7 +29,9 @@ Later app routes (audit, schedule, calendar) wait for Nav's shell and for the AP
 
 **Auth** (`app/(auth)/layout.tsx`). Logo, `AuthShell`, the page content, and the "not an official UF service" footer. New sign-in, sign-up, and onboarding screens go in the `(auth)` group so they pick this up. Do not copy the logo or footer into a page.
 
-The signed-in app shell (navigation, theme toggle, page frame) is Nav's and does not exist yet. It wraps routes outside `(auth)`. Auth pages stay on the auth layout.
+**App** (`app/(app)/layout.tsx`). Wraps every signed-in page in `AppShell`: a skip link, a sticky header (logo, nav links, theme toggle, account button), and the `<main id="main">` frame. Below `md` the links move to a fixed bottom tab bar. Pages render only their content; do not add another header or `<main>`. Auth pages and `/preview` stay outside this group.
+
+The account button shows Clerk's `UserButton` when signed in and a "Sign in" link when not. That is display only. It does not protect the route.
 
 ## Component conventions
 
@@ -38,12 +43,13 @@ Import from the `@/` aliases in `components.json`. New UI follows the folder it 
 | `components/feedback/` | `LoadingBlock`, `EmptyState`, `ErrorPanel`, `StatusBadge`. | Braydin |
 | `components/forms/` | `FormField`, `FormErrorSummary`, `SubmitButton`. | Zain |
 | `components/auth/` | `AuthShell` and other auth chrome. | Zain |
+| `components/nav/` | `AppShell`, `HeaderNav`/`MobileTabBar` (one `NAV_ITEMS` list, `aria-current` on the active link), `AccountButton`. | Braydin (was Nav) |
 | `components/theme/` | `ThemeScript` (in the root layout's `<head>`, sets `.dark` before first paint) and `ThemeToggle`. With no saved choice the theme follows the OS setting. | Braydin (was Nav) |
 | `components/onboarding/` | The onboarding wizard. | Zain |
 | `lib/forms.ts` | The `FormState` contract every form returns. | Zain |
 | `lib/onboarding.ts` | Placeholder profile fields. Swap the option lists for Shaun's schema when it exists. Do not add more placeholder majors here. | Zain |
 
-Nav's navigation, theme toggle, and calendar/agenda components get their own folders (`components/nav/`, `components/calendar/`) when that work starts. Nav also reviews accessibility on the other folders.
+The calendar/agenda components get `components/calendar/` when that work starts. Nav's work (shell, theme, calendar, accessibility review) is now covered by Braydin.
 
 Conventions already in the code:
 
