@@ -24,8 +24,10 @@ export function toMinutes(time: string) {
 }
 
 /** "9:35 AM – 10:25 AM" -> "9:35–10:25 AM"; keeps both suffixes when they differ. */
-export function formatTimeRange(start: string, end: string) {
+/** "9:35–10:25 AM"; short drops AM/PM ("9:35–10:25") for the grid, whose hour labels already show it. */
+export function formatTimeRange(start: string, end: string, short = false) {
   const [a, b] = [formatTime(start), formatTime(end)]
+  if (short) return `${a.split(" ")[0]}–${b.split(" ")[0]}`
   const [aTime, aSuffix] = a.split(" ")
   return aSuffix === b.split(" ")[1] ? `${aTime}–${b}` : `${a} – ${b}`
 }

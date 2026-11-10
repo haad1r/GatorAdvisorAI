@@ -50,7 +50,7 @@ export function WeekGrid({
       <div
         className="grid min-h-full"
         style={{
-          gridTemplateColumns: `4.5rem repeat(${days.length}, minmax(0, 1fr))`,
+          gridTemplateColumns: `3.75rem repeat(${days.length}, minmax(0, 1fr))`,
           gridTemplateRows: `auto minmax(${hourCount * MIN_PX_PER_HOUR}px, 1fr)`,
         }}
       >
@@ -104,7 +104,7 @@ export function WeekGrid({
                   return (
                     <li
                       key={m.id}
-                      className="absolute px-1 py-px"
+                      className="absolute px-0.5 py-px"
                       style={{
                         top: pct(start),
                         height: pct(length),

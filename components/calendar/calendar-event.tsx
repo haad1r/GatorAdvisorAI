@@ -33,7 +33,8 @@ export function CalendarEvent({
       aria-label={meetingLabel(meeting)}
       title={meetingLabel(meeting)}
       className={cn(
-        "min-w-0 overflow-hidden rounded-md border-l-4 px-2 text-xs",
+        "min-w-0 overflow-hidden rounded-md border-l-4 text-xs",
+        fixedHeight ? "px-1.5" : "px-2",
         compact ? "py-1" : "py-3",
         /* Size containment needs a set height, so only fixed-height grid blocks get it. */
         fixedHeight ? "[container-type:size]" : "@container",
@@ -46,7 +47,8 @@ export function CalendarEvent({
       <div
         aria-hidden="true"
         className={cn(
-          "flex min-w-0 flex-col gap-2.5",
+          /* 12px fills a one-period grid block exactly, so the time sits at its bottom; larger blocks and the lists use the same spacing. */
+          "flex min-w-0 flex-col gap-3",
           fixedHeight &&
             "[@container(max-height:2.95rem)]:flex-row [@container(max-height:2.95rem)]:items-baseline [@container(max-height:2.95rem)]:gap-7"
         )}
@@ -65,15 +67,16 @@ export function CalendarEvent({
             {KIND_LABEL[meeting.kind]}
           </span>
         </p>
-        <p className="min-w-0 truncate text-muted-foreground">
-          {time ? formatTimeRange(time.start, time.end) : meeting.online ? "Online · no set time" : "Time TBA"}
+        {/* Time at the left, room at the right, in every view; the time never truncates, the room does. */}
+        <p className="flex min-w-0 items-baseline gap-1 text-muted-foreground">
+          <span className="shrink-0">
+            {time ? formatTimeRange(time.start, time.end, fixedHeight) : meeting.online ? "Online · no set time" : "Time TBA"}
+          </span>
+          {!(meeting.online && !meeting.location) && (
+            <span className="ml-auto min-w-0 truncate text-[0.8em]">{meeting.location ?? "Room TBA"}</span>
+          )}
         </p>
       </div>
-      {!compact && !(meeting.online && !meeting.location) && (
-        <p aria-hidden="true" className="truncate text-muted-foreground">
-          {meeting.location ?? "Location TBA"}
-        </p>
-      )}
     </article>
   )
 }
