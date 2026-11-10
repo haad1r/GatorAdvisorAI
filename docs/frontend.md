@@ -11,7 +11,7 @@ The `(auth)` group does not appear in the URL. `/sign-in`, `/sign-up`, and `/onb
 | Path | File | What it is now | Owner |
 | --- | --- | --- | --- |
 | `/` | `app/page.tsx` | Next.js starter page. Nav replaces this with the app shell. | Nav |
-| `/preview` | `app/preview/page.tsx` | Static gallery of loading, empty, error, and status states. No API and no sign-in. | Braydin |
+| `/preview` | `app/preview/page.tsx` | Gallery of loading, empty, error, and status states, plus a mock API demo. Always uses the mocks, never a real backend, and needs no sign-in. | Braydin |
 | `/sign-in` | `app/(auth)/sign-in/[[...sign-in]]/page.tsx` | Clerk `<SignIn />`. A redirect here is not access control. | Zain |
 | `/sign-up` | `app/(auth)/sign-up/[[...sign-up]]/page.tsx` | Clerk `<SignUp />`. | Zain |
 | `/onboarding` | `app/(auth)/onboarding/page.tsx` | Static wizard with placeholder majors, catalog years, and terms. Still public. | Zain |
@@ -54,14 +54,42 @@ Conventions already in the code:
 
 ## API client boundary
 
-There is no API client yet. Building it is step 4 of issue #12. The boundary is:
+The rules:
 
 - Feature components call one shared client. They do not `fetch` Supabase, the degree engines, or live academic services themselves.
-- The client will live in `lib/api/`. Mock responses for local UI work use the same functions, so a screen cannot tell a fixture from a later network call.
+- Mock responses use the same client functions, so a screen cannot tell a fixture from a later network call.
 - The client is responsible for expired-session, authorization, validation, quota, and stale-record responses. Map those onto `FormState`, `ErrorPanel`, and `StatusBadge` in the screen. Do not invent a second error shape.
 - Browser code receives only the Clerk publishable key. Server secrets stay on the server. Maria owns provider restrictions and token validation.
 
-`OnboardingForm`'s default `mockSave` and the lists in `lib/onboarding.ts` are presentation stand-ins. They are not this client and not an approved fixture schema.
+### Using it
+
+```tsx
+const api = useApi()
+const result = await api.getCoursework()
+if (result.ok) setRows(result.data.rows)
+else setPanel(toErrorPanel(result.error)) // or toFormState(result.error) in a form
+```
+
+Calls never throw. Check `result.ok` before reading `data`.
+
+| File | What it does |
+| --- | --- |
+| `lib/api/types.ts` | Request, response, and error shapes. **Provisional** until Maria publishes `api-contracts.md`; replace this file when she does. |
+| `lib/api/client.ts` | The functions screens call: `getProfile`/`saveProfile`, `getLatestSurvey`/`submitSurvey`, `getCoursework`/`saveCoursework`. |
+| `lib/api/use-api.ts` | `useApi()` for client components. Uses the mocks when `NEXT_PUBLIC_API_MOCKS=true`, otherwise the real backend with the Clerk session token. |
+| `lib/api/transport.ts` | The real backend: `fetch` plus HTTP status to error code (401 `UNAUTHENTICATED`, 403 `FORBIDDEN`, 409 `STALE_WRITE`, 400/422 `VALIDATION_ERROR`, 429 `QUOTA_EXCEEDED`, 5xx `SERVER`, failed fetch `NETWORK`). |
+| `lib/api/errors.ts` | `toFormState()` for forms and `toErrorPanel()` for `ErrorPanel`. One message per error code. |
+| `lib/mocks/fixtures.ts` | Synthetic starting data. No real student records. |
+| `lib/mocks/handlers.ts` | The fake backend: in-memory saves, validation, and `STALE_WRITE` when a save sends an old `version`. |
+| `lib/mocks/transport.ts` | Fake latency (300 to 700 ms) and forced error scenarios. |
+
+### Mocks
+
+Copy `NEXT_PUBLIC_API_MOCKS=true` from `.env.example` into `.env.local`. Every endpoint above is mocked; none are live yet.
+
+To see an error state, add `?mock=<scenario>` to any URL: `expired`, `forbidden`, `validation`, `quota`, `stale`, `network`, `server`, or `slow` (3 s delay). It is remembered until `?mock=off`. `validation` and `stale` only affect saves. `/preview` has a demo with a scenario picker.
+
+`OnboardingForm`'s default `mockSave` and the lists in `lib/onboarding.ts` are still presentation stand-ins. Switching `mockSave` to `api.saveProfile` is Zain's call.
 
 ## Shared files
 

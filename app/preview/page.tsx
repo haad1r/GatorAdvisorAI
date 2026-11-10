@@ -1,3 +1,4 @@
+import { ApiStatesDemo } from "@/components/feedback/api-states-demo";
 import { EmptyState } from "@/components/feedback/empty-state";
 import { ErrorPanel } from "@/components/feedback/error-panel";
 import { LoadingBlock } from "@/components/feedback/loading-block";
@@ -11,6 +12,8 @@ export default function PreviewPage() {
         Static examples of shared loading, empty, error, and status UI. Not
         wired to APIs or sign-in.
       </p>
+
+      <ApiStatesDemo />
 
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-medium">Status</h2>
