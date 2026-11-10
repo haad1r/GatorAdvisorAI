@@ -30,6 +30,8 @@ import {
   type OnboardingProfile,
   type Option,
 } from "../../lib/onboarding"
+import { useApi } from "../../lib/api/use-api"
+import { toFormState } from "../../lib/api/errors"
 
 /** Matches the raised, frosted card Clerk uses for sign-in and sign-up. */
 const clerkCardClass =
@@ -40,16 +42,19 @@ const clerkCardStyle = {
     "0 5px 15px rgba(0, 0, 0, 0.08), 0 15px 35px -5px rgba(25, 28, 33, 0.2)",
 } as const
 
-/**
- * Presentation-only onboarding flow (checkpoint 1).
- * `onSubmit` defaults to a local mock; swap in the authenticated API
- * client call once the backend endpoint exists.
- */
+/** Saves through the shared API client unless `onSubmit` is passed (e.g. in tests). */
 export function OnboardingForm({
-  onSubmit = mockSave,
+  onSubmit,
 }: {
   onSubmit?: (profile: OnboardingProfile) => Promise<FormState>
 }) {
+  const api = useApi()
+  async function saveProfile(profile: OnboardingProfile): Promise<FormState> {
+    const result = await api.saveProfile(profile)
+    return result.ok
+      ? { status: "success", message: "Profile saved." }
+      : toFormState(result.error)
+  }
   const [step, setStep] = React.useState(0)
   const [profile, setProfile] = React.useState<OnboardingProfile>(emptyProfile)
   const [state, setState] = React.useState<FormState>(initialFormState)
@@ -89,7 +94,7 @@ export function OnboardingForm({
     if (hasErrors(errors)) return setState(errorState(errors))
     setPending(true)
     try {
-      setState(await onSubmit(profile))
+      setState(await (onSubmit ?? saveProfile)(profile))
     } catch {
       setState({
         status: "error",
@@ -359,10 +364,4 @@ function Done({ name }: { name: string }) {
       </div>
     </div>
   )
-}
-
-/** Local stand-in for the onboarding API call. */
-async function mockSave(): Promise<FormState> {
-  await new Promise((r) => setTimeout(r, 600))
-  return { status: "success", message: "Profile saved." }
 }

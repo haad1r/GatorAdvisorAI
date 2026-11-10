@@ -89,7 +89,7 @@ Copy `NEXT_PUBLIC_API_MOCKS=true` from `.env.example` into `.env.local`. Every e
 
 To see an error state, add `?mock=<scenario>` to any URL: `expired`, `forbidden`, `validation`, `quota`, `stale`, `network`, `server`, or `slow` (3 s delay). It is remembered until `?mock=off`. `validation` and `stale` only affect saves. `/preview` has a demo with a scenario picker.
 
-`OnboardingForm`'s default `mockSave` and the lists in `lib/onboarding.ts` are still presentation stand-ins. Switching `mockSave` to `api.saveProfile` is Zain's call.
+`OnboardingForm` saves through `api.saveProfile`, so `?mock=` scenarios show up in its error summary. The option lists in `lib/onboarding.ts` are still placeholders.
 
 ## Shared files
 
