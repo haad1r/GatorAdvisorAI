@@ -73,6 +73,34 @@ export type Coursework = {
   rows: CourseworkRow[]
 }
 
+export type Weekday = "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT" | "SUN"
+
+export type MeetingKind = "lecture" | "lab" | "discussion" | "exam"
+
+/** One weekly class meeting (or a dated exam) for the schedule calendar. */
+export type ScheduleMeeting = {
+  id: string
+  courseCode: string
+  title: string
+  section: string
+  kind: MeetingKind
+  /**
+   * Local America/New_York wall-clock time ("HH:MM", 24h). null when the
+   * meeting is TBA or asynchronous: it is listed, never given an invented time.
+   */
+  time: { day: Weekday; start: string; end: string } | null
+  /** null when TBA or online. */
+  location: string | null
+  online: boolean
+}
+
+export type WeekSchedule = {
+  term: string
+  /** Monday of the week, "YYYY-MM-DD". */
+  weekStart: string
+  meetings: ScheduleMeeting[]
+}
+
 /** Shown in the app footer so students know how current the data is. */
 export type DataFreshness = {
   catalogYear: string

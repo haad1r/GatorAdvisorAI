@@ -9,7 +9,16 @@ import type {
 } from "@/lib/api/types"
 import { hasErrors, type FieldErrors } from "@/lib/forms"
 import { validateProfile } from "@/lib/onboarding"
-import { courseworkFixture, freshnessFixture, profileFixture, surveyFixture } from "./fixtures"
+import {
+  courseworkFixture,
+  examFixture,
+  examWeekStart,
+  freshnessFixture,
+  profileFixture,
+  scheduleTerm,
+  surveyFixture,
+  weeklyMeetingsFixture,
+} from "./fixtures"
 
 type Store = {
   profile: Profile
@@ -100,10 +109,19 @@ function validateSurvey(body: SurveySubmission): FieldErrors {
   return errors
 }
 
-type Handler = (body: unknown) => ApiResult<unknown>
+type Handler = (body: unknown, query: URLSearchParams) => ApiResult<unknown>
 
 export const routes: Record<string, Handler> = {
   "GET /api/meta/freshness": () => ok(freshnessFixture),
+
+  "GET /api/schedule": (_body, query) => {
+    const week = query.get("week") ?? ""
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(week)) {
+      return { ok: false, error: { code: "VALIDATION_ERROR", message: "week must be a YYYY-MM-DD Monday." } }
+    }
+    const meetings = week === examWeekStart ? [...weeklyMeetingsFixture, examFixture] : weeklyMeetingsFixture
+    return ok({ term: scheduleTerm, weekStart: week, meetings })
+  },
 
   "GET /api/profile": () => ok(store.profile),
 

@@ -75,10 +75,11 @@ export const mockTransport: Transport = async ({ method, path, body }) => {
     if (appliesHere) return { ok: false, error: FORCED[scenario] }
   }
 
-  const handler = routes[`${method} ${path}`]
+  const [pathname, search = ""] = path.split("?")
+  const handler = routes[`${method} ${pathname}`]
   if (!handler) {
     return { ok: false, error: { code: "NOT_FOUND", message: `No mock for ${method} ${path}.` } }
   }
 
-  return handler(structuredClone(body))
+  return handler(structuredClone(body), new URLSearchParams(search))
 }

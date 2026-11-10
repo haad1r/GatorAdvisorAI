@@ -3,6 +3,7 @@ import type {
   ApiResult,
   Coursework,
   DataFreshness,
+  WeekSchedule,
   Profile,
   SurveySubmission,
   Transport,
@@ -27,6 +28,10 @@ export function createApiClient(transport: Transport) {
       call<Coursework>({ method: "PUT", path: "/api/coursework", body: coursework }),
 
     getDataFreshness: () => call<DataFreshness>({ method: "GET", path: "/api/meta/freshness" }),
+
+    /** weekStart is the Monday, "YYYY-MM-DD". */
+    getSchedule: (weekStart: string) =>
+      call<WeekSchedule>({ method: "GET", path: `/api/schedule?week=${encodeURIComponent(weekStart)}` }),
   }
 }
 
