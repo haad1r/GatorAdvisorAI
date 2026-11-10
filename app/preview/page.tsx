@@ -4,6 +4,7 @@ import { ErrorPanel } from "@/components/feedback/error-panel";
 import { LoadingBlock } from "@/components/feedback/loading-block";
 import { StatusBadge } from "@/components/feedback/status-badge";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { DialogDemo } from "./dialog-demo";
 
 export default function PreviewPage() {
   return (
@@ -18,6 +19,8 @@ export default function PreviewPage() {
       </p>
 
       <ApiStatesDemo />
+
+      <DialogDemo />
 
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-medium">Status</h2>

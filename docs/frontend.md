@@ -39,7 +39,7 @@ Import from the `@/` aliases in `components.json`. New UI follows the folder it 
 
 | Folder | Use it for | Owner |
 | --- | --- | --- |
-| `components/ui/` | shadcn primitives (button, input, badge, alert, skeleton, label, native select). Feature code composes these. It does not restyle them for one screen. | Shared. See below. |
+| `components/ui/` | shadcn primitives (button, input, badge, alert, skeleton, label, native select, dialog). Feature code composes these. It does not restyle them for one screen. | Shared. See below. |
 | `components/feedback/` | `LoadingBlock`, `EmptyState`, `ErrorPanel`, `StatusBadge`. | Braydin |
 | `components/forms/` | `FormField`, `FormErrorSummary`, `SubmitButton`. | Zain |
 | `components/auth/` | `AuthShell` and other auth chrome. | Zain |
@@ -57,6 +57,7 @@ Conventions already in the code:
 - `FormField` wires `label`, `aria-describedby`, and `aria-invalid`. Pass its control props through to the input.
 - Status is never color alone. `StatusBadge` takes a `kind` and a visible `label`.
 - `LoadingBlock` sets `aria-busy` and an accessible name.
+- Dialogs use `components/ui/dialog.tsx` (Base UI). Focus trapping, Escape, and returning focus to the trigger are built in. Always give it a `DialogTitle`. If the action removes the trigger (e.g. deleting a row), pass `finalFocus` so focus lands somewhere sensible instead of the top of the page. See `app/preview/dialog-demo.tsx`.
 - Preview new feedback states on `/preview` before using them in a feature page.
 
 ## API client boundary
