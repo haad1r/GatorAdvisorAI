@@ -44,3 +44,17 @@ test("no request reaches /api while mocks are on", async ({ page }) => {
   await expect(page.getByRole("article").first()).toBeVisible()
   expect(apiCalls).toEqual([])
 })
+
+test("the schedule's term follows the week shown", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-11-10T12:00:00-05:00"))
+  await page.goto("/schedule")
+  const range = page.getByRole("heading", { level: 2 }).first()
+  await expect(range).toContainText("Fall 2026")
+  for (let i = 0; i < 8; i++) await page.getByRole("button", { name: "Next week" }).click()
+  await expect(range).toContainText("Spring 2027")
+})
+
+test("the footer shows the app's newest catalog", async ({ page }) => {
+  await page.goto("/dashboard")
+  await expect(page.getByRole("contentinfo")).toContainText("Catalog 2026-2027")
+})

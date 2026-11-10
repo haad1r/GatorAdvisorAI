@@ -26,13 +26,24 @@ export const courseworkFixture: Coursework = {
 
 export const surveyFixture: SurveySubmission | null = null
 
+/* The newest catalog the app has data for (Shaun's scrape), not the student's own catalog year. */
 export const freshnessFixture: DataFreshness = {
-  catalogYear: "2025-2026",
+  catalogYear: "2026-2027",
   scheduleUpdatedAt: "2026-10-04T02:21:11Z",
 }
 
-/* Synthetic Spring-style schedule. Times follow UF periods; rooms are made up. */
-export const scheduleTerm = "Spring 2027"
+/* UF terms by the month a week starts in: Jan-Apr Spring, May-Jul Summer, Aug-Dec Fall. */
+export function termFor(weekStart: string) {
+  const [year, month] = weekStart.split("-").map(Number)
+  const season = month <= 4 ? "Spring" : month <= 7 ? "Summer" : "Fall"
+  return `${season} ${year}`
+}
+
+/*
+ * Synthetic schedule. Times follow UF periods; rooms are made up. There is no
+ * real source yet: the SOC scraper skips meeting times and rooms (they need a
+ * signed-in UF session), so students will likely enter them by hand.
+ */
 
 export const weeklyMeetingsFixture: ScheduleMeeting[] = [
   { id: "m1", courseCode: "MAC2312", title: "Analytic Geometry and Calculus 2", section: "1234", kind: "lecture", time: { day: "MON", start: "09:35", end: "10:25" }, location: "LIT 109", online: false },

@@ -15,8 +15,8 @@ import {
   examWeekStart,
   freshnessFixture,
   profileFixture,
-  scheduleTerm,
   surveyFixture,
+  termFor,
   weeklyMeetingsFixture,
 } from "./fixtures"
 
@@ -120,7 +120,7 @@ export const routes: Record<string, Handler> = {
       return { ok: false, error: { code: "VALIDATION_ERROR", message: "week must be a YYYY-MM-DD Monday." } }
     }
     const meetings = week === examWeekStart ? [...weeklyMeetingsFixture, examFixture] : weeklyMeetingsFixture
-    return ok({ term: scheduleTerm, weekStart: week, meetings })
+    return ok({ term: termFor(week), weekStart: week, meetings })
   },
 
   "GET /api/profile": () => ok(store.profile),
