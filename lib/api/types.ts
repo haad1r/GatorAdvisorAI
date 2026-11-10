@@ -73,6 +73,13 @@ export type Coursework = {
   rows: CourseworkRow[]
 }
 
+/** Shown in the app footer so students know how current the data is. */
+export type DataFreshness = {
+  catalogYear: string
+  /** ISO timestamp of the last schedule (SOC) data refresh. */
+  scheduleUpdatedAt: string
+}
+
 export type ApiRequest = {
   method: "GET" | "POST" | "PUT"
   path: string

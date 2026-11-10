@@ -10,10 +10,8 @@ Route groups in brackets do not appear in the URL. `/sign-in`, `/sign-up`, and `
 
 | Path | File | What it is now | Owner |
 | --- | --- | --- | --- |
-| `/` | `app/(app)/page.tsx` | Home. Placeholder `EmptyState` until the audit and schedule APIs exist. | Braydin |
-| `/audit` | `app/(app)/audit/page.tsx` | Degree audit placeholder. | Braydin |
-| `/schedule` | `app/(app)/schedule/page.tsx` | Schedule placeholder. | Braydin |
-| `/calendar` | `app/(app)/calendar/page.tsx` | Calendar placeholder. The weekly calendar/agenda shell goes here next. | Braydin |
+| `/` | `app/(app)/page.tsx` | Redirects to `/dashboard`. | Braydin |
+| `/dashboard`, `/audit`, `/courses`, `/recommendations`, `/plan`, `/schedule`, `/advisor`, `/import`, `/settings` | `app/(app)/<name>/page.tsx` | The #21 page map. Each is an `EmptyState` placeholder until its API exists. `/schedule` gets the calendar/agenda shell (#12 step 6). | Owners per #21 |
 | `/preview` | `app/preview/page.tsx` | Gallery of loading, empty, error, and status states, plus a mock API demo. Always uses the mocks, never a real backend, and needs no sign-in. | Braydin |
 | `/sign-in` | `app/(auth)/sign-in/[[...sign-in]]/page.tsx` | Clerk `<SignIn />`. A redirect here is not access control. | Zain |
 | `/sign-up` | `app/(auth)/sign-up/[[...sign-up]]/page.tsx` | Clerk `<SignUp />`. | Zain |
@@ -21,7 +19,7 @@ Route groups in brackets do not appear in the URL. `/sign-in`, `/sign-up`, and `
 
 `proxy.ts` runs Clerk middleware and does not protect any route yet. Leave route protection until Maria's publishable key, allowed URLs, and setup notes are in place. Signed-out users must be sent to `/sign-in` by the backend-approved Clerk config, not by a frontend-only check.
 
-The app pages are placeholders. Real content waits for the API contracts. New signed-in routes go in `app/(app)/` and get a link in `components/nav/nav-links.tsx`.
+The app pages are placeholders. Real content waits for the API contracts. New signed-in routes go in `app/(app)/` and get one entry in `components/nav/nav-items.ts`, which drives the sidebar, menu, tab bar, and page title.
 
 ## Layouts
 
@@ -29,9 +27,16 @@ The app pages are placeholders. Real content waits for the API contracts. New si
 
 **Auth** (`app/(auth)/layout.tsx`). Logo, `AuthShell`, the page content, and the "not an official UF service" footer. New sign-in, sign-up, and onboarding screens go in the `(auth)` group so they pick this up. Do not copy the logo or footer into a page.
 
-**App** (`app/(app)/layout.tsx`). Wraps every signed-in page in `AppShell`: a skip link, a sticky header (logo, nav links, theme toggle, account button), and the `<main id="main">` frame. Below `md` the links move to a fixed bottom tab bar. Pages render only their content; do not add another header or `<main>`. Auth pages and `/preview` stay outside this group.
+**App** (`app/(app)/layout.tsx`). Wraps every signed-in page in `AppShell`, following #21:
 
-The account button shows Clerk's `UserButton` when signed in and a "Sign in" link when not. That is display only. It does not protect the route.
+- Desktop (`lg`+): left sidebar (logo, main pages, Settings, account) and a sticky top bar with the page title, the student's program and catalog year, and the theme toggle.
+- Below `lg`: top bar with a menu button (all pages, in a panel built on the shared dialog) and a bottom tab bar for Dashboard, Audit, Plan, Schedule, Advisor.
+- Footer: data freshness (catalog year, last schedule data update) from `api.getDataFreshness()`, plus the "not an official UF service" note.
+- A skip link and `<main id="main">`.
+
+The top bar renders the page title as the page's only `<h1>`, from `nav-items.ts`. Pages render only their content: no `<h1>`, header, or `<main>`. Auth pages and `/preview` stay outside this group.
+
+The account control shows Clerk's `UserButton` (with a Dark/Light mode item) when signed in and a "Sign in" link when not. That is display only. It does not protect the route.
 
 ## Component conventions
 
@@ -43,13 +48,13 @@ Import from the `@/` aliases in `components.json`. New UI follows the folder it 
 | `components/feedback/` | `LoadingBlock`, `EmptyState`, `ErrorPanel`, `StatusBadge`. | Braydin |
 | `components/forms/` | `FormField`, `FormErrorSummary`, `SubmitButton`. | Zain |
 | `components/auth/` | `AuthShell` and other auth chrome. | Zain |
-| `components/nav/` | `AppShell`, `HeaderNav`/`MobileTabBar` (one `NAV_ITEMS` list, `aria-current` on the active link), `AccountButton`. | Braydin (was Nav) |
+| `components/nav/` | `AppShell`, `nav-items.ts` (the page map), `NavList`/`MobileTabBar`/`MobileMenu` (`aria-current` on the active link), `PageTitle`, `ProgramSummary`, `FreshnessFooter`, `AccountButton`, `LogoLink`. | Braydin (was Nav) |
 | `components/theme/` | `ThemeScript` (in the root layout's `<head>`, sets `.dark` before first paint) and `ThemeToggle`. With no saved choice the theme follows the OS setting. | Braydin (was Nav) |
 | `components/onboarding/` | The onboarding wizard. | Zain |
 | `lib/forms.ts` | The `FormState` contract every form returns. | Zain |
 | `lib/onboarding.ts` | Placeholder profile fields. Swap the option lists for Shaun's schema when it exists. Do not add more placeholder majors here. | Zain |
 
-The calendar/agenda components get `components/calendar/` when that work starts. Nav's work (shell, theme, calendar, accessibility review) is now covered by Braydin.
+The calendar/agenda components get `components/calendar/` and live on `/schedule`. Nav's work (shell, theme, calendar, accessibility review) is now covered by Braydin.
 
 Conventions already in the code:
 

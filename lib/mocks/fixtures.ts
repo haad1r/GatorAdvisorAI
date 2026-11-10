@@ -2,7 +2,7 @@
  * Synthetic data only. No real students, transcripts or grades.
  */
 
-import type { Coursework, Profile, SurveySubmission } from "@/lib/api/types"
+import type { Coursework, DataFreshness, Profile, SurveySubmission } from "@/lib/api/types"
 
 export const profileFixture: Profile = {
   preferredName: "Test Student",
@@ -25,3 +25,8 @@ export const courseworkFixture: Coursework = {
 }
 
 export const surveyFixture: SurveySubmission | null = null
+
+export const freshnessFixture: DataFreshness = {
+  catalogYear: "2025-2026",
+  scheduleUpdatedAt: "2026-10-04T02:21:11Z",
+}

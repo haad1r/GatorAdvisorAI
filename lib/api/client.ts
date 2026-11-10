@@ -2,6 +2,7 @@ import type {
   ApiRequest,
   ApiResult,
   Coursework,
+  DataFreshness,
   Profile,
   SurveySubmission,
   Transport,
@@ -24,6 +25,8 @@ export function createApiClient(transport: Transport) {
     getCoursework: () => call<Coursework>({ method: "GET", path: "/api/coursework" }),
     saveCoursework: (coursework: Coursework) =>
       call<Coursework>({ method: "PUT", path: "/api/coursework", body: coursework }),
+
+    getDataFreshness: () => call<DataFreshness>({ method: "GET", path: "/api/meta/freshness" }),
   }
 }
 

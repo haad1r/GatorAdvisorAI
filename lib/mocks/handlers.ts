@@ -9,7 +9,7 @@ import type {
 } from "@/lib/api/types"
 import { hasErrors, type FieldErrors } from "@/lib/forms"
 import { validateProfile } from "@/lib/onboarding"
-import { courseworkFixture, profileFixture, surveyFixture } from "./fixtures"
+import { courseworkFixture, freshnessFixture, profileFixture, surveyFixture } from "./fixtures"
 
 type Store = {
   profile: Profile
@@ -103,6 +103,8 @@ function validateSurvey(body: SurveySubmission): FieldErrors {
 type Handler = (body: unknown) => ApiResult<unknown>
 
 export const routes: Record<string, Handler> = {
+  "GET /api/meta/freshness": () => ok(freshnessFixture),
+
   "GET /api/profile": () => ok(store.profile),
 
   "PUT /api/profile": (body) => {
