@@ -1,9 +1,7 @@
+import Image from "next/image";
 import AuthShell from "@/components/auth/authShell";
 import { FluidScale } from "@/components/auth/fluid-scale";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-
-const logoClass =
-  "mx-auto h-[112px] w-[250px] shrink-0 object-cover object-top lg:absolute lg:top-0 lg:left-4 lg:mx-0 lg:h-[150px] lg:object-contain lg:object-center";
 
 /*
  * Mobile: one column in normal flow (logo, title, card, footer). The two
@@ -15,8 +13,11 @@ const logoClass =
 export default function AuthLayout({ children }: LayoutProps<"/">) {
   return (
     <main className="relative isolate flex min-h-dvh w-full min-w-[360px] flex-col lg:flex-row">
-      <img src="/logo.png" alt="GatorAdvisor" className={`${logoClass} block dark:hidden`} />
-      <img src="/logo-dark.png" alt="GatorAdvisor" className={`${logoClass} hidden dark:block`} />
+      {/* Trimmed logo; the padding reproduces where the full-size logo used to sit. */}
+      <div className="mx-auto shrink-0 pt-[44px] pb-[18px] lg:absolute lg:top-[50px] lg:left-[34px] lg:mx-0 lg:p-0">
+        <Image src="/logo-mark.png" alt="GatorAdvisor" width={214} height={50} priority className="dark:hidden" />
+        <Image src="/logo-mark-dark.png" alt="GatorAdvisor" width={214} height={50} priority className="hidden dark:block" />
+      </div>
       <div className="absolute top-4 right-4 z-10">
         <ThemeToggle />
       </div>

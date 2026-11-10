@@ -1,10 +1,9 @@
 import { ThemeToggle } from "@/components/theme/theme-toggle"
-import { AccountButton } from "./account-button"
 import { FreshnessFooter } from "./freshness-footer"
-import { LogoLink } from "./logo-link"
 import { MobileMenu } from "./mobile-menu"
-import { MobileTabBar, NavList, PageTitle } from "./nav-links"
+import { MobileTabBar, PageTitle } from "./nav-links"
 import { ProgramSummary } from "./program-summary"
+import { SidebarContent } from "./sidebar-content"
 
 /*
  * #21 shell. Desktop (lg+): left sidebar plus a top bar with the page title,
@@ -23,24 +22,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex min-h-dvh w-full lg:grid lg:grid-cols-[16rem_1fr]">
         <aside className="sticky top-0 hidden h-dvh flex-col gap-6 border-r border-border px-4 py-5 lg:flex">
-          <LogoLink className="self-start px-1" />
-          <nav aria-label="Primary" className="flex-1 overflow-y-auto">
-            <NavList list="main" />
-          </nav>
-          <div className="flex flex-col gap-3 border-t border-border pt-4">
-            <NavList list="settings" />
-            <AccountButton showName />
-          </div>
+          <SidebarContent />
         </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col bg-canvas">
           <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md">
             <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:h-20 lg:px-8">
               <div className="lg:hidden">
                 <MobileMenu />
               </div>
               <div className="min-w-0 flex-1">
-                <PageTitle className="truncate text-xl font-semibold tracking-tight lg:text-2xl" />
+                <PageTitle className="truncate text-xl font-semibold tracking-tight text-brand-blue lg:text-2xl" />
                 <ProgramSummary className="hidden truncate text-sm text-muted-foreground sm:block" />
               </div>
               <ThemeToggle className="size-10 lg:size-11 lg:rounded-xl" iconClassName="size-5 lg:size-[22px]" />
@@ -50,7 +42,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <main
             id="main"
             tabIndex={-1}
-            className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-6 outline-none sm:px-6 lg:gap-8 lg:px-8 lg:py-10"
+            className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-6 outline-none has-[[data-wide]]:max-w-[100rem] sm:px-6 lg:gap-8 lg:px-8 lg:py-10"
           >
             {children}
           </main>

@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "cn"
-import { ALL_NAV, MAIN_NAV, SETTINGS_NAV, isActive, titleFor } from "./nav-items"
+import { MAIN_NAV, SETTINGS_NAV, isActive, titleFor } from "./nav-items"
 
 const TAB_ITEMS = MAIN_NAV.filter((item) => item.tab)
 
@@ -15,7 +15,7 @@ export function PageTitle({ className }: { className?: string }) {
 }
 
 /* Lists are picked by name: nav items hold icon components, which can't be passed from a server component. */
-const LISTS = { main: MAIN_NAV, settings: [SETTINGS_NAV], all: ALL_NAV }
+const LISTS = { main: MAIN_NAV, settings: [SETTINGS_NAV] }
 
 /** Vertical links with icons, used by the desktop sidebar and the mobile menu. */
 export function NavList({ list, onNavigate }: { list: keyof typeof LISTS; onNavigate?: () => void }) {
@@ -35,12 +35,12 @@ export function NavList({ list, onNavigate }: { list: keyof typeof LISTS; onNavi
                 "relative flex h-11 items-center gap-3 rounded-xl px-3 text-[15px] transition-colors",
                 focusRing,
                 active
-                  ? "bg-muted font-medium text-foreground"
+                  ? "bg-brand-blue/10 font-medium text-brand-blue"
                   : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
               )}
             >
               {active && (
-                <span aria-hidden="true" className="absolute inset-y-2 left-0 w-1 rounded-full bg-foreground" />
+                <span aria-hidden="true" className="absolute inset-y-2 left-0 w-1 rounded-full bg-brand-blue" />
               )}
               <Icon aria-hidden="true" className="size-5 shrink-0" />
               {label}
@@ -71,11 +71,11 @@ export function MobileTabBar() {
                 className={cn(
                   "relative flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs transition-colors",
                   focusRing,
-                  active ? "font-semibold text-foreground" : "text-muted-foreground hover:text-foreground"
+                  active ? "font-semibold text-brand-blue" : "text-muted-foreground hover:text-foreground"
                 )}
               >
                 {active && (
-                  <span aria-hidden="true" className="absolute top-0 h-0.5 w-8 rounded-full bg-foreground" />
+                  <span aria-hidden="true" className="absolute top-0 h-0.5 w-8 rounded-full bg-brand-blue" />
                 )}
                 <Icon aria-hidden="true" className="size-5" />
                 {short ?? label}

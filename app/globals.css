@@ -5,6 +5,10 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-orange: var(--brand-orange);
+  --color-canvas: var(--canvas);
+  --color-event-lab: var(--event-lab);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
@@ -50,22 +54,30 @@
 
 :root {
   --background: oklch(1 0 0);
+  /* Calendar lab meetings. */
+  --event-lab: oklch(0.55 0.15 150);
+  /* App content area behind cards: a touch off-white so white cards stand out. */
+  --canvas: oklch(0.975 0.002 250);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  /* #21: orange for primary actions. White on UF orange fails contrast (3.4:1); near-black passes (5.1:1). */
+  --primary: var(--orange);
+  --primary-foreground: oklch(0.2 0.01 50);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  --muted-foreground: oklch(0.5 0 0); /* 4.5:1 on canvas and tinted calendar cards (axe) */
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: oklch(0.53 0.22 27.325);
   --orange: #F05B26;
   --blue: #094FA3;
+  /* #21: blue for navigation and headings. Use these, not --orange/--blue, so dark mode stays readable. */
+  --brand-blue: var(--blue);
+  --brand-orange: var(--orange);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -87,20 +99,25 @@
 
 .dark {
   --background: oklch(0.27 0.004 70);
+  /* Cards are already lighter than the page in dark mode, so the canvas is the page. */
+  --canvas: var(--background);
+  --event-lab: oklch(0.72 0.15 150);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.31 0.004 70);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.31 0.004 70);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
+  --primary: var(--orange);
+  --primary-foreground: oklch(0.2 0.01 50);
+  /* UF blue is too dark on flint; this lighter blue passes 4.5:1 on background and muted. */
+  --brand-blue: #79B0F2;
   --secondary: oklch(0.36 0.005 70);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.36 0.005 70);
   --muted-foreground: oklch(0.8 0.006 70);
   --accent: oklch(0.36 0.005 70);
   --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
+  --destructive: oklch(0.76 0.16 22.216);
   --border: oklch(1 0 0 / 15%);
   --input: oklch(1 0 0 / 20%);
   --ring: oklch(0.556 0 0);
