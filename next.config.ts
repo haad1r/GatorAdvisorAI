@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Dev-only "N" button; bottom-left covered the sidebar's account button.
+  devIndicators: { position: "bottom-right" },
 };
 
 export default nextConfig;
