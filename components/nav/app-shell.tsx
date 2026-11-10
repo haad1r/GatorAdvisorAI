@@ -1,6 +1,5 @@
 import Image from "next/image"
 import Link from "next/link"
-import { ThemeToggle } from "@/components/theme/theme-toggle"
 import { AccountButton } from "./account-button"
 import { HeaderNav, MobileTabBar } from "./nav-links"
 
@@ -27,7 +26,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
           <HeaderNav />
           <div className="ml-auto flex items-center gap-2 justify-self-end lg:gap-3">
-            <ThemeToggle className="size-10 lg:size-11 lg:rounded-xl" iconClassName="size-5 lg:size-[22px]" />
             <AccountButton />
           </div>
         </div>

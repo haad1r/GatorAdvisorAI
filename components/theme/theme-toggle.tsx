@@ -14,12 +14,12 @@ function subscribe(onChange: () => void) {
 
 const isDark = () => document.documentElement.classList.contains("dark")
 
-export function ThemeToggle({ className, iconClassName }: { className?: string; iconClassName?: string }) {
+/** Current theme plus a toggle that saves the choice. Shared by every theme control. */
+export function useTheme() {
   const dark = React.useSyncExternalStore(subscribe, isDark, () => false)
-  const label = dark ? "Switch to light theme" : "Switch to dark theme"
 
   function toggle() {
-    const next = dark ? "light" : "dark"
+    const next = isDark() ? "light" : "dark"
     try {
       localStorage.setItem(THEME_STORAGE_KEY, next)
     } catch {}
@@ -27,6 +27,13 @@ export function ThemeToggle({ className, iconClassName }: { className?: string; 
     root.classList.toggle("dark", next === "dark")
     root.style.colorScheme = next
   }
+
+  return { dark, toggle }
+}
+
+export function ThemeToggle({ className, iconClassName }: { className?: string; iconClassName?: string }) {
+  const { dark, toggle } = useTheme()
+  const label = dark ? "Switch to light theme" : "Switch to dark theme"
 
   return (
     <Button variant="outline" size="icon" className={cn(className)} onClick={toggle} aria-label={label} title={label}>
