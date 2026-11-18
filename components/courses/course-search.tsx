@@ -147,9 +147,13 @@ export function CourseSearch() {
         <h2 id="course-results" className="sr-only">
           Results
         </h2>
-        {state.kind === "loading" && <LoadingBlock />}
+        {/* Nothing is listed until there's a search or a filter, so the page starts clean. */}
         {state.kind === "error" && <LoadFailed error={state.error} onRetry={retry} />}
-        {state.kind === "ok" && <Results data={state.data} onPage={(p) => setParam("page", String(p))} />}
+        {active && state.kind === "loading" && <LoadingBlock />}
+        {active && state.kind === "ok" && <Results data={state.data} onPage={(p) => setParam("page", String(p))} />}
+        {!active && state.kind !== "error" && (
+          <p className="text-sm text-muted-foreground">Search by course code or name, or pick a filter to browse.</p>
+        )}
       </section>
     </div>
   )
