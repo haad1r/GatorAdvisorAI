@@ -19,6 +19,7 @@ export const profileFixture: Profile = {
   classStanding: "sophomore",
   major: "computer-science",
   catalogYear: "2025-2026",
+  entryTerm: "Fall 2025",
   expectedGraduation: "Spring 2029",
 }
 

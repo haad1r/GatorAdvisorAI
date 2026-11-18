@@ -31,6 +31,7 @@ import { errorState, fieldError, hasErrors, initialFormState, type FormState } f
 import {
   CLASS_STANDING_OPTIONS,
   PLACEHOLDER_CATALOG_YEARS,
+  PLACEHOLDER_ENTRY_TERMS,
   PLACEHOLDER_GRAD_TERMS,
   PLACEHOLDER_MAJOR_OPTIONS,
   PROFILE_LABELS,
@@ -171,6 +172,7 @@ function ProfileForm({ initial }: { initial: Profile }) {
       {select("classStanding", CLASS_STANDING_OPTIONS)}
       {select("major", PLACEHOLDER_MAJOR_OPTIONS)}
       {select("catalogYear", PLACEHOLDER_CATALOG_YEARS, "Usually the year you started at UF.")}
+      {select("entryTerm", PLACEHOLDER_ENTRY_TERMS, "Used to count your semesters for Critical Tracking.")}
       {select("expectedGraduation", PLACEHOLDER_GRAD_TERMS)}
       <div className="flex flex-wrap items-center gap-3">
         <SubmitButton pending={pending} pendingLabel="Saving…">
