@@ -63,6 +63,12 @@ const FIELD_LABEL: Record<Field, string> = {
 
 const key = (i: number, field: Field) => `rows.${i}.${field}`
 
+const SOURCE_LABEL: Record<CourseworkRow["source"], string> = {
+  transcript: "From transcript",
+  manual: "Added by hand",
+  exam: "Exam credit (AP, IB, etc.)",
+}
+
 /** Client-side check, mirroring the API's so errors show before a round trip. */
 function validateRows(rows: CourseworkRow[]): FieldErrors {
   const errors: FieldErrors = {}
@@ -349,7 +355,7 @@ function RowEditor({
         ) : (
           <span className="text-xs text-muted-foreground">Confirmed</span>
         )}
-        <span className="text-xs text-muted-foreground">· {row.source === "transcript" ? "From transcript" : "Added by hand"}</span>
+        <span className="text-xs text-muted-foreground">· {SOURCE_LABEL[row.source]}</span>
         <div className="ml-auto flex items-center gap-1">
           {review && (
             <Button variant="ghost" size="sm" onClick={() => onChange({ status: "confirmed" })}>

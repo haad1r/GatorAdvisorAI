@@ -4,6 +4,16 @@
 
 import type { Coursework, DataFreshness, Profile, ScheduleMeeting, SurveySubmission } from "@/lib/api/types"
 
+/*
+ * One made-up student used by every page, so the numbers agree across the
+ * site: a Computer Science (B.S.) student on the 2025-2026 catalog who started
+ * Fall 2025 and is in their third semester (Fall 2026). Course codes, titles,
+ * credits and AP awards are real (data/catalog, data/exam_credit); the person
+ * and grades are not. Keep these in sync with audit-fixtures.ts.
+ *
+ * Earned: 22 credits of classes + 9 of AP credit = 31, which is why they're a
+ * sophomore (UF: 30-59 earned credits). In progress this term: 13 credits.
+ */
 export const profileFixture: Profile = {
   preferredName: "Test Student",
   classStanding: "sophomore",
@@ -15,12 +25,17 @@ export const profileFixture: Profile = {
 export const courseworkFixture: Coursework = {
   version: 1,
   rows: [
-    { id: "row-1", courseCode: "COP3502", grade: "A", credits: 3, term: "Fall 2025", source: "transcript", status: "confirmed" },
+    { id: "row-1", courseCode: "COP3502C", grade: "A", credits: 4, term: "Fall 2025", source: "transcript", status: "confirmed" },
     { id: "row-2", courseCode: "MAC2311", grade: "B+", credits: 4, term: "Fall 2025", source: "transcript", status: "confirmed" },
     { id: "row-3", courseCode: "ENC1101", grade: "A-", credits: 3, term: "Fall 2025", source: "transcript", status: "confirmed" },
-    { id: "row-4", courseCode: "COP3503", grade: "B", credits: 3, term: "Spring 2026", source: "transcript", status: "needs-review" },
-    { id: "row-5", courseCode: "MAC2312", grade: "S", credits: 4, term: "Spring 2026", source: "transcript", status: "needs-review" },
-    { id: "row-6", courseCode: "CHM2045", grade: "B-", credits: 3, term: "Spring 2026", source: "manual", status: "confirmed" },
+    // AP Psychology (4) and AP US History (4). UF shows exam credit without a
+    // letter grade; "CR" is a placeholder until #9 decides how imports show it.
+    { id: "row-4", courseCode: "PSY2012", grade: "CR", credits: 3, term: "Fall 2025", source: "exam", status: "confirmed" },
+    { id: "row-5", courseCode: "AMH2010", grade: "CR", credits: 3, term: "Fall 2025", source: "exam", status: "confirmed" },
+    { id: "row-6", courseCode: "AMH2020", grade: "CR", credits: 3, term: "Fall 2025", source: "exam", status: "confirmed" },
+    { id: "row-7", courseCode: "COP3503C", grade: "B", credits: 4, term: "Spring 2026", source: "transcript", status: "needs-review" },
+    { id: "row-8", courseCode: "MAC2312", grade: "S", credits: 4, term: "Spring 2026", source: "transcript", status: "needs-review" },
+    { id: "row-9", courseCode: "CHM2045", grade: "B-", credits: 3, term: "Spring 2026", source: "manual", status: "confirmed" },
   ],
 }
 
@@ -40,30 +55,35 @@ export function termFor(weekStart: string) {
 }
 
 /*
- * Synthetic schedule. Times follow UF periods; rooms are made up. There is no
- * real source yet: the SOC scraper skips meeting times and rooms (they need a
- * signed-in UF session), so students will likely enter them by hand.
+ * This term (Fall 2026): PHY 2048 + lab, COT 3100, ENC 2210, DIG 1627 (13
+ * credits). Times follow UF periods; section numbers and rooms are made up.
+ * There is no real source for times yet: the SOC scraper skips meeting times
+ * and rooms (they need a signed-in UF session), so students will likely enter
+ * them by hand.
  */
 
+const PHY = { courseCode: "PHY2048", title: "Physics with Calculus 1", section: "2468", online: false } as const
+const COT = { courseCode: "COT3100", title: "Applications of Discrete Structures", section: "5678", online: false } as const
+const ENC = { courseCode: "ENC2210", title: "Technical Writing", section: "1357", online: false } as const
+
 export const weeklyMeetingsFixture: ScheduleMeeting[] = [
-  { id: "m1", courseCode: "MAC2312", title: "Analytic Geometry and Calculus 2", section: "1234", kind: "lecture", time: { day: "MON", start: "09:35", end: "10:25" }, location: "LIT 109", online: false },
-  { id: "m2", courseCode: "MAC2312", title: "Analytic Geometry and Calculus 2", section: "1234", kind: "lecture", time: { day: "WED", start: "09:35", end: "10:25" }, location: "LIT 109", online: false },
-  { id: "m3", courseCode: "MAC2312", title: "Analytic Geometry and Calculus 2", section: "1234", kind: "lecture", time: { day: "FRI", start: "09:35", end: "10:25" }, location: "LIT 109", online: false },
-  { id: "m4", courseCode: "MAC2312", title: "Analytic Geometry and Calculus 2", section: "1234", kind: "discussion", time: { day: "THU", start: "08:30", end: "09:20" }, location: "LIT 201", online: false },
-  { id: "m5", courseCode: "COP3503", title: "Programming Fundamentals 2", section: "5678", kind: "lecture", time: { day: "MON", start: "10:40", end: "11:30" }, location: "CSE A101", online: false },
-  { id: "m6", courseCode: "COP3503", title: "Programming Fundamentals 2", section: "5678", kind: "lecture", time: { day: "WED", start: "10:40", end: "11:30" }, location: "CSE A101", online: false },
-  { id: "m7", courseCode: "COP3503", title: "Programming Fundamentals 2", section: "5678", kind: "lecture", time: { day: "FRI", start: "10:40", end: "11:30" }, location: "CSE A101", online: false },
-  { id: "m8", courseCode: "COP3503", title: "Programming Fundamentals 2", section: "5678", kind: "discussion", time: { day: "TUE", start: "12:50", end: "13:40" }, location: "CSE E115", online: false },
-  { id: "m9", courseCode: "PHY2048", title: "Physics with Calculus 1", section: "2468", kind: "lecture", time: { day: "TUE", start: "11:45", end: "12:35" }, location: "NPB 1001", online: false },
-  { id: "m10", courseCode: "PHY2048", title: "Physics with Calculus 1", section: "2468", kind: "lecture", time: { day: "THU", start: "11:45", end: "12:35" }, location: "NPB 1001", online: false },
-  { id: "m11", courseCode: "PHY2048L", title: "Physics with Calculus 1 Lab", section: "1357", kind: "lab", time: { day: "WED", start: "15:00", end: "16:55" }, location: "NPB B110", online: false },
-  { id: "m12", courseCode: "CHM2045", title: "General Chemistry 1", section: "9999", kind: "lecture", time: null, location: null, online: true },
-  { id: "m13", courseCode: "IDS2935", title: "Quest 1 (section TBA)", section: "TBA", kind: "lecture", time: null, location: null, online: false },
+  { ...PHY, id: "m1", kind: "lecture", time: { day: "MON", start: "09:35", end: "10:25" }, location: "NPB 1001" },
+  { ...PHY, id: "m2", kind: "lecture", time: { day: "WED", start: "09:35", end: "10:25" }, location: "NPB 1001" },
+  { ...PHY, id: "m3", kind: "lecture", time: { day: "FRI", start: "09:35", end: "10:25" }, location: "NPB 1001" },
+  { ...PHY, id: "m4", kind: "discussion", time: { day: "THU", start: "08:30", end: "09:20" }, location: "NPB 1101" },
+  { ...COT, id: "m5", kind: "lecture", time: { day: "MON", start: "10:40", end: "11:30" }, location: "CSE A101" },
+  { ...COT, id: "m6", kind: "lecture", time: { day: "WED", start: "10:40", end: "11:30" }, location: "CSE A101" },
+  { ...COT, id: "m7", kind: "lecture", time: { day: "FRI", start: "10:40", end: "11:30" }, location: "CSE A101" },
+  { ...COT, id: "m8", kind: "discussion", time: { day: "TUE", start: "12:50", end: "13:40" }, location: "CSE E115" },
+  { ...ENC, id: "m9", kind: "lecture", time: { day: "MON", start: "12:50", end: "13:40" }, location: "TUR 2322" },
+  { ...ENC, id: "m10", kind: "lecture", time: { day: "WED", start: "12:50", end: "13:40" }, location: "TUR 2322" },
+  { ...ENC, id: "m11", kind: "lecture", time: { day: "FRI", start: "12:50", end: "13:40" }, location: "TUR 2322" },
+  { id: "m12", courseCode: "PHY2048L", title: "Laboratory for PHY 2048", section: "2470", kind: "lab", time: { day: "WED", start: "15:00", end: "16:55" }, location: "NPB B110", online: false },
+  { id: "m13", courseCode: "DIG1627", title: "AI & Art/Science/Fiction", section: "UFOL", kind: "lecture", time: null, location: null, online: true },
 ]
 
-/* A dated evening exam, only in the week starting this Monday. */
-export const examWeekStart = "2026-11-09"
+/* An evening PHY 2048 exam, only in the week starting this Monday. */
+export const examWeekStart = "2026-11-16"
 export const examFixture: ScheduleMeeting = {
-  id: "x1", courseCode: "MAC2312", title: "Analytic Geometry and Calculus 2", section: "1234", kind: "exam",
-  time: { day: "THU", start: "20:20", end: "22:10" }, location: "CAR 100", online: false,
+  ...PHY, id: "x1", kind: "exam", time: { day: "THU", start: "20:20", end: "22:10" }, location: "CAR 100",
 }

@@ -259,7 +259,7 @@ function RequirementCard({ requirement: r, sharedWith }: { requirement: Requirem
                   <li key={c.courseCode} className="flex flex-wrap items-baseline gap-x-2">
                     <span className="font-medium">{formatCourseCode(c.courseCode)}</span>
                     <span className="text-muted-foreground">
-                      {c.inProgress ? "In progress" : c.grade} · {c.credits} cr · {c.term}
+                      {c.inProgress ? "In progress" : c.source === "exam" ? "Exam credit" : c.grade} · {c.credits} cr{c.source === "exam" ? "" : ` · ${c.term}`}
                     </span>
                     {shared.length > 0 && <span className="text-muted-foreground">· Also counts toward {shared.join(", ")}</span>}
                   </li>
