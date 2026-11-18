@@ -4,10 +4,10 @@ import { KIND_LABEL, formatTimeRange, meetingLabel } from "@/lib/schedule"
 
 /* Kind is always shown as text; color only reinforces it. */
 const KIND_STYLE: Record<MeetingKind, string> = {
-  lecture: "border-l-brand-blue bg-brand-blue/10",
-  discussion: "border-l-brand-blue/60 bg-brand-blue/5",
-  lab: "border-l-event-lab bg-event-lab/10",
-  exam: "border-l-brand-orange bg-brand-orange/15",
+  lecture: "bg-brand-blue/10",
+  discussion: "bg-brand-blue/5",
+  lab: "bg-event-lab/10",
+  exam: "bg-brand-orange/15",
 }
 
 /**
@@ -33,7 +33,7 @@ export function CalendarEvent({
       aria-label={meetingLabel(meeting)}
       title={meetingLabel(meeting)}
       className={cn(
-        "min-w-0 overflow-hidden rounded-md border-l-4 text-xs",
+        "min-w-0 overflow-hidden rounded-md text-xs",
         fixedHeight ? "px-1.5" : "px-2",
         compact ? "py-1" : "py-3",
         /* Size containment needs a set height, so only fixed-height grid blocks get it. */
