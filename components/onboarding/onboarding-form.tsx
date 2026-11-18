@@ -348,6 +348,12 @@ function Done({ name }: { name: string }) {
         Next, import your transcript so we can mark the courses you&apos;ve
         already completed. You can also do this later.
       </p>
+      {/*
+        Intentional: saveProfile currently hits the mock transport, which only
+        keeps the profile in memory for this session (lib/mocks/handlers.ts).
+        Nothing is persisted yet, so this notice is accurate. Remove it once
+        PUT /api/profile is backed by the real API.
+      */}
       <Alert>
         <InfoIcon aria-hidden="true" />
         <AlertTitle>Preview build</AlertTitle>
