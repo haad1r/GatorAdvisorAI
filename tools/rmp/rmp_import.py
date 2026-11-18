@@ -148,7 +148,7 @@ def fetch(force: bool) -> None:
     rows = list({r["legacy_id"]: r for r in rows}.values())  # paging can repeat a profile
     rows.sort(key=lambda r: (r["last_name"].lower(), r["first_name"].lower(), r["legacy_id"]))
     with open(OUT / "professors.csv", "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=PROFESSOR_FIELDS)
+        w = csv.DictWriter(f, fieldnames=PROFESSOR_FIELDS, lineterminator="\n")
         w.writeheader()
         w.writerows(rows)
     manifest_path.write_text(json.dumps({
@@ -351,7 +351,7 @@ def match(terms: list[str] | None) -> None:
         out.append(row)
 
     with open(OUT / "instructor_ratings.csv", "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=MATCH_FIELDS)
+        w = csv.DictWriter(f, fieldnames=MATCH_FIELDS, lineterminator="\n")
         w.writeheader()
         w.writerows(out)
     matched = sum(1 for r in out if r.get("legacy_id"))
