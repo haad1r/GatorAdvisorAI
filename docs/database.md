@@ -16,7 +16,7 @@ The schema for #6 (private student data) and #8 (catalog persistence). One migra
 
 | Table | What it stores | Notes |
 |---|---|---|
-| `profiles` | One row per student: name, standing, program, catalog year, entry term, expected graduation | `program_id` has no foreign key to `catalog.programs` on purpose, so a catalog reload can never block or cascade into student data. `entry_term` anchors Critical Tracking semesters. |
+| `profiles` | One row per student: name, standing, program, catalog year, entry term, expected graduation | `program_id` has no foreign key to `catalog.programs` on purpose, so a catalog reload can never block or cascade into student data. `entry_term` is required: it anchors Critical Tracking semesters, and onboarding asks for it ("First term at UF"). |
 | `coursework_records` | One row per student with a `version` | The version for the whole course list (see "stale writes" below). |
 | `coursework` | One row per course attempt | A retake is two rows with different terms. `source` is transcript / manual / exam / transfer. `original_label` keeps the transcript's wording for review. Course codes are checked by the database (`COP3502C`, no space). |
 | `survey_submissions` | Interest survey answers as JSON | Kept as history; the newest is current. `answers` matches `SurveyAnswer[]` in `lib/api/types.ts`. |
@@ -63,16 +63,25 @@ Each mirrors a file in `data/`, column for column where possible:
 - Reloads should upsert (`INSERT ... ON CONFLICT (key) DO UPDATE`) so ids stay stable and nothing duplicates (#8 acceptance criterion).
 - Every value in the current data fits these column types (checked on 2026-11-18).
 
-## Applying it
+## Setting up Supabase (step [3])
 
-Until there's a Supabase project, nothing is applied. Once there is:
+1. **Get access first.** Ask Haadi whether to use an existing GatorAdvisor Supabase project or create one. #6 says not to create parallel projects.
+2. **Create or open the project** at supabase.com. Pick the US East region (closest to UF).
+3. **Apply the schema:** Dashboard → SQL Editor → paste `supabase/migrations/20261118120000_initial_schema.sql` → Run. (With the Supabase CLI: `supabase db push`.)
+4. **Optional dev data:** paste `supabase/seed.sql` into the SQL Editor after replacing `user_dev_student` with your Clerk test user's id. You get the same student the mocks show.
+5. **Copy two values** from Project Settings → API into `.env.local`:
 
-1. Supabase dashboard → SQL Editor → paste the migration → Run. (Or with the Supabase CLI: `supabase db push`.)
-2. Keep the service role key in server env vars only (`SUPABASE_SERVICE_ROLE_KEY`, never `NEXT_PUBLIC_`).
+   ```bash
+   SUPABASE_URL=https://<project-ref>.supabase.co
+   SUPABASE_SERVICE_ROLE_KEY=<service role key>   # server only, full access
+   ```
+
+   Never prefix these with `NEXT_PUBLIC_`: that would ship them to every browser. Add both names (with empty values) to `.env.example` once PR #22, which creates that file, is merged.
+6. **Don't use the anon key or Supabase Auth.** Clerk handles sign-in; the browser never talks to Supabase directly.
 
 ## Testing it locally
 
-`supabase/tests/schema_checks.sql` seeds two students and checks 15 things: cross-student inserts are rejected, bad values are refused, deletes cascade to every private table and only for that student, deleted students can't get data back, and a browser role reads nothing. With a local Postgres:
+GitHub runs this automatically on every PR that touches `supabase/` (`.github/workflows/schema.yml`): it applies the migration and `seed.sql` to a temporary Postgres, then runs the checks. To run it yourself: `supabase/tests/schema_checks.sql` seeds two students and checks 15 things: cross-student inserts are rejected, bad values are refused, deletes cascade to every private table and only for that student, deleted students can't get data back, and a browser role reads nothing. With a local Postgres:
 
 ```bash
 createdb gator_test
@@ -83,6 +92,6 @@ dropdb gator_test
 
 ## Open questions
 
-- **Shaun:** do the academic fields work for the engine? Especially `profiles.entry_term` for tracking semesters, `coursework` as one row per attempt, and whether the engine wants a `transfer_equivalencies` table.
+- **Shaun:** do the academic fields work for the engine? Especially `profiles.entry_term` (required) for tracking semesters, `coursework` as one row per attempt, and whether the engine wants a `transfer_equivalencies` table.
 - **AI team:** is `chat_messages.sources` (JSON) enough for citations, and does `recommendation_events` cover the feedback #11 needs?
 - **Everyone:** the course code format. Coursework uses `COP3502C`; the catalog uses `cop3502c`. Converting is uppercasing, but one shared helper should do it everywhere (Haadi's question 1 on #8).

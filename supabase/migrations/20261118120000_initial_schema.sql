@@ -202,7 +202,7 @@ create table public.profiles (
   class_standing      text not null check (class_standing in ('freshman', 'sophomore', 'junior', 'senior')),
   program_id          text not null,           -- catalog.programs.id; no FK so catalog reloads can't block or cascade
   catalog_year        text not null,           -- "2025-2026": decides which requirements apply
-  entry_term          text,                    -- "Fall 2025": first UF term, anchors tracking semesters
+  entry_term          text not null,           -- "Fall 2025": first UF term, anchors tracking semesters
   expected_graduation text not null,           -- "Spring 2029"
   version             integer not null default 1,
   created_at          timestamptz not null default now(),
