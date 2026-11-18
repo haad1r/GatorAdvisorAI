@@ -11,7 +11,7 @@ Route groups in brackets do not appear in the URL. `/sign-in`, `/sign-up`, and `
 | Path | File | What it is now | Owner |
 | --- | --- | --- | --- |
 | `/` | `app/(app)/page.tsx` | Redirects to `/dashboard`. | Braydin |
-| `/dashboard`, `/audit`, `/courses`, `/recommendations`, `/plan`, `/schedule`, `/advisor`, `/import`, `/settings` | `app/(app)/<name>/page.tsx` | The #21 page map. `/dashboard`, `/audit`, `/schedule`, `/import`, and `/settings` are built on the mocks; the rest are `EmptyState` placeholders until their API shapes exist. | Owners per #21 |
+| `/dashboard`, `/audit`, `/courses`, `/recommendations`, `/plan`, `/schedule`, `/advisor`, `/import`, `/settings` | `app/(app)/<name>/page.tsx` | The #21 page map. `/dashboard`, `/audit`, `/courses`, `/courses/[id]`, `/schedule`, `/import`, and `/settings` are built on the mocks; the rest are `EmptyState` placeholders until their API shapes exist. | Owners per #21 |
 | `/preview` | `app/preview/page.tsx` | Gallery of loading, empty, error, and status states, plus a mock API demo. Always uses the mocks, never a real backend, and needs no sign-in. | Braydin |
 | `/sign-in` | `app/(auth)/sign-in/[[...sign-in]]/page.tsx` | Clerk `<SignIn />`. A redirect here is not access control. | Zain |
 | `/sign-up` | `app/(auth)/sign-up/[[...sign-up]]/page.tsx` | Clerk `<SignUp />`. | Zain |
@@ -46,6 +46,7 @@ Import from the `@/` aliases in `components.json`. New UI follows the folder it 
 | --- | --- | --- |
 | `components/ui/` | shadcn primitives (button, input, badge, alert, skeleton, label, native select, dialog). Feature code composes these. It does not restyle them for one screen. | Shared. See below. |
 | `components/feedback/` | `LoadingBlock`, `EmptyState`, `ErrorPanel`, `LoadFailed` (error plus "Try again"), `StatusBadge`, `ResultStatusBadge` (met / in progress / not met / at risk / unknown, always with a label and icon). | Braydin |
+| `components/courses/` | `/courses` search (filters live in the URL, wrapped in `<Suspense>` because it reads search params) and `/courses/[id]` detail with prerequisites, a "not checked yet" eligibility box, and professors grouped and ranked by RMP rating per term. | Braydin |
 | `components/ratings/` | `InstructorRating`: an instructor's RateMyProfessors numbers, the rating count, and a link to RMP (or a search link when there's no match). Hidden when `NEXT_PUBLIC_SHOW_RMP=false`. | Braydin |
 | `components/audit/`, `components/dashboard/`, `components/import/`, `components/settings/` | The `/audit`, `/dashboard`, `/import`, and `/settings` screens. Import's replace/merge wording is placeholder text in `IMPORT_COPY` until #9 decides. `audit/stats.tsx` has `ProgressBar` and `Stat`, shared with the dashboard. | Braydin (moved from Zain) |
 | `components/forms/` | `FormField`, `FormErrorSummary`, `SubmitButton`. | Zain |
@@ -125,14 +126,15 @@ Calls never throw. Check `result.ok` before reading `data`.
 | File | What it does |
 | --- | --- |
 | `lib/api/types.ts` | Request, response, and error shapes. **Provisional** until Maria publishes `api-contracts.md`; replace this file when she does. |
-| `lib/api/client.ts` | The functions screens call: `getProfile`/`saveProfile`, `getLatestSurvey`/`submitSurvey`, `getCoursework`/`saveCoursework`, `getSchedule(weekStart)`, `getDataFreshness()`, `deleteAccount()`, and `getAudit()`/`getTracking()`. The audit and tracking shapes are provisional, taken from the engine plan on #8, until Shaun confirms them. |
+| `lib/api/client.ts` | The functions screens call: `getProfile`/`saveProfile`, `getLatestSurvey`/`submitSurvey`, `getCoursework`/`saveCoursework`, `getSchedule(weekStart)`, `getDataFreshness()`, `deleteAccount()`, `getAudit()`/`getTracking()`, and `getCourses(filters)`/`getCourse(id)`. The audit and tracking shapes are provisional, taken from the engine plan on #8, until Shaun confirms them. The course shapes are ours (catalog tables, see `docs/database.md`). |
 | `lib/api/use-load.ts` | `useLoad(fetcher)` for a screen that loads once: returns `{ state, retry }` with `loading`/`ok`/`error`. Pair it with `LoadFailed`. |
 | `lib/api/use-api.ts` | `useApi()` for client components. Uses the mocks when `NEXT_PUBLIC_API_MOCKS=true`, otherwise the real backend with the Clerk session token. |
 | `lib/api/transport.ts` | The real backend: `fetch` plus HTTP status to error code (401 `UNAUTHENTICATED`, 403 `FORBIDDEN`, 409 `STALE_WRITE`, 400/422 `VALIDATION_ERROR`, 429 `QUOTA_EXCEEDED`, 5xx `SERVER`, failed fetch `NETWORK`). |
 | `lib/api/errors.ts` | `toFormState()` for forms and `toErrorPanel()` for `ErrorPanel`. One message per error code. |
 | `lib/mocks/fixtures.ts` | Synthetic starting data. No real student records. |
+| `lib/mocks/course-fixture.json`, `lib/mocks/courses.ts` | 300 real UF courses with real Fall 2026 / Spring 2027 sections and RMP matches, built by `python3 tools/mock/build_course_fixture.py`. Loaded on first use so it stays out of the main bundle. The mock schedule's sections are real, so its instructors come from here too. |
 | `lib/mocks/audit-fixtures.ts` | A made-up audit and tracking result for the mock CS student, following the real CS requirement groups. Includes an unknown, a course counted twice, and an at-risk deadline. |
-| `lib/mocks/handlers.ts` | The fake backend: in-memory saves, validation, and `STALE_WRITE` when a save sends an old `version`. |
+| `lib/mocks/handlers.ts` | The fake backend (routes like `GET /api/courses/:id` get the id as `query.get("id")`; handlers may be async): in-memory saves, validation, and `STALE_WRITE` when a save sends an old `version`. |
 | `lib/mocks/transport.ts` | Fake latency (300 to 700 ms) and forced error scenarios. |
 
 ### Mocks
@@ -164,7 +166,7 @@ First time only: `npx playwright install chromium`.
 | `auth-boundary.spec.ts` | Signed-out "Sign in" link reaches Clerk's form, sign-up renders, expired-session and forbidden responses show their messages, one `<h1>` on each auth page |
 | `loading-failures.spec.ts` | Loading state, server/network/quota errors with "Try again", recovery after a retry, footer freshness failure, no `/api` requests while mocks are on |
 | `theme.spec.ts` | Follows the OS with no saved choice, the toggle saves and survives a reload, a saved dark theme applies before first paint |
-| `accessibility.spec.ts` | axe (WCAG 2.1 A/AA) on `/dashboard`, `/audit`, `/schedule`, `/import`, `/settings`, `/preview` in light and dark |
+| `accessibility.spec.ts` | axe (WCAG 2.1 A/AA) on `/dashboard`, `/audit`, `/courses`, `/courses/cop3530`, `/schedule`, `/import`, `/settings`, `/preview` in light and dark |
 
 Signed-in flows are not covered yet: they need a Clerk test user from Maria. Add them once she provides one, using Clerk's testing tokens rather than a real account.
 

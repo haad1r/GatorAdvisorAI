@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
-import { EmptyState } from "@/components/feedback/empty-state";
+import { Suspense } from "react";
+import { CourseSearch } from "@/components/courses/course-search";
+import { LoadingBlock } from "@/components/feedback/loading-block";
 
 export const metadata: Metadata = { title: "Courses · GatorAdvisor" };
 
 export default function CoursesPage() {
+  // CourseSearch reads the URL's query string, which needs a Suspense boundary.
   return (
-    <EmptyState
-      size="lg"
-      title="Course search is coming"
-      description="Search and filter UF courses by department, level, credits, and Gen Ed once the catalog API is available."
-    />
+    <Suspense fallback={<LoadingBlock />}>
+      <CourseSearch />
+    </Suspense>
   );
 }

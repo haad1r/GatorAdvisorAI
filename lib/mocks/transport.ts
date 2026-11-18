@@ -76,10 +76,20 @@ export const mockTransport: Transport = async ({ method, path, body }) => {
   }
 
   const [pathname, search = ""] = path.split("?")
-  const handler = routes[`${method} ${pathname}`]
+  const query = new URLSearchParams(search)
+  let handler: (typeof routes)[string] | undefined = routes[`${method} ${pathname}`]
+  if (!handler) {
+    // "/api/courses/cop3530" -> route "/api/courses/:id" with id in the query.
+    const slash = pathname.lastIndexOf("/")
+    const idRoute: (typeof routes)[string] | undefined = routes[`${method} ${pathname.slice(0, slash)}/:id`]
+    if (idRoute) {
+      handler = idRoute
+      query.set("id", decodeURIComponent(pathname.slice(slash + 1)))
+    }
+  }
   if (!handler) {
     return { ok: false, error: { code: "NOT_FOUND", message: `No mock for ${method} ${path}.` } }
   }
 
-  return handler(structuredClone(body), new URLSearchParams(search))
+  return handler(structuredClone(body), query)
 }
