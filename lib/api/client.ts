@@ -29,6 +29,12 @@ export function createApiClient(transport: Transport) {
 
     getDataFreshness: () => call<DataFreshness>({ method: "GET", path: "/api/meta/freshness" }),
 
+    /**
+     * Deletes the account and every private record. Only resolves ok once
+     * everything is gone; a partial failure comes back as an error.
+     */
+    deleteAccount: () => call<null>({ method: "DELETE", path: "/api/account" }),
+
     /** weekStart is the Monday, "YYYY-MM-DD". */
     getSchedule: (weekStart: string) =>
       call<WeekSchedule>({ method: "GET", path: `/api/schedule?week=${encodeURIComponent(weekStart)}` }),

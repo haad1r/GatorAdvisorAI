@@ -109,7 +109,7 @@ export type DataFreshness = {
 }
 
 export type ApiRequest = {
-  method: "GET" | "POST" | "PUT"
+  method: "GET" | "POST" | "PUT" | "DELETE"
   path: string
   body?: unknown
 }

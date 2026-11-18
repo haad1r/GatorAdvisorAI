@@ -8,7 +8,7 @@ import type {
   SurveySubmission,
 } from "@/lib/api/types"
 import { hasErrors, type FieldErrors } from "@/lib/forms"
-import { validateProfile } from "@/lib/onboarding"
+import { emptyProfile, validateProfile } from "@/lib/onboarding"
 import {
   courseworkFixture,
   examFixture,
@@ -141,6 +141,15 @@ export const routes: Record<string, Handler> = {
     if (hasErrors(errors)) return invalid(errors)
     store.survey = structuredClone(submission)
     return ok(store.survey)
+  },
+
+  "DELETE /api/account": () => {
+    store = {
+      profile: structuredClone(emptyProfile),
+      coursework: { version: store.coursework.version + 1, rows: [] },
+      survey: null,
+    }
+    return ok(null)
   },
 
   "GET /api/coursework": () => ok(store.coursework),
