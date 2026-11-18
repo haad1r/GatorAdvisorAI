@@ -15,9 +15,16 @@ PROFS = [
     prof(3, "Sam", "Sample", "Mathematics"),
     prof(4, "Sam", "Sample", "Physics"),
     prof(5, "Riley", "Twin", "History"),
-    prof(6, "Riley", "Twin", "History"),
+    prof(6, "Riley", "Twin", "Music"),
     prof(7, "José", "Núñez", "Chemistry"),
     prof(8, "Pat", "Lee", "English"),
+    prof(9, "Alex", "Rubenstein", "Management"),
+    prof(10, "Ashleigh", "White", "Advertising"),
+    prof(11, "Jonathan", "Martin", "Geology"),
+    prof(12, "Agnes", "Leslie", "History"),
+    prof(13, "Stephen", "Flory", "Agronomy"),
+    prof(14, "Dana", "Dupe", "Hospitality", ratings=0),
+    prof(15, "Dana", "Dupe", "Hospitality", ratings=7),
 ]
 
 DEPTS = {"Computer and Information Science and Engineering"}
@@ -45,17 +52,46 @@ class MatchOne(unittest.TestCase):
         method, p, _ = match_one("Jordan Q Example", DEPTS, PROFS)
         self.assertEqual((method, p.legacy_id), ("first_last", 2))
 
-    def test_nickname_falls_back_to_initial(self):
+    def test_nickname_prefix(self):
+        method, p, _ = match_one("Jon Martin", DEPTS, PROFS)
+        self.assertEqual((method, p.legacy_id), ("nickname", 11))
         method, p, _ = match_one("Patricia Lee", DEPTS, PROFS)
-        self.assertEqual((method, p.legacy_id), ("initial", 8))
+        self.assertEqual((method, p.legacy_id), ("nickname", 8))
+
+    def test_one_letter_typo(self):
+        method, p, _ = match_one("Agness Leslie", DEPTS, PROFS)
+        self.assertEqual((method, p.legacy_id), ("nickname", 12))
+
+    def test_bare_initial_is_not_enough(self):
+        self.assertEqual(match_one("S Flory", DEPTS, PROFS)[:2], ("none", None))
+
+    def test_prefix_that_isnt_a_nickname_is_not_enough(self):
+        profs = PROFS + [prof(20, "Jingjing", "Shi"), prof(21, "Ronald", "Behringer"), prof(22, "Jie", "Xu")]
+        for name in ("Jin Shi", "Donald Behringer", "Jin Xu"):
+            self.assertEqual(match_one(name, DEPTS, profs)[:2], ("none", None), name)
+
+    def test_rare_name_listed_twice_in_other_departments(self):
+        profs = PROFS + [prof(30, "Megan", "Mocko", "Statistics", ratings=397), prof(31, "Megan", "Mocko", "Business", ratings=30)]
+        method, p, _ = match_one("Megan Mocko", {"Biology"}, profs)
+        self.assertEqual((method, p.legacy_id), ("exact+duplicate", 30))
+
+    def test_common_name_in_other_departments_stays_ambiguous(self):
+        profs = PROFS + [prof(40 + i, "Chris", "Smith", d) for i, d in enumerate(["History", "Writing"])] + [prof(50 + i, "Al", "Smith") for i in range(3)]
+        self.assertEqual(match_one("Chris Smith", {"Physics"}, profs)[:2], ("ambiguous", None))
+
+    def test_same_first_letter_is_not_enough(self):
+        self.assertEqual(match_one("Alan Rubenstein", DEPTS, PROFS)[:2], ("none", None))
+
+    def test_half_of_hyphenated_last_name_is_not_enough(self):
+        self.assertEqual(match_one("Abby Owens-White", DEPTS, PROFS)[:2], ("none", None))
+
+    def test_rmp_duplicates_pick_most_ratings(self):
+        method, p, _ = match_one("Dana Dupe", {"Tourism"}, PROFS)
+        self.assertEqual((method, p.legacy_id), ("exact+duplicate", 15))
 
     def test_same_name_split_by_department(self):
         method, p, _ = match_one("Sam Sample", {"Physics"}, PROFS)
         self.assertEqual((method, p.legacy_id), ("exact+dept", 4))
-
-    def test_same_name_same_department_is_ambiguous(self):
-        method, p, cands = match_one("Riley Twin", {"History"}, PROFS)
-        self.assertEqual((method, p, len(cands)), ("ambiguous", None, 2))
 
     def test_no_match(self):
         self.assertEqual(match_one("Nobody Here", DEPTS, PROFS)[:2], ("none", None))

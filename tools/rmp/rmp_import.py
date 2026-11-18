@@ -192,37 +192,117 @@ def load_professors(path: Path) -> list[Professor]:
         ]
 
 
-def match_one(instructor: str, depts: set[str], profs: list[Professor]) -> tuple[str, Professor | None, list[Professor]]:
+def _edit_distance_at_most_one(a: str, b: str) -> bool:
+    if abs(len(a) - len(b)) > 1:
+        return False
+    if len(a) > len(b):
+        a, b = b, a
+    i = j = edits = 0
+    while i < len(a) and j < len(b):
+        if a[i] != b[j]:
+            edits += 1
+            if edits > 1:
+                return False
+            if len(a) == len(b):
+                i += 1
+            j += 1
+        else:
+            i += 1
+            j += 1
+    return edits + (len(b) - j) <= 1
+
+
+# Common English short forms. A first name matches another only if they're
+# equal, in the same group here, or a one-letter typo of a long name.
+NICKNAME_GROUPS = [
+    {"abby", "abigail"}, {"alex", "alexander", "alexandre", "alexandra", "alejandro"},
+    {"andy", "andrew"}, {"ben", "benjamin"}, {"becky", "rebecca"}, {"bill", "will", "william"},
+    {"bob", "rob", "robert", "bobby"}, {"charlie", "chuck", "charles"}, {"chris", "christopher"},
+    {"cindy", "cynthia"}, {"dan", "danny", "daniel"}, {"dave", "david"}, {"debbie", "deborah"},
+    {"don", "donald"}, {"doug", "douglas"}, {"ed", "eddie", "edward"}, {"fred", "frederick"},
+    {"geoff", "geoffrey"}, {"greg", "gregory"}, {"jake", "jacob"}, {"jeff", "jeffrey"},
+    {"jen", "jenn", "jenny", "jennifer"}, {"jessi", "jessie", "jessica"}, {"jim", "jimmy", "james"},
+    {"joe", "joseph"}, {"jon", "jonathan"}, {"josh", "joshua"},
+    {"kate", "katie", "kathy", "kathe", "katherine", "kathryn"}, {"ken", "kenneth"},
+    {"larry", "lawrence"}, {"liz", "beth", "elizabeth"}, {"matt", "matthew"}, {"max", "maxwell"},
+    {"meg", "megan"}, {"mike", "michael"}, {"nate", "nathan", "nathaniel"}, {"nick", "nicholas"},
+    {"pat", "patrick", "patricia"}, {"phil", "philip", "phillip"}, {"ray", "raymond"}, {"rich", "rick", "richard"}, {"ron", "ronald"},
+    {"sam", "samuel", "samantha"}, {"steve", "stephen", "steven"}, {"sue", "susan"},
+    {"ted", "theodore"}, {"tim", "timothy"}, {"tom", "thomas"}, {"tony", "anthony"}, {"zach", "zachary"},
+]
+
+
+def first_names_compatible(a: str, b: str) -> bool:
+    """Same person, written differently? Nickname pairs ("greg" / "gregory")
+    or a one-letter typo in a name of 5+ letters with the same first letter
+    ("agness" / "agnes"). Initials, prefixes ("jin" / "jingjing") and close
+    short names ("jin" / "jie", "donald" / "ronald") don't count: with common
+    last names they attach someone else's rating.
+    """
+    if not a or not b or a == b:
+        return bool(a) and a == b
+    if any(a in g and b in g for g in NICKNAME_GROUPS):
+        return True
+    return min(len(a), len(b)) >= 5 and a[0] == b[0] and _edit_distance_at_most_one(a, b)
+
+
+def index_by_last(profs: list[Professor]) -> dict[str, list[Professor]]:
+    """Professors grouped by normalized last name. Build once, pass to match_one."""
+    index: dict[str, list[Professor]] = {}
+    for p in profs:
+        index.setdefault(normalize(p.last), []).append(p)
+    return index
+
+
+def match_one(
+    instructor: str, depts: set[str], profs: list[Professor], index: dict[str, list[Professor]] | None = None
+) -> tuple[str, Professor | None, list[Professor]]:
     """Returns (method, professor or None, candidates considered).
 
     Tries, in order: exact full name; same first name and last name with
-    middle names ignored; first initial and last name. Several candidates are
-    narrowed by department; if more than one is still left it's "ambiguous"
-    and gets no rating rather than a guess.
+    middle names ignored; a nickname or typo of the first name and the same
+    last name. Several candidates are narrowed by department. RMP often lists
+    one person twice: identical full names resolve to the profile with the
+    most ratings when they share a department, or when the last name is rare
+    at UF (3 or fewer profiles). Anything still tied is "ambiguous" and gets
+    no rating rather than a guess.
     """
     name = normalize(instructor)
     tokens = name.split()
     if len(tokens) < 2:
         return "none", None, []
 
-    def last_fits(p: Professor) -> bool:
-        last = normalize(p.last)
-        return bool(last) and (name.endswith(" " + last) or tokens[-1] == last.split()[-1])
+    # Only professors whose last name ends the instructor's name can match:
+    # "ana martin ryals" looks up "martin ryals" and "ryals".
+    index = index if index is not None else index_by_last(profs)
+    pool = [p for i in range(1, len(tokens)) for p in index.get(" ".join(tokens[i:]), [])]
+
+    def first_of(p: Professor) -> str:
+        return (normalize(p.first).split() or [""])[0]
 
     tiers = [
-        ("exact", [p for p in profs if p.full == name]),
-        ("first_last", [p for p in profs if normalize(p.first).split()[:1] == tokens[:1] and last_fits(p)]),
-        ("initial", [p for p in profs if normalize(p.first)[:1] == tokens[0][:1] and last_fits(p)]),
+        ("exact", [p for p in pool if p.full == name]),
+        ("first_last", [p for p in pool if first_of(p) == tokens[0]]),
+        ("nickname", [p for p in pool if first_names_compatible(first_of(p), tokens[0])]),
     ]
+    dept_words = {normalize(d) for d in depts}
+
+    def in_dept(p: Professor) -> bool:
+        d = normalize(p.department)
+        return bool(d) and any(d in w or w in d for w in dept_words)
+
     for method, found in tiers:
         if not found:
             continue
         if len(found) == 1:
             return method, found[0], found
-        dept_words = {normalize(d) for d in depts}
-        in_dept = [p for p in found if normalize(p.department) and any(normalize(p.department) in d or d in normalize(p.department) for d in dept_words)]
-        if len(in_dept) == 1:
-            return method + "+dept", in_dept[0], found
+        narrowed = [p for p in found if in_dept(p)] or found
+        if len(narrowed) == 1:
+            return method + "+dept", narrowed[0], found
+        if len({(p.full, normalize(p.department)) for p in narrowed}) == 1:
+            return method + "+duplicate", max(narrowed, key=lambda p: p.num_ratings), found
+        if len({p.full for p in narrowed}) == 1 and len(index.get(normalize(narrowed[0].last), [])) <= 3:
+            return method + "+duplicate", max(narrowed, key=lambda p: p.num_ratings), found
         return "ambiguous", None, found
     return "none", None, []
 
@@ -250,6 +330,7 @@ def match(terms: list[str] | None) -> None:
     overrides_path = OUT / "overrides.json"
     overrides: dict = json.loads(overrides_path.read_text()) if overrides_path.exists() else {}
     by_id = {p.legacy_id: p for p in profs}
+    index = index_by_last(profs)
     terms = terms or open_terms()
     instructors = soc_instructors(terms)
 
@@ -259,7 +340,7 @@ def match(terms: list[str] | None) -> None:
             pid = overrides[name]
             method, prof, cands = ("override", by_id.get(pid), []) if pid else ("override_none", None, [])
         else:
-            method, prof, cands = match_one(name, instructors[name], profs)
+            method, prof, cands = match_one(name, instructors[name], profs, index)
         counts[method] = counts.get(method, 0) + 1
         row = {"instructor": name, "match": method, "candidates": "|".join(str(c.legacy_id) for c in cands) if not prof else ""}
         if prof:
