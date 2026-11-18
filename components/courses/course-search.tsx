@@ -88,8 +88,8 @@ export function CourseSearch() {
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="course-q">Search courses</Label>
           <div className="relative">
-            <SearchIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground" />
-            <Input id="course-q" type="search" value={text} onChange={(e) => setText(e.target.value)} placeholder="e.g. COP3530, calculus, ethics" className="h-15 rounded-xl pl-12 text-base md:text-sm" />
+            <SearchIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input id="course-q" type="search" value={text} onChange={(e) => setText(e.target.value)} placeholder="e.g. COP3530, calculus, ethics" className="h-15 rounded-xl pl-11 text-base md:text-sm" />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
