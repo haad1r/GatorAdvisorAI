@@ -17,13 +17,15 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { ErrorPanel } from "@/components/feedback/error-panel"
+import { LoadFailed } from "@/components/feedback/load-failed"
 import { LoadingBlock } from "@/components/feedback/loading-block"
 import { FormErrorSummary } from "@/components/forms/form-error-summary"
 import { FormField } from "@/components/forms/form-field"
 import { SubmitButton } from "@/components/forms/submit-button"
 import { useTheme } from "@/components/theme/theme-toggle"
 import { toErrorPanel, toFormState } from "@/lib/api/errors"
-import type { ApiError, ApiResult, Coursework, Profile, SurveySubmission } from "@/lib/api/types"
+import type { ApiError, Coursework, Profile, SurveySubmission } from "@/lib/api/types"
+import { useLoad } from "@/lib/api/use-load"
 import { useApi } from "@/lib/api/use-api"
 import { errorState, fieldError, hasErrors, initialFormState, type FormState } from "@/lib/forms"
 import {
@@ -65,32 +67,6 @@ export function SettingsView() {
 
 /* ---------- shared bits ---------- */
 
-type Load<T> = { kind: "loading" } | { kind: "ok"; data: T } | { kind: "error"; error: ApiError }
-
-/** Loads once, with a retry. `fetcher` must be stable (wrap it in useCallback). */
-function useLoad<T>(fetcher: () => Promise<ApiResult<T>>) {
-  const [state, setState] = React.useState<Load<T>>({ kind: "loading" })
-  const [attempt, setAttempt] = React.useState(0)
-
-  React.useEffect(() => {
-    let live = true
-    fetcher().then((result) => {
-      if (!live) return
-      setState(result.ok ? { kind: "ok", data: result.data } : { kind: "error", error: result.error })
-    })
-    return () => {
-      live = false
-    }
-  }, [fetcher, attempt])
-
-  function retry() {
-    setState({ kind: "loading" })
-    setAttempt((n) => n + 1)
-  }
-
-  return { state, setState, retry }
-}
-
 function Section({
   id,
   title,
@@ -121,17 +97,6 @@ function Section({
       </div>
       {children}
     </section>
-  )
-}
-
-function LoadFailed({ error, onRetry }: { error: ApiError; onRetry: () => void }) {
-  return (
-    <div className="flex flex-col items-start gap-3">
-      <ErrorPanel {...toErrorPanel(error)} />
-      <Button variant="outline" onClick={onRetry}>
-        Try again
-      </Button>
-    </div>
   )
 }
 
