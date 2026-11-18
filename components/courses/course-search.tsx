@@ -89,7 +89,7 @@ export function CourseSearch() {
           <Label htmlFor="course-q">Search courses</Label>
           <div className="relative">
             <SearchIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input id="course-q" type="search" value={text} onChange={(e) => setText(e.target.value)} placeholder="e.g. COP3530, calculus, ethics" className="pl-9" />
+            <Input id="course-q" type="search" value={text} onChange={(e) => setText(e.target.value)} placeholder="e.g. COP3530, calculus, ethics" className="h-11 pl-9" />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -175,7 +175,7 @@ function Filter({
   return (
     <div className="flex min-w-0 flex-col gap-1.5">
       <Label htmlFor={id}>{label}</Label>
-      <NativeSelect id={id} value={value ?? ""} onChange={(e) => onChange(e.target.value || undefined)}>
+      <NativeSelect id={id} className="h-11" value={value ?? ""} onChange={(e) => onChange(e.target.value || undefined)}>
         <option value="">Any</option>
         {children}
       </NativeSelect>
