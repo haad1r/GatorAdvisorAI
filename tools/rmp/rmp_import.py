@@ -145,6 +145,7 @@ def fetch(force: bool) -> None:
         sys.exit(f"Only got {len(rows)} of ~{expected} professors; not writing a partial file.")
 
     OUT.mkdir(parents=True, exist_ok=True)
+    rows = list({r["legacy_id"]: r for r in rows}.values())  # paging can repeat a profile
     rows.sort(key=lambda r: (r["last_name"].lower(), r["first_name"].lower(), r["legacy_id"]))
     with open(OUT / "professors.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=PROFESSOR_FIELDS)
@@ -185,11 +186,13 @@ class Professor:
 
 
 def load_professors(path: Path) -> list[Professor]:
+    """One Professor per RMP id (RMP's paging can return a profile twice)."""
+    seen: dict[int, Professor] = {}
     with open(path, encoding="utf-8") as f:
-        return [
-            Professor(int(r["legacy_id"]), r["first_name"], r["last_name"], r["department"], int(r["num_ratings"] or 0), r)
-            for r in csv.DictReader(f)
-        ]
+        for r in csv.DictReader(f):
+            pid = int(r["legacy_id"])
+            seen.setdefault(pid, Professor(pid, r["first_name"], r["last_name"], r["department"], int(r["num_ratings"] or 0), r))
+    return list(seen.values())
 
 
 def _edit_distance_at_most_one(a: str, b: str) -> bool:
