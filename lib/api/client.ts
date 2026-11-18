@@ -2,10 +2,12 @@ import type {
   ApiRequest,
   ApiResult,
   Coursework,
+  DegreeAudit,
   DataFreshness,
   WeekSchedule,
   Profile,
   SurveySubmission,
+  TrackingResult,
   Transport,
 } from "./types"
 
@@ -26,6 +28,11 @@ export function createApiClient(transport: Transport) {
     getCoursework: () => call<Coursework>({ method: "GET", path: "/api/coursework" }),
     saveCoursework: (coursework: Coursework) =>
       call<Coursework>({ method: "PUT", path: "/api/coursework", body: coursework }),
+
+    /** #8 answer 1. Provisional shape. */
+    getAudit: () => call<DegreeAudit>({ method: "GET", path: "/api/audit" }),
+    /** #8 answer 4. Provisional shape. */
+    getTracking: () => call<TrackingResult>({ method: "GET", path: "/api/tracking" }),
 
     getDataFreshness: () => call<DataFreshness>({ method: "GET", path: "/api/meta/freshness" }),
 

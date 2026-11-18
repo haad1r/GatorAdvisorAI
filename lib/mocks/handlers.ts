@@ -19,6 +19,7 @@ import {
   termFor,
   weeklyMeetingsFixture,
 } from "./fixtures"
+import { auditFixture, trackingFixture } from "./audit-fixtures"
 
 type Store = {
   profile: Profile
@@ -122,6 +123,10 @@ export const routes: Record<string, Handler> = {
     const meetings = week === examWeekStart ? [...weeklyMeetingsFixture, examFixture] : weeklyMeetingsFixture
     return ok({ term: termFor(week), weekStart: week, meetings })
   },
+
+  /* Fixed results: they don't recompute when profile or courses change. */
+  "GET /api/audit": () => ok({ ...auditFixture, recordVersion: store.coursework.version }),
+  "GET /api/tracking": () => ok(trackingFixture),
 
   "GET /api/profile": () => ok(store.profile),
 
