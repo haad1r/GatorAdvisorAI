@@ -11,7 +11,7 @@ Route groups in brackets do not appear in the URL. `/sign-in`, `/sign-up`, and `
 | Path | File | What it is now | Owner |
 | --- | --- | --- | --- |
 | `/` | `app/(app)/page.tsx` | Redirects to `/dashboard`. | Braydin |
-| `/dashboard`, `/audit`, `/courses`, `/recommendations`, `/plan`, `/schedule`, `/advisor`, `/import`, `/settings` | `app/(app)/<name>/page.tsx` | The #21 page map. `/dashboard`, `/audit`, `/schedule`, and `/settings` are built on the mocks; the rest are `EmptyState` placeholders until their API shapes exist. | Owners per #21 |
+| `/dashboard`, `/audit`, `/courses`, `/recommendations`, `/plan`, `/schedule`, `/advisor`, `/import`, `/settings` | `app/(app)/<name>/page.tsx` | The #21 page map. `/dashboard`, `/audit`, `/schedule`, `/import`, and `/settings` are built on the mocks; the rest are `EmptyState` placeholders until their API shapes exist. | Owners per #21 |
 | `/preview` | `app/preview/page.tsx` | Gallery of loading, empty, error, and status states, plus a mock API demo. Always uses the mocks, never a real backend, and needs no sign-in. | Braydin |
 | `/sign-in` | `app/(auth)/sign-in/[[...sign-in]]/page.tsx` | Clerk `<SignIn />`. A redirect here is not access control. | Zain |
 | `/sign-up` | `app/(auth)/sign-up/[[...sign-up]]/page.tsx` | Clerk `<SignUp />`. | Zain |
@@ -46,7 +46,7 @@ Import from the `@/` aliases in `components.json`. New UI follows the folder it 
 | --- | --- | --- |
 | `components/ui/` | shadcn primitives (button, input, badge, alert, skeleton, label, native select, dialog). Feature code composes these. It does not restyle them for one screen. | Shared. See below. |
 | `components/feedback/` | `LoadingBlock`, `EmptyState`, `ErrorPanel`, `LoadFailed` (error plus "Try again"), `StatusBadge`, `ResultStatusBadge` (met / in progress / not met / at risk / unknown, always with a label and icon). | Braydin |
-| `components/audit/`, `components/dashboard/`, `components/settings/` | The `/audit`, `/dashboard`, and `/settings` screens. `audit/stats.tsx` has `ProgressBar` and `Stat`, shared with the dashboard. | Braydin (moved from Zain) |
+| `components/audit/`, `components/dashboard/`, `components/import/`, `components/settings/` | The `/audit`, `/dashboard`, `/import`, and `/settings` screens. Import's replace/merge wording is placeholder text in `IMPORT_COPY` until #9 decides. `audit/stats.tsx` has `ProgressBar` and `Stat`, shared with the dashboard. | Braydin (moved from Zain) |
 | `components/forms/` | `FormField`, `FormErrorSummary`, `SubmitButton`. | Zain |
 | `components/auth/` | `AuthShell` and other auth chrome. | Zain |
 | `components/nav/` | `AppShell`, `nav-items.ts` (the page map), `NavList`/`MobileTabBar`/`MobileMenu` (`aria-current` on the active link), `PageTitle`, `ProgramSummary`, `FreshnessFooter`, `AccountButton`, `LogoLink`. | Braydin (was Nav) |
@@ -163,7 +163,7 @@ First time only: `npx playwright install chromium`.
 | `auth-boundary.spec.ts` | Signed-out "Sign in" link reaches Clerk's form, sign-up renders, expired-session and forbidden responses show their messages, one `<h1>` on each auth page |
 | `loading-failures.spec.ts` | Loading state, server/network/quota errors with "Try again", recovery after a retry, footer freshness failure, no `/api` requests while mocks are on |
 | `theme.spec.ts` | Follows the OS with no saved choice, the toggle saves and survives a reload, a saved dark theme applies before first paint |
-| `accessibility.spec.ts` | axe (WCAG 2.1 A/AA) on `/dashboard`, `/audit`, `/schedule`, `/settings`, `/preview` in light and dark |
+| `accessibility.spec.ts` | axe (WCAG 2.1 A/AA) on `/dashboard`, `/audit`, `/schedule`, `/import`, `/settings`, `/preview` in light and dark |
 
 Signed-in flows are not covered yet: they need a Clerk test user from Maria. Add them once she provides one, using Clerk's testing tokens rather than a real account.
 
