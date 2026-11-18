@@ -4,7 +4,8 @@ import type { MeetingKind, ScheduleMeeting, Weekday } from "@/lib/api/types"
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
-export const WEEKDAYS: Weekday[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+/** The calendar only shows Mon–Fri; there is no weekend section. */
+export const WEEKDAYS: Weekday[] = ["MON", "TUE", "WED", "THU", "FRI"]
 
 const DAY_NAMES: Record<Weekday, string> = {
   MON: "Monday", TUE: "Tuesday", WED: "Wednesday", THU: "Thursday", FRI: "Friday", SAT: "Saturday", SUN: "Sunday",
@@ -63,20 +64,17 @@ export function mondayOf(iso: string) {
 
 export type CalendarDay = { weekday: Weekday; date: string; name: string; short: string }
 
-/** Mon–Fri, plus Saturday/Sunday only when a meeting falls on them. */
-export function daysToShow(weekStart: string, meetings: ScheduleMeeting[]): CalendarDay[] {
-  const used = new Set(meetings.map((m) => m.time?.day))
-  return WEEKDAYS.map((weekday, i) => ({ weekday, i }))
-    .filter(({ weekday, i }) => i < 5 || used.has(weekday))
-    .map(({ weekday, i }) => {
-      const date = addDays(weekStart, i)
-      return {
-        weekday,
-        date,
-        name: DAY_NAMES[weekday],
-        short: `${MONTHS[Number(date.slice(5, 7)) - 1]} ${Number(date.slice(8, 10))}`,
-      }
-    })
+/** Mon–Fri of the week starting on `weekStart`. */
+export function daysToShow(weekStart: string): CalendarDay[] {
+  return WEEKDAYS.map((weekday, i) => {
+    const date = addDays(weekStart, i)
+    return {
+      weekday,
+      date,
+      name: DAY_NAMES[weekday],
+      short: `${MONTHS[Number(date.slice(5, 7)) - 1]} ${Number(date.slice(8, 10))}`,
+    }
+  })
 }
 
 /**
@@ -84,9 +82,9 @@ export function daysToShow(weekStart: string, meetings: ScheduleMeeting[]): Cale
  * Built by hand: Intl formatRange spacing differs between Node and browsers,
  * which breaks hydration.
  */
-export function formatWeekRange(weekStart: string, days = 5) {
+export function formatWeekRange(weekStart: string) {
   const [y1, m1, d1] = weekStart.split("-").map(Number)
-  const [y2, m2, d2] = addDays(weekStart, days - 1).split("-").map(Number)
+  const [y2, m2, d2] = addDays(weekStart, WEEKDAYS.length - 1).split("-").map(Number)
   if (y1 !== y2) return `${MONTHS[m1 - 1]} ${d1}, ${y1} – ${MONTHS[m2 - 1]} ${d2}, ${y2}`
   if (m1 !== m2) return `${MONTHS[m1 - 1]} ${d1} – ${MONTHS[m2 - 1]} ${d2}, ${y2}`
   return `${MONTHS[m1 - 1]} ${d1} – ${d2}, ${y2}`

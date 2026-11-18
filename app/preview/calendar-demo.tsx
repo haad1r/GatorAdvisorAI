@@ -38,7 +38,7 @@ export function CalendarDemo() {
       <p className="text-sm text-muted-foreground">Overlapping meetings sit side by side:</p>
       <div role="region" aria-label="Overlapping meetings example" tabIndex={0} className="overflow-x-auto rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
         <div className="min-w-[32rem]">
-          <WeekGrid days={daysToShow("2026-11-09", CLASH)} meetings={CLASH} today="" className="h-[28rem]" />
+          <WeekGrid days={daysToShow("2026-11-09")} meetings={CLASH} today="" className="h-[28rem]" />
         </div>
       </div>
     </section>

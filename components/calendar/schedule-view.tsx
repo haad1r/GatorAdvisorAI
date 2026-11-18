@@ -46,7 +46,7 @@ export function ScheduleView() {
   }
 
   const meetings = state.kind === "ok" ? state.data.meetings : []
-  const days = daysToShow(weekStart, meetings)
+  const days = daysToShow(weekStart)
   const timed = meetings.filter((m) => m.time)
 
   return (
@@ -70,7 +70,7 @@ export function ScheduleView() {
           </Button>
         </div>
         <h2 aria-live="polite" className="ml-1 min-w-0 text-xl font-semibold tracking-tight">
-          {formatWeekRange(weekStart, days.length)}
+          {formatWeekRange(weekStart)}
           {state.kind === "ok" && <span className="ml-2 text-base font-normal tracking-normal text-muted-foreground">{state.data.term}</span>}
         </h2>
 
