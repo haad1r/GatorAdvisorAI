@@ -89,7 +89,7 @@ export function CourseSearch() {
           <Label htmlFor="course-q">Search courses</Label>
           <div className="relative">
             <SearchIcon aria-hidden="true" className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input id="course-q" type="search" value={text} onChange={(e) => setText(e.target.value)} placeholder="e.g. COP3530, calculus, ethics" className="h-12 rounded-xl pl-11 text-2xl font-light tracking-tight md:text-2xl placeholder:text-base placeholder:font-normal placeholder:tracking-normal md:placeholder:text-sm" />
+            <Input id="course-q" type="search" value={text} onChange={(e) => setText(e.target.value)} placeholder="e.g. COP3530, calculus, ethics" className="h-12 rounded-xl pl-11 text-[22px] font-light tracking-tight md:text-[22px] placeholder:text-base placeholder:font-normal placeholder:tracking-normal md:placeholder:text-sm" />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
