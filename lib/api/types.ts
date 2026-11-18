@@ -55,7 +55,7 @@ export type SurveySubmission = {
 
 export type CourseworkStatus = "confirmed" | "needs-review"
 
-export type CourseworkSource = "transcript" | "manual"
+export type CourseworkSource = "transcript" | "manual" | "exam"
 
 export type CourseworkRow = {
   id: string

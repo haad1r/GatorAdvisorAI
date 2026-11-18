@@ -1,10 +1,11 @@
 /*
- * Synthetic audit and tracking for the mock student in fixtures.ts (a
- * Computer Science B.S. sophomore). Requirement groups and tracking
- * milestones follow Shaun's scrape of the CS program page
- * (data/programs/requirements.csv, milestones.csv); the results are made up
- * and were not produced by an engine. Deliberately includes an unknown, a
- * course counted twice, and an at-risk deadline so every UI state shows up.
+ * Synthetic audit and tracking for the mock student in fixtures.ts. Every
+ * course, grade and credit here matches courseworkFixture (done) and
+ * weeklyMeetingsFixture (in progress, Fall 2026). Requirement groups and
+ * tracking milestones follow Shaun's scrape of the CS program page
+ * (data/programs/requirements.csv, milestones.csv); the results were worked
+ * out by hand, not by an engine. Deliberately includes unknowns, courses
+ * counted twice, exam credit, and an at-risk deadline so every UI state shows.
  */
 
 import type {
@@ -28,12 +29,27 @@ const GEN_ED: SourceReference = {
   fetchedAt: "2026-10-04T01:40:28Z",
 }
 
+const EXAM_CREDIT: SourceReference = {
+  label: "UF Catalog: Exam credit",
+  url: "https://catalog.ufl.edu/UGRD/academic-advising/exam-credit/",
+  fetchedAt: "2026-10-04T01:27:12Z",
+}
+
 const done = (courseCode: string, grade: string, credits: number, term: string): CountedCourse => ({
   courseCode,
   grade,
   credits,
   term,
   source: "transcript",
+  inProgress: false,
+})
+
+const exam = (courseCode: string): CountedCourse => ({
+  courseCode,
+  grade: null,
+  credits: 3,
+  term: "Fall 2025",
+  source: "exam",
   inProgress: false,
 })
 
@@ -56,12 +72,12 @@ const requirements: RequirementResult[] = [
     id: "required-foundational-coursework",
     category: "major",
     title: "Foundational writing",
-    status: "not_met",
+    status: "in_progress",
     needed: { credits: 3, courses: 1 },
     earned: { credits: 0, courses: 0 },
-    counted: [],
-    stillToTake: ["One of ENC 3246, ENC 2210, ENC 2256"],
-    reason: "None of the listed writing courses is on your record.",
+    counted: [current("ENC2210", 3)],
+    stillToTake: [],
+    reason: "ENC 2210 is in progress this term.",
   }),
   req({
     id: "required-foundational-coursework-2",
@@ -113,10 +129,10 @@ const requirements: RequirementResult[] = [
     title: "Computing core",
     status: "in_progress",
     needed: { credits: 14, courses: 4 },
-    earned: { credits: 6, courses: 2 },
-    counted: [done("COP3502", "A", 3, "Fall 2025"), done("COP3503", "B", 3, "Spring 2026")],
-    stillToTake: ["COT 3100", "COP 3530"],
-    reason: "2 of 4 courses done.",
+    earned: { credits: 8, courses: 2 },
+    counted: [done("COP3502C", "A", 4, "Fall 2025"), done("COP3503C", "B", 4, "Spring 2026"), current("COT3100", 3)],
+    stillToTake: ["COP 3530"],
+    reason: "COP 3502C and COP 3503C are done; COT 3100 is in progress.",
   }),
   req({
     id: "required-major-core-coursework",
@@ -158,42 +174,43 @@ const requirements: RequirementResult[] = [
     status: "in_progress",
     needed: { credits: 9, courses: null },
     earned: { credits: 3, courses: 1 },
-    counted: [done("CHM2045", "B-", 3, "Spring 2026"), current("PHY2048", 3)],
-    stillToTake: ["3 more credits of B or P courses"],
-    reason: "CHM 2045 counts; PHY 2048 will count once finished.",
+    counted: [done("CHM2045", "B-", 3, "Spring 2026"), current("PHY2048", 3), current("PHY2048L", 1)],
+    stillToTake: ["2 more credits of B or P courses after this term"],
+    reason: "CHM 2045 counts; PHY 2048 and its lab will count once finished.",
   }),
   req({
     id: "gened-humanities",
     category: "gen_ed",
     title: "Humanities (H)",
-    status: "not_met",
+    status: "in_progress",
     needed: { credits: 9, courses: null },
     earned: { credits: 0, courses: 0 },
-    counted: [],
-    stillToTake: ["9 credits of H courses"],
-    reason: "No humanities courses yet.",
+    counted: [current("DIG1627", 3)],
+    stillToTake: ["6 more credits of H courses after this term"],
+    reason: "DIG 1627 is in progress and counts as Humanities.",
   }),
   req({
     id: "gened-social",
     category: "gen_ed",
     title: "Social and behavioral sciences (S)",
-    status: "not_met",
+    status: "met",
     needed: { credits: 9, courses: null },
-    earned: { credits: 0, courses: 0 },
-    counted: [],
-    stillToTake: ["9 credits of S courses"],
-    reason: "No social science courses yet.",
+    earned: { credits: 9, courses: 3 },
+    counted: [exam("PSY2012"), exam("AMH2010"), exam("AMH2020")],
+    stillToTake: [],
+    reason: "AP Psychology and AP US History credit cover all 9 credits.",
+    sources: [GEN_ED, EXAM_CREDIT],
   }),
   req({
     id: "gened-quest1",
     category: "gen_ed",
     title: "Quest 1",
-    status: "not_met",
+    status: "in_progress",
     needed: { credits: 3, courses: 1 },
     earned: { credits: 0, courses: 0 },
-    counted: [],
-    stillToTake: ["One Quest 1 course"],
-    reason: "No Quest 1 course yet.",
+    counted: [current("DIG1627", 3)],
+    stillToTake: [],
+    reason: "DIG 1627 is a Quest 1 course, in progress this term.",
   }),
   req({
     id: "gened-quest2",
@@ -220,19 +237,29 @@ const requirements: RequirementResult[] = [
   }),
 ]
 
+/*
+ * Credits: 22 from classes + 9 from AP = 31 earned; 13 in progress
+ * (PHY 2048 3, PHY 2048L 1, COT 3100 3, ENC 2210 3, DIG 1627 3).
+ * GPA counts letter grades only (not S or exam credit): 60.34 points over
+ * 18 hours = 3.35. Major GPA here is the two COP courses: 28 / 8 = 3.50.
+ */
 export const auditFixture: DegreeAudit = {
   program: { id: "uglas-csc_bs", name: "Computer Science (B.S.)", catalogYear: "2025-2026" },
   recordVersion: 1,
   generatedAt: "2026-11-17T14:00:00Z",
-  credits: { earned: 20, inProgress: 4, required: 120, remaining: 96 },
-  percentComplete: 17,
+  credits: { earned: 31, inProgress: 13, required: 120, remaining: 76 },
+  percentComplete: 26,
   gpa: [
-    { kind: "overall", value: 3.33 },
+    { kind: "overall", value: 3.35 },
     { kind: "major", value: 3.5 },
     { kind: "upper_division", value: null, note: "No 3000-level or higher courses graded yet." },
   ],
   requirements,
-  sharedCourses: [{ courseCode: "PHY2048", requirementIds: ["select-one", "gened-natural_science"] }],
+  sharedCourses: [
+    { courseCode: "PHY2048", requirementIds: ["select-one", "gened-natural_science"] },
+    { courseCode: "PHY2048L", requirementIds: ["select-one", "gened-natural_science"] },
+    { courseCode: "DIG1627", requirementIds: ["gened-humanities", "gened-quest1"] },
+  ],
   unknowns: [
     { requirementId: "required-foundational-coursework-2", message: "Whether an S grade in MAC 2312 meets the C-or-better rule." },
     { requirementId: "clas-foreign-language", message: "Whether high school language credit covers the foreign language requirement." },
@@ -241,18 +268,20 @@ export const auditFixture: DegreeAudit = {
 
 const milestone = (m: Omit<TrackingMilestone, "sources">): TrackingMilestone => ({ ...m, sources: [CATALOG] })
 
+/* Semester 1 = Fall 2025 (the student's first term), counting fall and spring only. */
 const milestones: TrackingMilestone[] = [
   milestone({ id: "ct-1", semester: 1, description: "Complete MAC 1147 or MAC 2311", deadlineTerm: "Fall 2025", status: "met", reason: "MAC 2311 completed Fall 2025 (B+)." }),
   milestone({ id: "ct-2", semester: 2, description: "Complete MAC 2311", deadlineTerm: "Spring 2026", status: "met", reason: "MAC 2311 completed Fall 2025 (B+)." }),
   milestone({ id: "ct-3", semester: 3, description: "Complete MAC 2312", deadlineTerm: "Fall 2026", status: "unknown", reason: "MAC 2312 has an S grade; tracking needs a C or better." }),
-  milestone({ id: "ct-4", semester: 4, description: "Complete MAC 2313, and PHY 2048/2048L or PHY 2053/2053L", deadlineTerm: "Spring 2027", status: "at_risk", reason: "MAC 2313 isn't on your record or in progress, and it's due by the end of Spring 2027." }),
+  milestone({ id: "ct-4", semester: 4, description: "Complete MAC 2313, and PHY 2048/2048L or PHY 2053/2053L", deadlineTerm: "Spring 2027", status: "at_risk", reason: "PHY 2048 and its lab are in progress, but MAC 2313 isn't on your record or this term's schedule, and it's due by the end of Spring 2027." }),
   milestone({ id: "ct-5", semester: 5, description: "Complete COP 3502C or COP 3504C, and PHY 2049/2049L or PHY 2054/2054L", deadlineTerm: "Fall 2027", status: "not_met", reason: "COP 3502C is done; second physics isn't taken yet." }),
-  milestone({ id: "ct-6", semester: 6, description: "Complete COP 3503C or COP 3504C, and COT 3100", deadlineTerm: "Spring 2028", status: "not_met", reason: "COP 3503C is done; COT 3100 isn't taken yet." }),
+  milestone({ id: "ct-6", semester: 6, description: "Complete COP 3503C or COP 3504C, and COT 3100", deadlineTerm: "Spring 2028", status: "not_met", reason: "COP 3503C is done; COT 3100 is in progress." }),
   milestone({ id: "ct-7", semester: 7, description: "Complete COP 3530", deadlineTerm: "Fall 2028", status: "not_met", reason: "COP 3530 not yet taken." }),
   milestone({ id: "ct-8", semester: 8, description: "Complete COP 4600", deadlineTerm: "Spring 2029", status: "not_met", reason: "COP 4600 not yet taken." }),
 ]
 
 export const trackingFixture: TrackingResult = {
   milestones,
+  /* The earliest milestone that isn't met: MAC 2312, this term, unknown. */
   nextDeadline: milestones[2],
 }
