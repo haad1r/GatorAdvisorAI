@@ -96,6 +96,38 @@ class MatchOne(unittest.TestCase):
     def test_no_match(self):
         self.assertEqual(match_one("Nobody Here", DEPTS, PROFS)[:2], ("none", None))
 
+    def test_compound_surname_needs_the_department(self):
+        profs = PROFS + [prof(60, "Angel", "Gonzalez", "Economics")]
+        self.assertEqual(match_one("Angel Checa Gonzalez", {"Medicine: Community Health"}, profs)[:2], ("none", None))
+        method, p, _ = match_one("Angel Checa Gonzalez", {"Economics"}, profs)
+        self.assertEqual((method, p.legacy_id), ("first_last", 60))
+
+    def test_hyphenated_first_name_is_not_a_different_given_name(self):
+        profs = PROFS + [prof(61, "Ji Hoon", "Lee", "Journalism"), prof(62, "Su Ar", "Lee", "Languages")]
+        self.assertEqual(match_one("Ji-Hyun Lee", {"Biostatistics"}, profs)[:2], ("none", None))
+        self.assertEqual(match_one("Su Hyun Lee", {"Languages"}, profs)[:2], ("none", None))
+
+    def test_rmp_two_word_first_name_matches_when_present(self):
+        profs = PROFS + [prof(63, "Kyung Sun", "Rhee", "Marketing")]
+        method, p, _ = match_one("Kyung Sun Rhee", {"Statistics"}, profs)
+        self.assertEqual((method, p.legacy_id), ("exact", 63))
+
+    def test_rmp_middle_name(self):
+        profs = PROFS + [prof(66, "Adam B.", "Munson", "Management"), prof(67, "Clifford Russell", "Bowers", "Chemistry")]
+        method, p, _ = match_one("Adam Munson", {"Physics"}, profs)
+        self.assertEqual((method, p.legacy_id), ("first_last", 66))
+        self.assertEqual(match_one("Clifford Bowers", {"Physics"}, profs)[:2], ("none", None))
+        method, p, _ = match_one("Clifford Bowers", {"Chemistry"}, profs)
+        self.assertEqual((method, p.legacy_id), ("first_last", 67))
+
+    def test_parenthesized_notes_are_dropped(self):
+        self.assertEqual(normalize("Joslyn Ahlgren (she/her)"), "joslyn ahlgren")
+        profs = PROFS + [prof(64, "Joslyn", "Ahlgren", "Biology"), prof(65, "Chengguo", "Xing", "Pharmacy")]
+        method, p, _ = match_one("Joslyn Ahlgren (she/her)", {"Biology"}, profs)
+        self.assertEqual((method, p.legacy_id), ("exact", 64))
+        method, p, _ = match_one("Chengguo (CX) Xing", {"Pharmacy"}, profs)
+        self.assertEqual((method, p.legacy_id), ("exact", 65))
+
     def test_single_word_name_is_not_matched(self):
         self.assertEqual(match_one("Staff", DEPTS, PROFS)[:2], ("none", None))
 

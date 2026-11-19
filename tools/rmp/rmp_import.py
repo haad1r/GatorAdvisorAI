@@ -166,7 +166,9 @@ def fetch(force: bool) -> None:
 
 
 def normalize(name: str) -> str:
-    """'José Martín-Ryals' -> 'jose martin ryals'."""
+    """'José Martín-Ryals' -> 'jose martin ryals'. Parenthesized notes such as
+    pronouns or a nickname ('Joslyn Ahlgren (she/her)') are dropped."""
+    name = re.sub(r"\([^)]*\)", " ", name)
     ascii_name = unicodedata.normalize("NFKD", name).encode("ascii", "ignore").decode()
     return re.sub(r"\s+", " ", re.sub(r"[^a-z ]", " ", ascii_name.lower())).strip()
 
@@ -283,16 +285,30 @@ def match_one(
     def first_of(p: Professor) -> str:
         return (normalize(p.first).split() or [""])[0]
 
-    tiers = [
-        ("exact", [p for p in pool if p.full == name]),
-        ("first_last", [p for p in pool if first_of(p) == tokens[0]]),
-        ("nickname", [p for p in pool if first_names_compatible(first_of(p), tokens[0])]),
-    ]
     dept_words = {normalize(d) for d in depts}
 
     def in_dept(p: Professor) -> bool:
         d = normalize(p.department)
         return bool(d) and any(d in w or w in d for w in dept_words)
+
+    def fits(p: Professor) -> bool:
+        """Name words only one side has could be a middle name or part of a
+        compound surname or given name ('Angel Checa Gonzalez', 'Ji-Hyun Lee'),
+        so p must teach in the same department unless they're only initials.
+        Two different middle parts are different people ('Ji Hoon Lee' isn't
+        'Ji-Hyun Lee')."""
+        skipped = tokens[1 : len(tokens) - len(normalize(p.last).split())]
+        extra = normalize(p.first).split()[1:]
+        if skipped and extra and not set(extra) <= set(skipped):
+            return False
+        one_side = [t for t in skipped if t not in extra] + [t for t in extra if t not in skipped]
+        return all(len(t) == 1 for t in one_side) or in_dept(p)
+
+    tiers = [
+        ("exact", [p for p in pool if p.full == name]),
+        ("first_last", [p for p in pool if first_of(p) == tokens[0] and fits(p)]),
+        ("nickname", [p for p in pool if first_names_compatible(first_of(p), tokens[0]) and fits(p)]),
+    ]
 
     for method, found in tiers:
         if not found:
