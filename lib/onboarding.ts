@@ -68,6 +68,19 @@ export const PLACEHOLDER_GRAD_TERMS: Option[] = [
   "Fall 2029",
   "Spring 2030",
 ].map((t) => ({ value: t, label: t }))
+const GRAD_ORDER_ERROR = "Graduation has to come after your first term."
+
+/**
+ * Field errors once `field` has been edited: its own error goes, and so does
+ * the graduation-order error when the first term changes, since that can fix it.
+ */
+export function errorsAfterChange(errors: FieldErrors | undefined, field: keyof OnboardingProfile) {
+  if (!errors) return errors
+  const next: FieldErrors = { ...errors, [field]: undefined }
+  if (field === "entryTerm" && errors.expectedGraduation?.[0] === GRAD_ORDER_ERROR) next.expectedGraduation = undefined
+  return next
+}
+
 /** Human-readable labels, used by FormErrorSummary links and the review step. */
 export const PROFILE_LABELS: Record<keyof OnboardingProfile, string> = {
   preferredName: "Preferred name",
@@ -151,7 +164,7 @@ export function validateProfile(
         const start = termOrder(profile.entryTerm.trim())
         const end = termOrder(value)
         if (fields.includes("entryTerm") && start !== null && end !== null && end <= start)
-          add(field, "Graduation has to come after your first term.")
+          add(field, GRAD_ORDER_ERROR)
         break
       }
     }

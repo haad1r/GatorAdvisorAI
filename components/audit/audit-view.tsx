@@ -203,7 +203,7 @@ function RequirementList({ audit, category, filter }: { audit: DegreeAudit; cate
   const inTab = audit.requirements.filter((r) => r.category === category)
   if (inTab.length === 0) {
     return category === "minor" ? (
-      <EmptyState title="No minor on your record" description="Add a minor in Settings to see its requirements here." />
+      <EmptyState title="No minor on your record" description="Adding a minor to your profile isn't available yet." />
     ) : (
       <EmptyState title="No requirements to show" description="Your program has no requirements of this type." />
     )

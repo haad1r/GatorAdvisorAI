@@ -85,6 +85,8 @@ function NextDeadlineCard() {
             <p className="font-medium">{state.data.nextDeadline.description}</p>
             <p>{state.data.nextDeadline.reason}</p>
           </div>
+        ) : state.data.milestones.length === 0 ? (
+          <p className="text-sm">Your program has no Critical Tracking.</p>
         ) : (
           <p className="text-sm">You&apos;re caught up. No tracking deadlines left.</p>
         ))}

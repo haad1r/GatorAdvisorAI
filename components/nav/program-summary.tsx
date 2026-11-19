@@ -4,6 +4,7 @@ import * as React from "react"
 import { useApi } from "@/lib/api/use-api"
 import type { Profile } from "@/lib/api/types"
 import { PLACEHOLDER_MAJOR_OPTIONS } from "@/lib/onboarding"
+import { onProfileChange } from "@/lib/profile-events"
 
 /** "Computer Science · 2025-2026 catalog". Renders nothing until the profile loads, or if it fails. */
 export function ProgramSummary({ className }: { className?: string }) {
@@ -15,8 +16,13 @@ export function ProgramSummary({ className }: { className?: string }) {
     api.getProfile().then((result) => {
       if (live && result.ok) setProfile(result.data)
     })
+    const stop = onProfileChange((p) => {
+      live = false
+      setProfile(p)
+    })
     return () => {
       live = false
+      stop()
     }
   }, [api])
 
