@@ -166,7 +166,7 @@ First time only: `npx playwright install chromium`.
 | `loading-failures.spec.ts` | Loading state, server/network/quota errors with "Try again", recovery after a retry, footer freshness failure, no `/api` requests while mocks are on |
 | `theme.spec.ts` | Follows the OS with no saved choice, the toggle saves and survives a reload, a saved dark theme applies before first paint |
 | `accessibility.spec.ts` | axe (WCAG 2.1 A/AA) on `/dashboard`, `/audit`, `/schedule`, `/import`, `/settings`, `/preview` in light and dark |
-| `settings.spec.ts` | Saving a new major updates the top bar, changing the first term clears the graduation-order error, deleting the account shows the deleted message and clears the top bar |
+| `settings.spec.ts` | Saving a new major updates the top bar, changing the first term clears the graduation-order error, deleting the account shows the deleted message and clears the top bar, the sidebar leads from that message back to Settings |
 
 Signed-in flows are not covered yet: they need a Clerk test user from Maria. Add them once she provides one, using Clerk's testing tokens rather than a real account.
 

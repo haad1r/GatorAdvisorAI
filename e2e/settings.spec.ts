@@ -12,6 +12,15 @@ test.describe("top bar", () => {
     await expect(page.getByText("Profile saved.")).toBeVisible()
     await expect(header.getByText("Electrical Engineering · 2025-2026 catalog")).toBeVisible()
   })
+
+  test("leaving the deleted message through the sidebar shows Settings again", async ({ page }) => {
+    await page.goto("/settings?account=deleted")
+    await expect(page.getByText("Your account was deleted")).toBeVisible()
+    await page.locator("aside").getByRole("link", { name: "Settings", exact: true }).click()
+    await expect(page).toHaveURL(/\/settings$/)
+    await expect(page.getByRole("button", { name: "Save profile" })).toBeVisible()
+    await expect(page.getByText("Your account was deleted")).toHaveCount(0)
+  })
 })
 
 test("changing the first term clears the graduation-order error", async ({ page }) => {
