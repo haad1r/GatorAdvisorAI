@@ -237,18 +237,30 @@ NICKNAME_GROUPS = [
 ]
 
 
+def _undouble(name: str) -> str:
+    return re.sub(r"(.)\1", r"\1", name)
+
+
 def first_names_compatible(a: str, b: str) -> bool:
     """Same person, written differently? Nickname pairs ("greg" / "gregory")
-    or a one-letter typo in a name of 5+ letters with the same first letter
-    ("agness" / "agnes"). Initials, prefixes ("jin" / "jingjing") and close
-    short names ("jin" / "jie", "donald" / "ronald") don't count: with common
-    last names they attach someone else's rating.
+    or a doubled letter ("agness" / "agnes", "randal" / "randall").
+    Initials, prefixes ("jin" / "jingjing") and close names ("jin" / "jie",
+    "donald" / "ronald") don't count: with common last names they attach
+    someone else's rating.
     """
     if not a or not b or a == b:
         return bool(a) and a == b
     if any(a in g and b in g for g in NICKNAME_GROUPS):
         return True
-    return min(len(a), len(b)) >= 5 and a[0] == b[0] and _edit_distance_at_most_one(a, b)
+    return _undouble(a) == _undouble(b)
+
+
+def first_names_one_letter_apart(a: str, b: str) -> bool:
+    """Any other one-letter difference in a name of 5+ letters with the same
+    first letter. It may be a typo ("alyson" / "alison") or a different
+    name ("andre" / "andrea", "jinping" / "jianping"), so match_one only
+    accepts it within the instructor's department."""
+    return bool(a) and bool(b) and min(len(a), len(b)) >= 5 and a[0] == b[0] and _edit_distance_at_most_one(a, b)
 
 
 def index_by_last(profs: list[Professor]) -> dict[str, list[Professor]]:
@@ -265,8 +277,9 @@ def match_one(
     """Returns (method, professor or None, candidates considered).
 
     Tries, in order: exact full name; same first name and last name with
-    middle names ignored; a nickname or typo of the first name and the same
-    last name. Several candidates are narrowed by department. RMP often lists
+    middle names ignored; a nickname or doubled-letter typo of the first name
+    and the same last name; any other one-letter first-name difference, only
+    in the instructor's department. Several candidates are narrowed by department. RMP often lists
     one person twice: identical full names resolve to the profile with the
     most ratings when they share a department, or when the last name is rare
     at UF (3 or fewer profiles). Anything still tied is "ambiguous" and gets
@@ -308,6 +321,7 @@ def match_one(
         ("exact", [p for p in pool if p.full == name]),
         ("first_last", [p for p in pool if first_of(p) == tokens[0] and fits(p)]),
         ("nickname", [p for p in pool if first_names_compatible(first_of(p), tokens[0]) and fits(p)]),
+        ("typo", [p for p in pool if first_names_one_letter_apart(first_of(p), tokens[0]) and fits(p) and in_dept(p)]),
     ]
 
     for method, found in tiers:

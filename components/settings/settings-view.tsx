@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useClerk } from "@clerk/nextjs"
 import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -35,21 +36,31 @@ import {
   PLACEHOLDER_GRAD_TERMS,
   PLACEHOLDER_MAJOR_OPTIONS,
   PROFILE_LABELS,
+  errorsAfterChange,
   validateProfile,
   type OnboardingProfile,
   type Option,
 } from "@/lib/onboarding"
+import { announceProfile } from "@/lib/profile-events"
 
 /* Settings (#21): profile and program, survey, courses, theme, delete account. */
-export function SettingsView() {
-  const [deleted, setDeleted] = React.useState(false)
+export function SettingsView({ deleted: deletedBefore = false }: { deleted?: boolean }) {
+  const { signOut } = useClerk()
+  const [deleted, setDeleted] = React.useState(deletedBefore)
+
+  function onDeleted() {
+    setDeleted(true)
+    announceProfile(null)
+    // The account is gone, so its session must end too. The redirect lands back here with the message.
+    signOut({ redirectUrl: "/settings?account=deleted" }).catch(() => {})
+  }
 
   if (deleted) {
     return (
       <section role="status" className="max-w-2xl rounded-xl border border-border bg-card px-5 py-4">
         <h2 className="text-base font-medium lg:text-lg">Your account was deleted</h2>
         <p className="mt-1 text-muted-foreground">
-          Your profile, courses, survey answers, plans, schedules, and chats are gone.
+          Your profile, courses, survey answers, plans, schedules, and chats are gone, and you&apos;ve been signed out.
         </p>
       </section>
     )
@@ -61,7 +72,7 @@ export function SettingsView() {
       <SurveySection />
       <CoursesSection />
       <AppearanceSection />
-      <DeleteAccountSection onDeleted={() => setDeleted(true)} />
+      <DeleteAccountSection onDeleted={onDeleted} />
     </div>
   )
 }
@@ -125,13 +136,7 @@ function ProfileForm({ initial }: { initial: Profile }) {
 
   function update(field: keyof OnboardingProfile, value: string) {
     setProfile((p) => ({ ...p, [field]: value }))
-    setState((s) =>
-      s.status === "success"
-        ? initialFormState
-        : s.fieldErrors?.[field]
-          ? { ...s, fieldErrors: { ...s.fieldErrors, [field]: undefined } }
-          : s
-    )
+    setState((s) => (s.status === "success" ? initialFormState : { ...s, fieldErrors: errorsAfterChange(s.fieldErrors, field) }))
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -141,6 +146,7 @@ function ProfileForm({ initial }: { initial: Profile }) {
     setPending(true)
     const result = await api.saveProfile(profile)
     setPending(false)
+    if (result.ok) announceProfile(result.data)
     setState(result.ok ? { status: "success", message: "Profile saved." } : toFormState(result.error))
   }
 
