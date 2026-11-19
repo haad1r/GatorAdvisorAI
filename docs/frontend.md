@@ -126,6 +126,7 @@ Calls never throw. Check `result.ok` before reading `data`.
 | `lib/api/types.ts` | Request, response, and error shapes. **Provisional** until Maria publishes `api-contracts.md`; replace this file when she does. |
 | `lib/api/client.ts` | The functions screens call: `getProfile`/`saveProfile`, `getLatestSurvey`/`submitSurvey`, `getCoursework`/`saveCoursework`, `getSchedule(weekStart)`, `getDataFreshness()`, `deleteAccount()`, and `getAudit()`/`getTracking()`. The audit and tracking shapes are provisional, taken from the engine plan on #8, until Shaun confirms them. |
 | `lib/api/use-load.ts` | `useLoad(fetcher)` loads on mount and again when `fetcher` changes (a new search, a new id): returns `{ state, retry }` with `loading`/`ok`/`error`, and never shows the previous fetcher's result while the new one loads. Pair it with `LoadFailed`. |
+| `lib/profile-events.ts` | `announceProfile(profile)` after a profile save (or `null` after account deletion) so the top bar's `ProgramSummary` updates without a reload. |
 | `lib/api/use-api.ts` | `useApi()` for client components. Uses the mocks when `NEXT_PUBLIC_API_MOCKS=true`, otherwise the real backend with the Clerk session token. |
 | `lib/api/transport.ts` | The real backend: `fetch` plus HTTP status to error code (401 `UNAUTHENTICATED`, 403 `FORBIDDEN`, 409 `STALE_WRITE`, 400/422 `VALIDATION_ERROR`, 429 `QUOTA_EXCEEDED`, 5xx `SERVER`, failed fetch `NETWORK`). |
 | `lib/api/errors.ts` | `toFormState()` for forms and `toErrorPanel()` for `ErrorPanel`. One message per error code. |
@@ -164,6 +165,7 @@ First time only: `npx playwright install chromium`.
 | `loading-failures.spec.ts` | Loading state, server/network/quota errors with "Try again", recovery after a retry, footer freshness failure, no `/api` requests while mocks are on |
 | `theme.spec.ts` | Follows the OS with no saved choice, the toggle saves and survives a reload, a saved dark theme applies before first paint |
 | `accessibility.spec.ts` | axe (WCAG 2.1 A/AA) on `/dashboard`, `/audit`, `/schedule`, `/import`, `/settings`, `/preview` in light and dark |
+| `settings.spec.ts` | Saving a new major updates the top bar, changing the first term clears the graduation-order error, deleting the account shows the deleted message and clears the top bar |
 
 Signed-in flows are not covered yet: they need a Clerk test user from Maria. Add them once she provides one, using Clerk's testing tokens rather than a real account.
 

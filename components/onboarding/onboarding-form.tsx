@@ -27,6 +27,7 @@ import {
   PLACEHOLDER_MAJOR_OPTIONS,
   PROFILE_LABELS,
   emptyProfile,
+  errorsAfterChange,
   validateProfile,
   type OnboardingProfile,
   type Option,
@@ -68,12 +69,7 @@ export function OnboardingForm({
   function update(field: keyof OnboardingProfile, value: string) {
     setProfile((p) => ({ ...p, [field]: value }))
     // Clear that field's error as soon as the user fixes it.
-    if (state.fieldErrors?.[field]) {
-      setState((s) => ({
-        ...s,
-        fieldErrors: { ...s.fieldErrors, [field]: undefined },
-      }))
-    }
+    setState((s) => ({ ...s, fieldErrors: errorsAfterChange(s.fieldErrors, field) }))
   }
 
   function goTo(next: number) {
