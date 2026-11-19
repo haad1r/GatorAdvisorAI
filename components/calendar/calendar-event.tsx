@@ -1,6 +1,6 @@
 import { cn } from "cn"
 import type { MeetingKind, ScheduleMeeting } from "@/lib/api/types"
-import { KIND_LABEL, formatTimeRange, meetingLabel } from "@/lib/schedule"
+import { KIND_LABEL, dayName, formatTimeRange, isOffGrid, meetingLabel } from "@/lib/schedule"
 
 /* Kind is always shown as text; color only reinforces it. */
 const KIND_STYLE: Record<MeetingKind, string> = {
@@ -70,7 +70,11 @@ export function CalendarEvent({
         {/* Time at the left, room at the right, in every view; the time never truncates, the room does. */}
         <p className="flex min-w-0 items-baseline gap-1 text-muted-foreground">
           <span className="shrink-0">
-            {time ? formatTimeRange(time.start, time.end, fixedHeight) : meeting.online ? "Online · no set time" : "Time TBA"}
+            {time
+              ? `${isOffGrid(meeting) ? `${dayName(time.day)} ` : ""}${formatTimeRange(time.start, time.end, fixedHeight)}`
+              : meeting.online
+                ? "Online · no set time"
+                : "Time TBA"}
           </span>
           {!(meeting.online && !meeting.location) && (
             <span className="ml-auto min-w-0 truncate text-[0.8em]">{meeting.location ?? "Room TBA"}</span>
