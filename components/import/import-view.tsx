@@ -129,8 +129,6 @@ type SaveState =
   | { kind: "stale"; error: ApiError }
   | { kind: "failed"; error: ApiError }
 
-let newRowCount = 0
-
 function CourseEditor({ saved, onReload }: { saved: Coursework; onReload: () => void }) {
   const api = useApi()
   const [rows, setRows] = React.useState(() => reviewFirst(saved.rows))
@@ -176,10 +174,9 @@ function CourseEditor({ saved, onReload }: { saved: Coursework; onReload: () => 
   }
 
   function add() {
-    newRowCount += 1
     setRows((rs) => [
       ...rs,
-      { id: `new-${newRowCount}`, courseCode: "", grade: "", credits: 3, term: "", source: "manual", status: "confirmed" },
+      { id: `new-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`, courseCode: "", grade: "", credits: 3, term: "", source: "manual", status: "confirmed" },
     ])
     setForm(initialFormState)
     touch()
