@@ -113,8 +113,17 @@ export function layoutLanes(dayMeetings: ScheduleMeeting[]) {
   return { lane, count: Math.max(1, laneEnds.length) }
 }
 
+/** Saturday and Sunday meetings have no column, so they're listed instead of dropped. */
+export function isOffGrid(m: ScheduleMeeting) {
+  return m.time !== null && !WEEKDAYS.includes(m.time.day)
+}
+
+export function dayName(day: Weekday) {
+  return DAY_NAMES[day]
+}
+
 export function unscheduled(meetings: ScheduleMeeting[]) {
-  return meetings.filter((m) => !m.time)
+  return meetings.filter((m) => !m.time || isOffGrid(m))
 }
 
 /** Full sentence for screen readers, e.g. "COP3503 lecture, Monday 10:40 AM to 11:30 AM, CSE A101". */

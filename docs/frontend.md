@@ -126,7 +126,7 @@ Calls never throw. Check `result.ok` before reading `data`.
 | --- | --- |
 | `lib/api/types.ts` | Request, response, and error shapes. **Provisional** until Maria publishes `api-contracts.md`; replace this file when she does. |
 | `lib/api/client.ts` | The functions screens call: `getProfile`/`saveProfile`, `getLatestSurvey`/`submitSurvey`, `getCoursework`/`saveCoursework`, `getSchedule(weekStart)`, `getDataFreshness()`, `deleteAccount()`, and `getAudit()`/`getTracking()`. The audit and tracking shapes are provisional, taken from the engine plan on #8, until Shaun confirms them. |
-| `lib/api/use-load.ts` | `useLoad(fetcher)` for a screen that loads once: returns `{ state, retry }` with `loading`/`ok`/`error`. Pair it with `LoadFailed`. |
+| `lib/api/use-load.ts` | `useLoad(fetcher)` loads on mount and again when `fetcher` changes (a new search, a new id): returns `{ state, retry }` with `loading`/`ok`/`error`, and never shows the previous fetcher's result while the new one loads. Pair it with `LoadFailed`. |
 | `lib/api/use-api.ts` | `useApi()` for client components. Uses the mocks when `NEXT_PUBLIC_API_MOCKS=true`, otherwise the real backend with the Clerk session token. |
 | `lib/api/transport.ts` | The real backend: `fetch` plus HTTP status to error code (401 `UNAUTHENTICATED`, 403 `FORBIDDEN`, 409 `STALE_WRITE`, 400/422 `VALIDATION_ERROR`, 429 `QUOTA_EXCEEDED`, 5xx `SERVER`, failed fetch `NETWORK`). |
 | `lib/api/errors.ts` | `toFormState()` for forms and `toErrorPanel()` for `ErrorPanel`. One message per error code. |

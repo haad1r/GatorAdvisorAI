@@ -99,42 +99,41 @@ function AttentionCard() {
   const audit = useLoad(auditFetcher)
   const courses = useLoad(courseFetcher)
 
+  // Each half shows on its own, so one failed request doesn't hide the other's result.
   const loading = audit.state.kind === "loading" || courses.state.kind === "loading"
+  const failed = audit.state.kind === "error" || courses.state.kind === "error"
   const unknowns = audit.state.kind === "ok" ? audit.state.data.unknowns.length : 0
   const toReview = courses.state.kind === "ok" ? courses.state.data.rows.filter((r) => r.status === "needs-review").length : 0
 
   return (
     <Card id="dash-attention" title="Needs your attention">
-      {loading && <LoadingBlock />}
+      {loading && !failed && unknowns === 0 && toReview === 0 && <LoadingBlock />}
       {audit.state.kind === "error" && <LoadFailed error={audit.state.error} onRetry={audit.retry} />}
       {courses.state.kind === "error" && <LoadFailed error={courses.state.error} onRetry={courses.retry} />}
-      {!loading && audit.state.kind === "ok" && courses.state.kind === "ok" && (
-        unknowns === 0 && toReview === 0 ? (
-          <p className="text-sm">Nothing right now.</p>
-        ) : (
-          <ul className="flex flex-col gap-3 text-sm">
-            {unknowns > 0 && (
-              <li className="flex flex-wrap items-center justify-between gap-2">
-                <span>
-                  {unknowns === 1 ? "1 requirement" : `${unknowns} requirements`} we couldn&apos;t check
-                </span>
-                <Button variant="outline" size="sm" render={<Link href="/audit" />} nativeButton={false}>
-                  See audit
-                </Button>
-              </li>
-            )}
-            {toReview > 0 && (
-              <li className="flex flex-wrap items-center justify-between gap-2">
-                <span>
-                  {toReview === 1 ? "1 course needs" : `${toReview} courses need`} review
-                </span>
-                <Button variant="outline" size="sm" render={<Link href="/import" />} nativeButton={false}>
-                  Review courses
-                </Button>
-              </li>
-            )}
-          </ul>
-        )
+      {!loading && !failed && unknowns === 0 && toReview === 0 && <p className="text-sm">Nothing right now.</p>}
+      {(unknowns > 0 || toReview > 0) && (
+        <ul className="flex flex-col gap-3 text-sm">
+          {unknowns > 0 && (
+            <li className="flex flex-wrap items-center justify-between gap-2">
+              <span>
+                {unknowns === 1 ? "1 requirement" : `${unknowns} requirements`} we couldn&apos;t check
+              </span>
+              <Button variant="outline" size="sm" render={<Link href="/audit" />} nativeButton={false}>
+                See audit
+              </Button>
+            </li>
+          )}
+          {toReview > 0 && (
+            <li className="flex flex-wrap items-center justify-between gap-2">
+              <span>
+                {toReview === 1 ? "1 course needs" : `${toReview} courses need`} review
+              </span>
+              <Button variant="outline" size="sm" render={<Link href="/import" />} nativeButton={false}>
+                Review courses
+              </Button>
+            </li>
+          )}
+        </ul>
       )}
     </Card>
   )
