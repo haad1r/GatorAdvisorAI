@@ -141,11 +141,14 @@ def fetch(force: bool) -> None:
             break
         cursor = page["pageInfo"]["endCursor"]
 
-    if expected and len(rows) < expected * 0.9:
+    rows = list({r["legacy_id"]: r for r in rows}.values())  # paging can repeat a profile
+    # Keep the last good snapshot (and the weekly limit unstamped) unless this one is complete.
+    if not expected:
+        sys.exit("RMP didn't report how many professors to expect; not replacing professors.csv.")
+    if len(rows) < expected * 0.9:
         sys.exit(f"Only got {len(rows)} of ~{expected} professors; not writing a partial file.")
 
     OUT.mkdir(parents=True, exist_ok=True)
-    rows = list({r["legacy_id"]: r for r in rows}.values())  # paging can repeat a profile
     rows.sort(key=lambda r: (r["last_name"].lower(), r["first_name"].lower(), r["legacy_id"]))
     with open(OUT / "professors.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=PROFESSOR_FIELDS, lineterminator="\n")
@@ -263,6 +266,29 @@ def first_names_one_letter_apart(a: str, b: str) -> bool:
     return bool(a) and bool(b) and min(len(a), len(b)) >= 5 and a[0] == b[0] and _edit_distance_at_most_one(a, b)
 
 
+# RMP department labels too broad to say two people work in the same place.
+GENERIC_DEPARTMENTS = {"science", "sciences", "art", "arts", "studies", "general", "other", "not specified"}
+_DEPT_STOPWORDS = {"and", "of", "the", "in", "for"}
+
+
+def same_department(rmp_department: str, uf_departments: set[str]) -> bool:
+    """Does RMP's label fit one of the UF departments the instructor teaches
+    in? Every word of the shorter name must appear in the longer one as a
+    whole word or a word ending ('engineering' fits 'chemical engineering',
+    'biology' fits 'microbiology and cell science'). Generic labels such as
+    'science' never fit, and 'art' doesn't fit 'earth'."""
+    rmp = normalize(rmp_department)
+    if not rmp or rmp in GENERIC_DEPARTMENTS:
+        return False
+    a = [w for w in rmp.split() if w not in _DEPT_STOPWORDS]
+    for uf in uf_departments:
+        b = [w for w in normalize(uf).split() if w not in _DEPT_STOPWORDS]
+        short, long_ = (a, b) if len(a) <= len(b) else (b, a)
+        if short and all(any(x == w or x.endswith(w) for x in long_) for w in short):
+            return True
+    return False
+
+
 def index_by_last(profs: list[Professor]) -> dict[str, list[Professor]]:
     """Professors grouped by normalized last name. Build once, pass to match_one."""
     index: dict[str, list[Professor]] = {}
@@ -298,11 +324,8 @@ def match_one(
     def first_of(p: Professor) -> str:
         return (normalize(p.first).split() or [""])[0]
 
-    dept_words = {normalize(d) for d in depts}
-
     def in_dept(p: Professor) -> bool:
-        d = normalize(p.department)
-        return bool(d) and any(d in w or w in d for w in dept_words)
+        return same_department(p.department, depts)
 
     def fits(p: Professor) -> bool:
         """Name words only one side has could be a middle name or part of a

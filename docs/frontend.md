@@ -169,7 +169,7 @@ First time only: `npx playwright install chromium`.
 | `theme.spec.ts` | Follows the OS with no saved choice, the toggle saves and survives a reload, a saved dark theme applies before first paint |
 | `accessibility.spec.ts` | axe (WCAG 2.1 A/AA) on `/dashboard`, `/audit`, `/courses`, `/courses/cop3530`, `/schedule`, `/import`, `/settings`, `/preview` in light and dark |
 | `courses.spec.ts` | A new course search shows loading, never the previous search's results |
-| `settings.spec.ts` | Saving a new major updates the top bar, changing the first term clears the graduation-order error, deleting the account shows the deleted message and clears the top bar |
+| `settings.spec.ts` | Saving a new major updates the top bar, changing the first term clears the graduation-order error, deleting the account shows the deleted message and clears the top bar, the sidebar leads from that message back to Settings |
 
 Signed-in flows are not covered yet: they need a Clerk test user from Maria. Add them once she provides one, using Clerk's testing tokens rather than a real account.
 

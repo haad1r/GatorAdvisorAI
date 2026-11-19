@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { useClerk } from "@clerk/nextjs"
+import { useAuth, useClerk } from "@clerk/nextjs"
 import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -44,16 +44,22 @@ import {
 import { announceProfile } from "@/lib/profile-events"
 
 /* Settings (#21): profile and program, survey, courses, theme, delete account. */
-export function SettingsView({ deleted: deletedBefore = false }: { deleted?: boolean }) {
+export function SettingsView({ deleted: deletedParam = false }: { deleted?: boolean }) {
   const { signOut } = useClerk()
-  const [deleted, setDeleted] = React.useState(deletedBefore)
+  const { isLoaded, isSignedIn } = useAuth()
+  const [justDeleted, setJustDeleted] = React.useState(false)
+  // ?account=deleted is where the sign-out lands. It only counts once the session is gone:
+  // a signed-in student who opens that link gets Settings as usual.
+  const deleted = justDeleted || (deletedParam && isLoaded && !isSignedIn)
 
   function onDeleted() {
-    setDeleted(true)
+    setJustDeleted(true)
     announceProfile(null)
     // The account is gone, so its session must end too. The redirect lands back here with the message.
     signOut({ redirectUrl: "/settings?account=deleted" }).catch(() => {})
   }
+
+  if (deletedParam && !isLoaded) return <LoadingBlock />
 
   if (deleted) {
     return (
