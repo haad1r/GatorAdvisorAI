@@ -48,7 +48,7 @@ Each mirrors a file in `data/`, column for column where possible:
 | `requisites` | `data/catalog/requisites.csv` | `course_id, kind` |
 | `programs` | `data/programs/programs.csv` | `id` (`uglas-csc_bs`) |
 | `requirement_groups` | `data/programs/requirements.csv` | `program_id, group_key` |
-| `tracking_milestones` | `data/programs/milestones.csv` | generated `id` (a semester can repeat a kind) |
+| `tracking_milestones` | `data/programs/milestones.csv` | `program_id, semester, position` (position = the row's order within its program and semester in the CSV, from 1; rows can repeat word for word) |
 | `model_plan_courses` | `data/programs/plans.csv` | `program_id, semester_index, position` |
 | `terms` | `data/soc/terms.csv` | `term` |
 | `sections` | `data/soc/sections/<term>.csv` | `term, class_number` |
@@ -67,7 +67,7 @@ Each mirrors a file in `data/`, column for column where possible:
 
 1. **Get access first.** Ask Haadi whether to use an existing GatorAdvisor Supabase project or create one. #6 says not to create parallel projects.
 2. **Create or open the project** at supabase.com. Pick the US East region (closest to UF).
-3. **Apply the schema:** Dashboard → SQL Editor → paste `supabase/migrations/20261118120000_initial_schema.sql` → Run. (With the Supabase CLI: `supabase db push`.)
+3. **Apply the schema:** Dashboard → SQL Editor → paste `supabase/migrations/20261118120000_initial_schema.sql` → Run. (With the Supabase CLI: `supabase db push`.) The migration grants the service role access to the `catalog` schema; Supabase only sets that up for `public` on its own. If the server uses `supabase-js` (not a direct Postgres connection), also add `catalog` under Project Settings → API → Exposed schemas.
 4. **Optional dev data:** paste `supabase/seed.sql` into the SQL Editor after replacing `user_dev_student` with your Clerk test user's id. You get the same student the mocks show.
 5. **Copy two values** from Project Settings → API into `.env.local`:
 
@@ -81,10 +81,11 @@ Each mirrors a file in `data/`, column for column where possible:
 
 ## Testing it locally
 
-GitHub runs this automatically on every PR that touches `supabase/` (`.github/workflows/schema.yml`): it applies the migration and `seed.sql` to a temporary Postgres, then runs the checks. To run it yourself: `supabase/tests/schema_checks.sql` seeds two students and checks 15 things: cross-student inserts are rejected, bad values are refused, deletes cascade to every private table and only for that student, deleted students can't get data back, and a browser role reads nothing. With a local Postgres:
+GitHub runs this automatically on every PR that touches `supabase/` (`.github/workflows/schema.yml`): it applies the migration and `seed.sql` to a temporary Postgres, then runs the checks. To run it yourself: `supabase/tests/schema_checks.sql` seeds two students and checks 19 things: cross-student inserts are rejected, bad values and duplicate sections are refused, the server role can read and reload catalog without duplicates, deletes cascade to every private table and only for that student, deleted students can't get data back, and a browser role reads nothing. With a local Postgres:
 
 ```bash
 createdb gator_test
+psql -d gator_test -v ON_ERROR_STOP=1 -f supabase/tests/supabase_roles.sql   # Supabase's roles; never run on Supabase
 psql -d gator_test -v ON_ERROR_STOP=1 -f supabase/migrations/20261118120000_initial_schema.sql
 psql -d gator_test -f supabase/tests/schema_checks.sql      # ends with "ALL CHECKS PASSED"
 dropdb gator_test

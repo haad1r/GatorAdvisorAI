@@ -37,6 +37,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Create Supabase's built-in roles
+        run: psql -v ON_ERROR_STOP=1 -q -f supabase/tests/supabase_roles.sql
+
       - name: Apply migrations
         run: |
           for f in supabase/migrations/*.sql; do

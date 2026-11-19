@@ -22,12 +22,15 @@ values ('user_A', 'a@ufl.edu', 'Ann', 'sophomore', 'uglas-csc_bs', '2025-2026', 
 insert into coursework_records (user_id) values ('user_A'), ('user_B');
 insert into coursework (user_id, course_code, grade, credits, term, source, status) values
   ('user_A', 'COP3502C', 'A', 4, 'Fall 2025', 'transcript', 'confirmed'),
-  ('user_A', 'PSY2012', 'CR', 3, 'Fall 2025', 'exam', 'confirmed');
+  ('user_A', 'PSY2012', 'CR', 3, 'Fall 2025', 'exam', 'confirmed'),
+  ('user_A', 'MUS1010', 'S', 0, 'Fall 2025', 'transcript', 'confirmed');
 insert into schedules (id, user_id, term, is_primary) values
   ('00000000-0000-0000-0000-00000000000a', 'user_A', '2268', true),
   ('00000000-0000-0000-0000-00000000000b', 'user_B', '2268', true);
-insert into schedule_sections (id, schedule_id, user_id, course_code, section) values
-  ('00000000-0000-0000-0000-0000000000a1', '00000000-0000-0000-0000-00000000000a', 'user_A', 'COT3100', '5678');
+insert into schedule_sections (id, schedule_id, user_id, course_code, class_number, section) values
+  ('00000000-0000-0000-0000-0000000000a1', '00000000-0000-0000-0000-00000000000a', 'user_A', 'COT3100', '11529', '5678');
+insert into schedule_sections (schedule_id, user_id, course_code) values
+  ('00000000-0000-0000-0000-00000000000a', 'user_A', 'MAC2311');
 insert into schedule_meetings (schedule_section_id, user_id, kind, day, start_time, end_time, location) values
   ('00000000-0000-0000-0000-0000000000a1', 'user_A', 'lecture', 'MON', '10:40', '11:30', 'CSE A101');
 insert into chat_conversations (id, user_id) values ('00000000-0000-0000-0000-0000000000c1', 'user_A');
@@ -50,12 +53,35 @@ select pg_temp.must_fail('B adds a course to A''s plan',
 
 -- Bad values.
 select pg_temp.must_fail('course code with a space', $$insert into coursework (user_id, course_code, grade, credits, term, source, status) values ('user_A', 'COP 3530', 'A', 3, 'x', 'manual', 'confirmed')$$);
-select pg_temp.must_fail('zero credits', $$insert into coursework (user_id, course_code, grade, credits, term, source, status) values ('user_A', 'COP3530', 'A', 0, 'x', 'manual', 'confirmed')$$);
+select pg_temp.must_fail('negative credits', $$insert into coursework (user_id, course_code, grade, credits, term, source, status) values ('user_A', 'COP3530', 'A', -1, 'x', 'manual', 'confirmed')$$);
+select pg_temp.must_fail('same course twice with no section', $$insert into schedule_sections (schedule_id, user_id, course_code) values ('00000000-0000-0000-0000-00000000000a', 'user_A', 'MAC2311')$$);
+select pg_temp.must_fail('same class number twice in a schedule', $$insert into schedule_sections (schedule_id, user_id, course_code, class_number, section) values ('00000000-0000-0000-0000-00000000000a', 'user_A', 'COT3100', '11529', '9999')$$);
 select pg_temp.must_fail('unknown source', $$insert into coursework (user_id, course_code, grade, credits, term, source, status) values ('user_A', 'COP3530', 'A', 3, 'x', 'magic', 'confirmed')$$);
 select pg_temp.must_fail('two primary schedules in one term', $$insert into schedules (user_id, term, is_primary) values ('user_A', '2268', true)$$);
 select pg_temp.must_fail('meeting ends before it starts', $$insert into schedule_meetings (schedule_section_id, user_id, kind, day, start_time, end_time) values ('00000000-0000-0000-0000-0000000000a1', 'user_A', 'lab', 'TUE', '11:00', '10:00')$$);
 select pg_temp.must_fail('meeting with a day but no times', $$insert into schedule_meetings (schedule_section_id, user_id, kind, day) values ('00000000-0000-0000-0000-0000000000a1', 'user_A', 'lab', 'TUE')$$);
 select pg_temp.must_fail('coursework for a student with no profile', $$insert into coursework (user_id, course_code, grade, credits, term, source, status) values ('user_GONE', 'COP3530', 'A', 3, 'x', 'manual', 'confirmed')$$);
+
+-- The server (service_role) can read and load catalog, and reloading a
+-- milestone updates it in place instead of adding a copy.
+set role service_role;
+do $$ declare n int;
+begin
+  insert into catalog.programs (id, name, kind, status, catalog_year, source_url, fetched_at)
+  values ('test-prog', 'Test Program', 'major', 'published', '2026-2027', 'https://catalog.ufl.edu', now());
+  for i in 1..2 loop
+    insert into catalog.tracking_milestones (program_id, semester, position, kind, raw_text)
+    values ('test-prog', 1, 1, 'note', 'reload ' || i)
+    on conflict (program_id, semester, position) do update set raw_text = excluded.raw_text;
+  end loop;
+  select count(*) into n from catalog.tracking_milestones where program_id = 'test-prog';
+  if n <> 1 then raise exception 'FAIL reloading a milestone left % rows', n; end if;
+  perform count(*) from catalog.courses;
+  raise notice 'PASS  service_role reads and loads catalog; a milestone reload upserts';
+end $$;
+reset role;
+select pg_temp.must_fail('two milestones in the same position', $$insert into catalog.tracking_milestones (program_id, semester, position, kind, raw_text) values ('test-prog', 1, 1, 'note', 'copy')$$);
+delete from catalog.programs where id = 'test-prog';
 
 -- updated_at moves on update.
 do $$ declare before timestamptz; after timestamptz;

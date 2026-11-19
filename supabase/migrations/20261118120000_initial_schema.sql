@@ -96,18 +96,20 @@ create table catalog.requirement_groups (
 );
 
 -- data/programs/milestones.csv: Critical Tracking by semester. A semester
--- can have several rows of the same kind, so rows get a generated id.
+-- can repeat a kind and even a row's text, so the reload key is the row's
+-- position within its program and semester, in CSV order.
 create table catalog.tracking_milestones (
   id         bigint generated always as identity primary key,
   program_id text not null references catalog.programs (id) on delete cascade,
   semester   integer not null,
+  position   integer not null,
   kind       text not null check (kind in ('courses', 'count', 'note')),
   slots      jsonb,
   count      integer,
   pool       jsonb,
-  raw_text   text not null
+  raw_text   text not null,
+  unique (program_id, semester, position)
 );
-create index on catalog.tracking_milestones (program_id, semester);
 
 -- data/programs/plans.csv: UF's model semester plan per program.
 create table catalog.model_plan_courses (
@@ -229,7 +231,7 @@ create table public.coursework (
   user_id        text not null references public.coursework_records (user_id) on delete cascade,
   course_code    text not null check (course_code ~ '^[A-Z]{3}[0-9]{4}[A-Z]?$'),
   grade          text not null,
-  credits        numeric(4,1) not null check (credits > 0),
+  credits        numeric(4,1) not null check (credits >= 0),  -- 0 for recital attendance, ROTC labs, some research
   term           text not null,
   source         text not null check (source in ('transcript', 'manual', 'exam', 'transfer')),
   status         text not null check (status in ('confirmed', 'needs-review')),
@@ -274,11 +276,14 @@ create table public.schedule_sections (
   course_code  text not null,
   class_number text,                           -- catalog.sections.class_number when known
   section      text,
-  unique (schedule_id, course_code, section),
+  -- nulls not distinct: a course with no section yet can't be added twice.
+  unique nulls not distinct (schedule_id, course_code, section),
   unique (id, user_id),
   -- The section must belong to a schedule owned by the same student.
   foreign key (schedule_id, user_id) references public.schedules (id, user_id) on delete cascade
 );
+create unique index schedule_sections_one_class_number on public.schedule_sections (schedule_id, class_number)
+  where class_number is not null;
 
 -- Meeting times. UF's public data has none, so students enter them.
 create table public.schedule_meetings (
@@ -396,3 +401,17 @@ begin
     execute format('alter table %I.%I enable row level security', t.schemaname, t.tablename);
   end loop;
 end $$;
+
+
+-- =====================================================================
+-- Catalog access for the server
+-- =====================================================================
+-- Supabase sets up its roles' access to the public schema only, so the
+-- server (service_role) needs explicit grants to read and load catalog.
+-- anon and authenticated get none.
+
+grant usage on schema catalog to service_role;
+grant all on all tables in schema catalog to service_role;
+grant all on all sequences in schema catalog to service_role;
+alter default privileges in schema catalog grant all on tables to service_role;
+alter default privileges in schema catalog grant all on sequences to service_role;
