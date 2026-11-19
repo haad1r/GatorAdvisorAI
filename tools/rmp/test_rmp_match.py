@@ -1,8 +1,12 @@
 """Matching tests. Synthetic names only; no network."""
 
+import tempfile
 import unittest
+from pathlib import Path
+from unittest import mock
 
-from rmp_import import Professor, match_one, normalize
+import rmp_import
+from rmp_import import Professor, match_one, normalize, same_department
 
 
 def prof(legacy_id, first, last, department="Computer Science", ratings=10):
@@ -142,6 +146,56 @@ class MatchOne(unittest.TestCase):
 
     def test_single_word_name_is_not_matched(self):
         self.assertEqual(match_one("Staff", DEPTS, PROFS)[:2], ("none", None))
+
+
+
+class SameDepartment(unittest.TestCase):
+    def test_broad_rmp_label_fits_a_longer_uf_name(self):
+        self.assertTrue(same_department("Engineering", {"Chemical Engineering"}))
+        self.assertTrue(same_department("Biology", {"Microbiology and Cell Science"}))
+        self.assertTrue(same_department("Soil & Water Sciences", {"Soil, Water, and Ecosystems Sciences"}))
+
+    def test_generic_or_partial_words_do_not_fit(self):
+        self.assertFalse(same_department("Science", {"Political Science"}))
+        self.assertFalse(same_department("Art", {"Earth Sciences"}))
+        self.assertFalse(same_department("Not Specified", {"Business Admin General"}))
+        self.assertFalse(same_department("", {"History"}))
+
+
+def page(nodes, result_count, has_next=False):
+    edges = [{"node": {"legacyId": n, "firstName": "A", "lastName": f"P{n}", "department": "History",
+                       "avgRating": 4, "avgDifficulty": 3, "wouldTakeAgainPercent": 80, "numRatings": 5,
+                       "school": {"legacyId": rmp_import.UF_LEGACY_ID}}} for n in nodes]
+    return {"resultCount": result_count, "edges": edges, "pageInfo": {"hasNextPage": has_next, "endCursor": "c"}}
+
+
+class FetchKeepsTheLastGoodSnapshot(unittest.TestCase):
+    def run_fetch(self, pages):
+        with tempfile.TemporaryDirectory() as tmp, \
+                mock.patch.object(rmp_import, "OUT", Path(tmp)), \
+                mock.patch.object(rmp_import, "_post", side_effect=pages), \
+                mock.patch.object(rmp_import.time, "sleep"):
+            (Path(tmp) / "professors.csv").write_text("old snapshot\n")
+            try:
+                rmp_import.fetch(force=True)
+                exited = False
+            except SystemExit:
+                exited = True
+            return exited, (Path(tmp) / "professors.csv").read_text(), (Path(tmp) / "manifest.json").exists()
+
+    def test_missing_result_count_writes_nothing(self):
+        self.assertEqual(self.run_fetch([page([], None)]), (True, "old snapshot\n", False))
+        self.assertEqual(self.run_fetch([page([], 0)]), (True, "old snapshot\n", False))
+
+    def test_repeated_profiles_do_not_count_toward_the_total(self):
+        pages = [page([1, 2, 3, 4, 5], 10, has_next=True), page([1, 2, 3, 4, 5], 10)]
+        self.assertEqual(self.run_fetch(pages), (True, "old snapshot\n", False))
+
+    def test_complete_fetch_replaces_the_snapshot(self):
+        exited, text, manifest = self.run_fetch([page(range(1, 11), 10)])
+        self.assertFalse(exited)
+        self.assertTrue(manifest)
+        self.assertEqual(len(text.strip().splitlines()), 11)
 
 
 if __name__ == "__main__":
