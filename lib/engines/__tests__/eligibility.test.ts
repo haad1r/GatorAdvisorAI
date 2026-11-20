@@ -42,6 +42,8 @@ describe("eligibility engine reproduces the hand-built examples", () => {
       expect(got.reasons.map((r) => r.code)).toEqual(expected.reasons.map((r) => r.code));
       expect(got.sources).toEqual(expected.sources);
       expect(got.versions).toEqual(expected.versions);
+      expect(got.taken).toEqual(expected.taken);
+      expect(got.offering).toEqual(expected.offering);
     });
   }
 });

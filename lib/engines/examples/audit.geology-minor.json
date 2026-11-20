@@ -1,8 +1,8 @@
 {
   "versions": {
-    "contractVersion": "0.1.0",
-    "engineVersion": "0.1.0",
-    "dataVersion": "58b635bccd760966",
+    "contractVersion": "0.2.0",
+    "engineVersion": "0.2.0",
+    "dataVersion": "410aa67291ca74cd",
     "catalogYear": "2026-2027",
     "recordId": "synthetic-student-001",
     "recordVersion": "1"
@@ -42,7 +42,8 @@
   "totals": {
     "required": { "credits": 17 },
     "completed": { "credits": 9 },
-    "inProgress": { "credits": 6 }
+    "inProgress": { "credits": 6 },
+    "remaining": { "credits": 3 }
   },
   "requirements": [
     {
@@ -166,15 +167,10 @@
     { "courseId": "mac2311", "code": "MAC 2311", "credits": 4, "evidenceId": "e01", "via": "exam" }
   ],
   "gpa": [
-    {
-      "kind": "uf_cumulative",
-      "status": "computed",
-      "value": 2.96,
-      "gradePoints": 71,
-      "gpaHours": 24,
-      "attemptIds": ["a01", "a02", "a03", "a04", "a05", "a06", "a07", "a09"],
-      "reasons": []
-    }
+    { "kind": "uf_cumulative", "status": "computed", "value": 2.96, "gradePoints": 71, "gpaHours": 24, "attemptIds": ["a01", "a02", "a03", "a04", "a05", "a06", "a07", "a09"], "reasons": [] },
+    { "kind": "upper_division", "status": "unknown", "value": null, "gradePoints": 0, "gpaHours": 0, "attemptIds": [], "reasons": [{ "code": "gpa_rule_not_checked", "message": "Not computed: no catalog policy in the data defines the upper-division GPA, and program pages that use it don't agree (one says \"all courses taken after the student earned 60 credits\"; most give no definition)." }] },
+    { "kind": "major", "status": "unknown", "value": null, "gradePoints": 0, "gpaHours": 0, "attemptIds": [], "reasons": [{ "code": "gpa_rule_not_checked", "message": "Not computed: which courses count toward a major GPA is set by each program, and the program data doesn't list them." }] },
+    { "kind": "critical_tracking", "status": "unknown", "value": null, "gradePoints": 0, "gpaHours": 0, "attemptIds": [], "reasons": [{ "code": "gpa_rule_not_checked", "message": "Not computed: the critical-tracking GPA's courses and attempt rules differ by program (\"all attempts\", \"best of two attempts\"); the tracking result reports each threshold." }] }
   ],
   "sources": [
     {

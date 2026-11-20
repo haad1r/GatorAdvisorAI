@@ -31,7 +31,7 @@ const audits = ["audit.geology-minor.json", "audit.english-minor-needs-review.js
 );
 const eligibility = EligibilityResult.array().parse(example("eligibility.json"));
 const tracking = TrackingResult.parse(example("tracking.psychology-bs.json"));
-const plan = Plan.parse(example("plan.geology-minor.json"));
+const plan = Plan.parse(example("plan.psychology-geology.json"));
 
 const attempt = (id: string) => record.attempts.find((a) => a.attemptId === id);
 const examCredit = (id: string) => record.examCredits.find((e) => e.examCreditId === id);
@@ -198,16 +198,29 @@ describe("tracking example", () => {
 
 describe("plan example", () => {
   it("fills real slots with real courses", () => {
+    const slots = new Map(plan.slots.map((s) => [s.slotId, s]));
     for (const t of plan.terms)
       for (const c of t.courses) {
-        expect(catalog.courses[c.courseId!]).toBeDefined();
+        if (c.courseId === null) {
+          // A placeholder reserves hours for a prose slot, which lists no course.
+          expect(c.why).toBe("placeholder");
+          for (const id of c.slotIds) expect(slots.get(id)?.courseIds, id).toEqual([]);
+          continue;
+        }
+        expect(catalog.courses[c.courseId]).toBeDefined();
         for (const slot of c.slotIds) {
           const [programId, rest] = slot.split("/");
           const key = rest.split("#")[0];
           const group = catalog.programs[programId].requirements.find((g) => g.key === key);
           expect(group?.eligibleCourseIds, slot).toContain(c.courseId);
+          expect(slots.get(slot)?.courseIds, slot).toContain(c.courseId);
         }
       }
+  });
+
+  it("keeps the student's lock where it was put", () => {
+    const sta = plan.terms.flatMap((t) => t.courses.map((c) => ({ ...c, term: t.term }))).find((c) => c.courseId === "sta3024")!;
+    expect([sta.locked, sta.term]).toEqual([true, { season: "spring", year: 2027 }]);
   });
 
   it('marks an offering "confirmed" only when the published schedule has it', () => {

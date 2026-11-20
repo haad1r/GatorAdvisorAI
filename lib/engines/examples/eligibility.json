@@ -1,6 +1,6 @@
 [
   {
-    "versions": { "contractVersion": "0.1.0", "engineVersion": "0.1.0", "dataVersion": "58b635bccd760966", "catalogYear": "2026-2027", "recordId": "synthetic-student-001", "recordVersion": "1" },
+    "versions": { "contractVersion": "0.2.0", "engineVersion": "0.2.0", "dataVersion": "410aa67291ca74cd", "catalogYear": "2026-2027", "recordId": "synthetic-student-001", "recordVersion": "1" },
     "courseId": "gly3105c",
     "term": { "season": "spring", "year": 2027 },
     "status": "eligible",
@@ -14,13 +14,15 @@
       ]
     },
     "corequisite": null,
+    "taken": { "status": "none", "evidenceIds": [] },
+    "offering": { "status": "not_scheduled", "term": { "season": "spring", "year": 2027 }, "seenInSeason": [], "message": "Not in the published Spring 2027 Schedule of Courses as read on 2026-10-04.", "source": { "kind": "schedule_of_courses", "label": "UF Schedule of Courses, Fall 2021 to Spring 2027", "url": "https://one.uf.edu/soc/", "fetchedAt": "2026-10-04T17:33:03.899569+00:00" } },
     "reasons": [],
     "sources": [
       { "kind": "course_catalog", "label": "GLY 3105C (catalog 2026-2027)", "url": "https://catalog.ufl.edu/UGRD/courses/geology/", "catalogYear": "2026-2027", "fetchedAt": "2026-10-03T23:20:31.222011+00:00", "excerpt": "GLY 2010C or GLY 2030C ." }
     ]
   },
   {
-    "versions": { "contractVersion": "0.1.0", "engineVersion": "0.1.0", "dataVersion": "58b635bccd760966", "catalogYear": "2026-2027", "recordId": "synthetic-student-001", "recordVersion": "1" },
+    "versions": { "contractVersion": "0.2.0", "engineVersion": "0.2.0", "dataVersion": "410aa67291ca74cd", "catalogYear": "2026-2027", "recordId": "synthetic-student-001", "recordVersion": "1" },
     "courseId": "gly4043",
     "term": { "season": "spring", "year": 2027 },
     "status": "eligible_pending",
@@ -34,6 +36,8 @@
       ]
     },
     "corequisite": null,
+    "taken": { "status": "none", "evidenceIds": [] },
+    "offering": { "status": "not_scheduled", "term": { "season": "spring", "year": 2027 }, "seenInSeason": [], "message": "Not in the published Spring 2027 Schedule of Courses as read on 2026-10-04.", "source": { "kind": "schedule_of_courses", "label": "UF Schedule of Courses, Fall 2021 to Spring 2027", "url": "https://one.uf.edu/soc/", "fetchedAt": "2026-10-04T17:33:03.899569+00:00" } },
     "reasons": [
       { "code": "in_progress_pending", "message": "Eligible once GLY 3202C (in progress, Fall 2026) is passed.", "courseIds": ["gly3202c"] }
     ],
@@ -42,7 +46,7 @@
     ]
   },
   {
-    "versions": { "contractVersion": "0.1.0", "engineVersion": "0.1.0", "dataVersion": "58b635bccd760966", "catalogYear": "2026-2027", "recordId": "synthetic-student-001", "recordVersion": "1" },
+    "versions": { "contractVersion": "0.2.0", "engineVersion": "0.2.0", "dataVersion": "410aa67291ca74cd", "catalogYear": "2026-2027", "recordId": "synthetic-student-001", "recordVersion": "1" },
     "courseId": "hsa3111",
     "term": { "season": "spring", "year": 2027 },
     "status": "not_eligible",
@@ -67,6 +71,8 @@
       ]
     },
     "corequisite": null,
+    "taken": { "status": "none", "evidenceIds": [] },
+    "offering": { "status": "confirmed", "term": { "season": "spring", "year": 2027 }, "seenInSeason": [{ "season": "spring", "year": 2026 }, { "season": "spring", "year": 2025 }], "message": "In the published Spring 2027 Schedule of Courses.", "source": { "kind": "schedule_of_courses", "label": "UF Schedule of Courses, Fall 2021 to Spring 2027", "url": "https://one.uf.edu/soc/", "fetchedAt": "2026-10-04T17:33:03.899569+00:00" } },
     "reasons": [
       { "code": "requisite_not_met", "message": "Restricted to students in HES_BHS, CSD_BHS or PBH_UMN; the record declares none of them. Standing is met (31 earned credits), the grades are met, and the restriction alone settles it." }
     ],
@@ -75,7 +81,7 @@
     ]
   },
   {
-    "versions": { "contractVersion": "0.1.0", "engineVersion": "0.1.0", "dataVersion": "58b635bccd760966", "catalogYear": "2026-2027", "recordId": "synthetic-student-001", "recordVersion": "1" },
+    "versions": { "contractVersion": "0.2.0", "engineVersion": "0.2.0", "dataVersion": "410aa67291ca74cd", "catalogYear": "2026-2027", "recordId": "synthetic-student-001", "recordVersion": "1" },
     "courseId": "evs3000",
     "term": { "season": "spring", "year": 2027 },
     "status": "unknown",
@@ -107,6 +113,8 @@
       ]
     },
     "corequisite": null,
+    "taken": { "status": "none", "evidenceIds": [] },
+    "offering": { "status": "confirmed", "term": { "season": "spring", "year": 2027 }, "seenInSeason": [{ "season": "spring", "year": 2026 }, { "season": "spring", "year": 2025 }, { "season": "spring", "year": 2024 }, { "season": "spring", "year": 2023 }, { "season": "spring", "year": 2022 }], "message": "In the published Spring 2027 Schedule of Courses.", "source": { "kind": "schedule_of_courses", "label": "UF Schedule of Courses, Fall 2021 to Spring 2027", "url": "https://one.uf.edu/soc/", "fetchedAt": "2026-10-04T17:33:03.899569+00:00" } },
     "reasons": [
       { "code": "requisite_unverifiable", "message": "The chemistry prerequisite accepts \"or equivalent\", which only an advisor can judge; the record has none of the listed chemistry courses." }
     ],
@@ -115,12 +123,14 @@
     ]
   },
   {
-    "versions": { "contractVersion": "0.1.0", "engineVersion": "0.1.0", "dataVersion": "58b635bccd760966", "catalogYear": "2026-2027", "recordId": "synthetic-student-001", "recordVersion": "1" },
+    "versions": { "contractVersion": "0.2.0", "engineVersion": "0.2.0", "dataVersion": "410aa67291ca74cd", "catalogYear": "2026-2027", "recordId": "synthetic-student-001", "recordVersion": "1" },
     "courseId": "gly4900",
     "term": { "season": "spring", "year": 2027 },
     "status": "unknown",
     "prerequisite": { "type": "unparsed", "value": "unknown", "label": "Six GLY credits" },
     "corequisite": null,
+    "taken": { "status": "none", "evidenceIds": [] },
+    "offering": { "status": "not_scheduled", "term": { "season": "spring", "year": 2027 }, "seenInSeason": [], "message": "Not in the published Spring 2027 Schedule of Courses as read on 2026-10-04.", "source": { "kind": "schedule_of_courses", "label": "UF Schedule of Courses, Fall 2021 to Spring 2027", "url": "https://one.uf.edu/soc/", "fetchedAt": "2026-10-04T17:33:03.899569+00:00" } },
     "reasons": [
       { "code": "requisite_unparsed", "message": "The prerequisite \"Six GLY credits\" is not parsed into a rule yet, so it isn't evaluated. Never read this as eligible." }
     ],

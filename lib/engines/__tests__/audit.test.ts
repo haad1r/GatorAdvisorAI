@@ -32,6 +32,7 @@ describe("audit engine reproduces the hand-built examples", () => {
       expect(got.totals).toEqual(expected.totals);
       expect(got.unappliedCourses).toEqual(expected.unappliedCourses);
       expect(got.versions).toEqual(expected.versions);
+      expect(got.gpa.map((g) => [g.kind, g.status, g.value])).toEqual(expected.gpa.map((g) => [g.kind, g.status, g.value]));
       const gpa = got.gpa[0];
       expect(gpa.value).toBe(expected.gpa[0].value);
       expect(gpa.gradePoints).toBeCloseTo(expected.gpa[0].gradePoints, 9);
@@ -207,5 +208,20 @@ describe("whole catalog", () => {
       const audit = auditProgram(catalog, record, id, history);
       expect(auditProgram(catalog, record, id, history)).toEqual(audit);
     }
+  });
+});
+
+describe("a required course the page lists twice", () => {
+  it("counts for both requirements, saying why", () => {
+    // Criminology BA lists STA 2023 under "Foundation coursework" and again as
+    // the "Statistics course requirement". One STA 2023 meets both.
+    const cri = withRecord((r) => {
+      r.programs = [{ programId: "uglas-cri_ba" }];
+    });
+    const a = auditProgram(catalog, cri, "uglas-cri_ba");
+    const rows = a.requirements.filter((r) => [...r.appliedCourses, ...r.pendingCourses].some((c) => c.courseId === "sta2023"));
+    expect(rows.map((r) => r.requirementKey).sort()).toEqual(["foundation-coursework", "statistics-course-requirement"]);
+    expect(rows.flatMap((r) => r.reasons.map((x) => x.code))).toContain("listed_twice");
+    expect(requirement(a, "statistics-course-requirement").status).toBe("satisfied");
   });
 });

@@ -155,13 +155,13 @@ describe("TrackingResult and Plan validation", () => {
   });
 
   it("rejects an infeasible plan with no blocker", () => {
-    const p = example("plan.geology-minor.json");
+    const p = example("plan.psychology-geology.json");
     p.status = "infeasible";
     expect(messages(Plan.safeParse(p))).toContain("an infeasible plan must name its blocker");
   });
 
   it("rejects a term whose credits don't add up", () => {
-    const p = example("plan.geology-minor.json");
+    const p = example("plan.psychology-geology.json");
     p.terms[0].credits = 6;
     expect(messages(Plan.safeParse(p))).toContain("credits must sum the term's courses");
   });

@@ -68,6 +68,14 @@ in `groupShape` matters:
   electives at the 4000 level") can't be matched to courses. An unfilled
   prose slot is `unknown`, and it is listed in `remainingOptions.openSlots`.
   A credit pool with no list at all is `unknown` for the same reason.
+- **A language sequence is one language.** The CLAS language requirement
+  (84 programs) is an 8-credit pool over 43 courses with `is_sequence`.
+  Read as a plain pool, ARA 1130 + CHI 1130 would meet it. The pool claims
+  only the prefix the student holds the most completed credits in.
+- **Every result carries a `need`** (`group.ts`): what is still needed, in
+  structure (the unfilled slots, the option followed, N more credits from
+  the pool). The planner builds its slots from it, so it plans exactly
+  what the audit says is missing.
 
 ## Counting domains
 
@@ -96,6 +104,13 @@ marks with an `exclusive_set` are covered by that rule. Two reasons:
 - Over-counting tells a student they're done when they aren't. Under-counting
   is the safer error, and an advisor can fix it with an `allow_overlap`
   exception in the record.
+
+**One exception: a required course listed twice.** When a one-course slot's
+course already counts toward another requirement of the same program, the
+page is stating the same required course twice (Criminology BA lists STA
+2023 under "Foundation coursework" and again as the "Statistics course
+requirement"). It counts for both, with reason `listed_twice`. Without this
+rule, one of the two could never be met: 7 programs, 12 courses.
 
 ## Spend order
 

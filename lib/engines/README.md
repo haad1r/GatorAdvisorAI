@@ -5,16 +5,109 @@ and planning (issue #8). The AI layer explains these results and the frontend
 renders them. Neither recomputes them, and the AI never decides eligibility
 on its own.
 
-**Status: checkpoint 2 in progress.** The contracts (checkpoint 1) and three
-engines are here: eligibility, the degree audit and Critical Tracking. The
-planner and what-if come in checkpoint 3. Until then, build against
-`examples/plan.geology-minor.json`; the planner will return the same shape.
+**Status: checkpoints 1 to 3, engine side.** Contracts, eligibility, the
+degree audit, Critical Tracking, requirement flags and the candidate filter
+for recommendation scoring, the semester planner, plan validation and
+what-if (audit, tracking and plans) are here, behind one API (`index.ts`).
+Database integration (Maria, TEAM-01) and the section scheduler's use of the
+same eligibility calls are the remaining integration steps. See
+[Readiness](#readiness) at the end.
+
+## The API
+
+```ts
+import { createAcademicEngine } from "@/lib/engines";
+import { loadCatalog } from "@/lib/engines/catalog/load"; // Node only (reads data/)
+
+const engine = createAcademicEngine(loadCatalog("data"));
+```
+
+| call | answers | returns |
+|---|---|---|
+| `engine.audit(record)` | What have I done and what is left? Every declared program, credit earned / in progress, labelled GPAs, courses counting twice, everything unknown. | `StudentAudit` |
+| `engine.eligibility(record, course, term?)` | Can I take this course? Requisites, plus already taken and offered that term. `term` defaults to the next fall or spring. | `EligibilityResult` |
+| `engine.requirementFlags(record, courses)` | Does each course fill an open requirement / an open major requirement? Read off the audit. | `RequirementFlags` |
+| `engine.filterCandidates(record, courses, term?)` | Which courses may be recommended at all (eligible, not held, offered)? | `CandidateFilter` |
+| `engine.tracking(record)` | Am I on track? Every declared program with milestones, deadline terms, the next deadline. | `StudentTracking` |
+| `engine.generatePlan(record, options)` | What should I take, and when? Terms, why each course is there, feasible or not and what blocks it, what it couldn't place, what it assumes. | `Plan` |
+| `engine.regeneratePlan(record, plan, changes?)` | The same, keeping every lock of an earlier plan. | `Plan` |
+| `engine.validatePlan(record, planOrDraft)` | Can this plan (generated, or made by a student or advisor) work as written? | `PlanCheck` |
+| `engine.whatIf(record, change, plan?)` | What if I add, drop or switch programs? On a copy; the saved record and plan are never touched. With plan options, also a scenario plan and the difference. | `WhatIfResult` |
+| `engine.auditProgram(record, id)`, `engine.trackingForProgram(record, id)` | One program only. | `AuditResult`, `TrackingResult` |
+
+Every call validates the record (a malformed one throws a `ZodError` naming
+the field), and every result is validated before it is returned. Plain
+functions: no UI, no clock, no network, no database writes. The same
+functions are exported individually (`auditStudent`, `requirementFlags`, ...)
+for callers that hold a `CourseHistory`.
 
 | engine | entry point | question it answers | docs |
 |---|---|---|---|
 | course eligibility | `evaluateEligibility` in `eligibility.ts` | Can this student take this course in this term? | [Eligibility](#eligibility) below |
 | degree audit | `auditProgram` in `audit/` | How far through this program is the student? | [audit/README.md](audit/README.md) |
 | Critical Tracking | `evaluateTracking` in `tracking.ts` | Is the student on track for the program's semester milestones? | [Critical Tracking](#critical-tracking) below |
+| student-wide audit / tracking | `auditStudent`, `trackStudent` in `student.ts` | Every declared program at once | [The API](#the-api) |
+| flags and filter | `requirementFlags`, `filterCandidates` in `flags.ts` | Inputs to recommendation scoring | [Recommendation scoring](#recommendation-scoring) below |
+| offerings | `offeringOf` in `offering.ts` | Is this course offered in this term? | [Offerings](#offerings) below |
+| planner | `generatePlan` in `planner.ts` | A term-by-term plan | [Planner](#planner) below |
+| plan validation | `validatePlan` in `validate.ts` | Does this plan work? | [Plan validation](#plan-validation) below |
+| what-if | `whatIf` in `whatif.ts` | The audit, tracking and plan under other programs | [What-if](#what-if) below |
+
+### Course ids
+
+Course ids are lowercase, no space, **with** the suffix letter:
+`cop3502c`, `chm2045l`. That is the key every CSV joins on. The suffix
+can't be dropped, because `chm2045` and `chm2045l` are different courses.
+Inputs may use any spelling: `toCourseId("STA 3100")`, `"STA3100"` and
+`"sta3100"` all give `"sta3100"`. It is the same rule as the scraper's
+`ids.code_to_id`. `toDisplayCode("cop3502c")` gives `"COP 3502C"`.
+`parseCourseId` returns null instead of throwing.
+
+### Recommendation scoring
+
+Scoring (`lib/engines/recommendations/scoring.ts`, issue #11) needs two
+steps from this engine, kept separate because scoring doesn't filter:
+
+```ts
+const term = { season: "spring", year: 2027 };
+const filter = engine.filterCandidates(record, codes, term);
+const keep = filter.courses.filter((c) => c.decision === "candidate").map((c) => c.courseId!);
+const flags = engine.requirementFlags(record, keep);
+const courses = flags.courses.map((f) => ({ code: f.code, ...toScoringFlags(f), tags, level }));
+```
+
+**`filterCandidates`** decides each course, in input order:
+
+| decision | when |
+|---|---|
+| `excluded` | already passed or in progress (`already_held`); `not_eligible`; not in the term's complete published schedule (`not_offered`); not a course code or not in the catalog (`unknown_course`) |
+| `needs_check` | eligibility `unknown`; offering `unknown` or `not_seen`; a completed attempt with no grade. **Not a candidate** until a person checks. |
+| `candidate` | `eligible` or `eligible_pending`, not held, and offered (or offered in past terms of the season). Notes say what it rests on (`in_progress_pending`, `offering_unconfirmed`). |
+
+For the synthetic student, over all 9,870 courses for Spring 2027: 1,564
+candidates, 1,234 needs_check, 7,072 excluded. It takes about 300 ms.
+
+**`requirementFlags`** gives, per course, `fillsRequirement` (any open
+requirement of a declared program, gen ed included) and `fillsMajorSlot`
+(an open requirement in the `major` section of a declared major). Each is
+`yes`, `no` or `unknown`:
+
+- `yes`: the audit lists the course as able to fill a requirement that is
+  `not_satisfied`.
+- `unknown`: it is listed only for requirements the audit can't decide (a
+  program under review, a fact the record lacks such as language
+  proficiency).
+- `no`: no open requirement lists it, or the student already holds it.
+
+The flags come from the audit's own remaining-course lists, the full ones
+rather than the first 8. They are not recalculated, so a flag can't
+disagree with the audit. `toScoringFlags(f)` turns them into scoring's two
+booleans, and only `yes` is true, so an unknown never raises a score.
+`requirements` lists the open requirements behind each flag, for the "why".
+Prose slots ("approved elective") list no courses and flag nothing; the
+result's caveats count them. For the synthetic student: 283 courses fill
+an open requirement, 6 fill an open major slot, 43 are unknown (CLAS
+language courses, because proficiency isn't recorded). Takes about 40 ms.
 
 ## What the engine is for
 
@@ -40,20 +133,31 @@ results; nothing is recomputed in a prompt. Four properties make that safe:
 
 ```
 lib/engines/
+  index.ts      createAcademicEngine: the public API (start here)
   schemas/      zod schemas + inferred types (import from "lib/engines/schemas")
-    common.ts   ids, Term, SourceReference, Reason codes, ResultVersions
+    common.ts   ids (toCourseId), Term, term codes, SourceReference, Reason codes, ResultVersions
     catalog.ts  the scraped catalog as the engine reads it (engine input)
     record.ts   AcademicRecord: one student's facts (engine input)
-    results.ts  AuditResult, EligibilityResult, TrackingResult (engine output)
-    plan.ts     Plan, RequirementSlot (engine output; draft)
+    results.ts  AuditResult, EligibilityResult, TrackingResult (per program / course)
+    student.ts  StudentAudit, RequirementFlags, CandidateFilter, StudentTracking, WhatIfResult
+    plan.ts     Plan, RequirementSlot, PlanOptions, PlanDraft, PlanCheck
   status.ts     status vocabularies and the rules that combine them
-  history.ts    what a record says about courses: grade rules, credit, GPA
+  history.ts    what a record says about courses: grade rules, credit, GPA, already taken
   eligibility.ts  evaluateEligibility: requisite trees -> EligibilityResult
+  offering.ts   offeringOf: Schedule of Courses terms -> offered in a term?
   audit/        auditProgram: program + record -> AuditResult (own README)
   tracking.ts   evaluateTracking: milestones + record -> TrackingResult
+  student.ts    auditStudent / trackStudent: every declared program
+  flags.ts      requirementFlags / filterCandidates: inputs to recommendation scoring
+  planner.ts    generatePlan / regenerationOptions: record + options -> Plan
+  validate.ts   validatePlan: record + plan -> PlanCheck
+  deadlines.ts  Critical Tracking as "these courses by this term" (planner, validator)
+  hypothetical.ts  the record at the start of a future term, planned courses assumed passed
+  whatif.ts     whatIf: audit + tracking + plans on a modified copy of the record
   versions.ts   the versions block results carry
   catalog/      CSV reader and loader: data/*.csv -> validated Catalog
   examples/     synthetic record + one example of every result type
+    fixtures/   three hand-checked students (issue step 10; own README)
   __tests__/    vitest
 ```
 
@@ -65,7 +169,7 @@ will replace it.
 
 ```
 npm install
-npm test                  # vitest: catalog load, schemas, examples
+npm test                  # vitest: catalog, schemas, examples, engines, fixtures, whole-catalog sweep (~8 s)
 npx eslint lib/engines
 ```
 
@@ -102,9 +206,21 @@ const result = evaluateEligibility(catalog, record, "gly4043", { season: "spring
 evaluateEligibility(catalog, record, "chm2045", term, { concurrent: ["chm2045l"] });
 ```
 
-The term must be after the record's `currentTerm`. Evaluating many courses
-for one record? Build one `new CourseHistory(record, catalog)` and pass it as
-the last argument. The whole catalog takes about 150 ms.
+The term must be after the record's `currentTerm` (`engine.eligibility`
+defaults it to the next fall or spring). Evaluating many courses for one
+record? Build one `new CourseHistory(record, catalog)` and pass it as the
+last argument. The whole catalog takes about 150 ms.
+
+`status` is about requisites only. Two facts are reported beside it and
+never change it:
+
+- `taken`: `passed` (a passing attempt or exam credit), `in_progress`,
+  `no_grade` (completed, grade missing), `not_passed` (every attempt failed
+  or withdrawn, so a retake is possible) or `none`, with the record entries.
+- `offering`: whether the course is offered that term; see
+  [Offerings](#offerings).
+
+The candidate filter combines all three.
 
 How leaves are decided:
 
@@ -117,6 +233,19 @@ How leaves are decided:
 | standing | Credits earned against UF's classification: sophomore 30, junior 60, senior 90 ([Student Classifications](https://catalog.ufl.edu/UGRD/academic-regulations/student-classifications/)). Earned credit is each course once (transfer included, which UF accepts "as hours earned"), exam credit (an assumption: the page doesn't say) and elective credit. Met on completed credit, pending if current courses would reach it, unknown if an ungraded course would decide it. "Junior standing" means junior or higher; no requisite in the data sets a ceiling. |
 | permission, placement, equivalent | Unknown (`requisite_unverifiable`). |
 | unparsed | Unknown (`requisite_unparsed`). |
+
+### Offerings
+
+`offeringOf(catalog, courseId, term)` reads only the Schedule of Courses
+terms the scraper read (Fall 2021 to Spring 2027, `catalog.schedule`):
+
+| status | meaning |
+|---|---|
+| `confirmed` | In that term's published schedule. |
+| `not_scheduled` | That term's schedule was read completely and the course isn't in it. For a term that isn't closed, the message gives the snapshot date, because UF can still add sections. |
+| `historical` | The term isn't published; the course ran in that season before (`seenInSeason`). **An assumption, never a confirmation.** |
+| `not_seen` | The term isn't published; the course ran in no term of that season that was read. |
+| `unknown` | The term was only partly read (Spring 2022: UF's server failed mid-scrape), or no term of that season was read. |
 
 ### Critical Tracking
 
@@ -136,7 +265,11 @@ certificate, and 9 majors whose pages have no tracking tab). Check
 `record.firstTerm` through `record.currentTerm`. Summers don't count, as in
 UF's tracking language, and a student who starts in summer is in semester 1.
 Continuous enrollment is assumed. A milestone is **due** when its semester is
-the current one or earlier.
+the current one or earlier. Each milestone's `dueTerm` is its semester as a
+calendar term under the same assumption, and `nextDeadline` is the earliest
+semester, this one or later, with a milestone not met (null when everything
+is met). For the synthetic student that's semester 3, Fall 2026: a count
+resting on current courses and an unchecked GPA rule.
 
 **Checked as of today.** Milestones are judged against the record as it
 stands now, not as it stood when each semester ended. A course finished a
@@ -178,6 +311,140 @@ fires only on those two Psychology lines.
 
 Evaluating many programs for one record? Pass one `CourseHistory` as the
 last argument. All 224 programs with milestones take about 50 ms.
+
+### GPA
+
+Every GPA is labelled by kind. A GPA is computed only where a source says
+which courses and attempts count:
+
+| kind | computed? | rule |
+|---|---|---|
+| `uf_cumulative` | yes | UF grading policy: UF attempts only (transfer and dual-enrollment grades are never averaged in), **every** attempt of a repeat, only grades that carry points (A through E, WF, I, NG). Credit for a repeated course is earned once. |
+| `upper_division` | no (`unknown`) | No catalog policy in the data defines it, and the program pages that use it disagree. One tracking line says "all courses taken after the student earned 60 credits"; the other 160 give no definition. |
+| `major` | no | Each program sets which courses count, and the program data doesn't list them. |
+| `critical_tracking` | no | Courses and attempt rules differ by program ("best of two attempts"). The tracking result reports each threshold. |
+
+`StudentAudit.gpa` holds the student-wide kinds (`uf_cumulative`,
+`upper_division`); each program's `AuditResult.gpa` holds all four. Credit
+is kept apart the same way: `credits.earned` (completed and exam credit,
+each course once, plus elective credit) and `credits.inProgress` (current
+enrollment, not earned until graded). An audit's `totals.remaining` is the
+credit still to take after current courses pass.
+
+### Planner
+
+```ts
+const plan = engine.generatePlan(record, {
+  targetTerm: { season: "spring", year: 2029 },   // last planned term
+  creditCap: 15,                                  // default 15 (a planner default, not a UF rule)
+  locks: [{ course: "STA 3024", term: { season: "spring", year: 2027 } }],
+  prefer: rankedCodes,                            // e.g. the recommendation ranking
+});
+const again = engine.regeneratePlan(record, plan, { creditCap: 12 }); // locks kept
+```
+
+Options also take `startTerm` (default: the next fall or spring),
+`termCaps`, `summer` (default false), `lockedTerms` (nothing is added to
+them), `programIds` and `assumedTermLoad` (below).
+
+**How it plans** (`planner.ts`, deterministic, greedy):
+
+1. **Slots.** Each declared program is audited. Every requirement still
+   open becomes `RequirementSlot`s from what the audit says it still
+   needs: a fixed course, a choice among courses, N credits from a pool,
+   or hours for a prose row ("approved elective", planned as a
+   placeholder). Slot ids are stable across regenerations.
+2. **Choose** a course per slot. Locks come first, then fixed courses, then
+   choices (fewest options first), then credit pools (broad pools last).
+   As in the audit, a course fills one slot per program and counting
+   domain, but it may serve a major slot and a gen ed slot at once.
+   Candidates are ranked: no impossible prerequisite, already chosen for
+   another slot, in the `prefer` list, listed by the most open slots, fewest
+   prerequisite credits to add, in the program's model plan, offered
+   before, lower level, id. A language sequence stays in one language.
+3. **Close** over prerequisites and corequisites (the cheapest route
+   through each tree is added, `why: "prerequisite"` / `"corequisite"`)
+   and over Critical Tracking. Open milestones become deadlines: "7 of
+   these 8 by semester 7" takes the slots that can be finished soonest.
+   Deadlines flow down prerequisite chains.
+4. **Schedule** term by term: locked courses where the student put them,
+   then every course whose requisites are met on the record as it would
+   stand then, that is offered (or was offered that season before), and
+   that fits the cap. The earliest deadline goes first, then the course
+   that unlocks the most others.
+5. **Check** the result with `validatePlan`. Every error it finds is a
+   blocker, so the planner can't call a plan feasible that the validator
+   rejects (tested on every program in the catalog).
+
+**Eligibility in future terms** comes from the one eligibility engine, run
+on a *hypothetical record* (`hypothetical.ts`): the record at the start of
+that term, with current and earlier planned courses entered as passed. They
+are entered as transfer-style attempts with an A, so they meet any minimum
+grade but never enter the UF GPA. For class standing, each planned fall or
+spring term counts as at least `assumedTermLoad` credits (default 12, UF's
+full-time load), because a plan names only requirement courses and the rest
+of a load is free electives. Both assumptions are stated in every plan's
+`assumptions`.
+
+**What a plan says:**
+
+| field | |
+|---|---|
+| `status` | `feasible` only with no blocker, no unplaced slot and no unplaced course |
+| `terms[].courses[]` | `why` (requirement / prerequisite / corequisite / tracking / locked / placeholder), `slotIds` (the requirements it fills), `deadline` (a tracking deadline it serves), `offering` (confirmed / historical / unconfirmed), `locked`, `notes` (what the placement rests on: an unverifiable prerequisite, a variable-credit course at its minimum, an unconfirmed offering) |
+| `slots` | every slot the plan had to fill, the "why" a course points at |
+| `unplacedSlots`, `unplacedCourses` | what couldn't be placed, each with a reason |
+| `blockers` | the binding constraints: `credit_cap`, `prerequisite_chain`, `not_offered`, `deadline_unreachable` (including a milestone already missed, which no plan can fix), `locked_conflict`, `requirements_remaining` |
+| `assumptions` | passing grades, unconfirmed offerings, the assumed term load, requirements that can't be planned, programs under review |
+| `options` | the options it was made with, so it can be regenerated |
+
+**Locks survive regeneration.** `regeneratePlan` (or `regenerationOptions`)
+keeps the old plan's `options.locks`, every course marked `locked`, and
+every `locked` term exactly as it was. A lock that breaks a rule (its
+prerequisites aren't met by then, the term's schedule lacks it, it's over the
+cap) stays where it was put and makes the plan infeasible with a
+`locked_conflict` blocker. The planner never moves it.
+
+### Plan validation
+
+```ts
+engine.validatePlan(record, plan);   // a generated Plan
+engine.validatePlan(record, { terms: [{ term, courses: ["MAR 3023", "GEB 3373"] }], creditCap: 18 });
+```
+
+Checks any plan with the same engines. It finds terms not after the current
+term or out of order, unknown course codes, a course planned twice, a
+course already passed (a warning: a repeat), terms over `creditCap`,
+requisites not met in their term (earlier planned courses assumed passed,
+same-term courses counted for corequisites), courses not in a term's
+complete published schedule (an error) or not seen that season (a warning),
+open Critical Tracking milestones not covered by their term, and
+requirements still unmet once the whole plan is passed. `valid` means no
+error. `programsAfter` gives each program's status once the plan is
+passed.
+
+### What-if
+
+```ts
+engine.whatIf(record, { add: ["uglas-gpy_umn"], remove: ["uglas-gly_umn"] });
+engine.whatIf(record, { programs: [{ programId: "uglas-psy_bs02" }] });
+```
+
+The change is applied to a deep copy whose `recordVersion` becomes
+`"<version>+what-if"`, so a scenario result can't be cached as the real
+record's. The result has `baseline` and `scenario` program summaries
+(status, credits applied / in progress / remaining, requirement counts,
+tracking status), the full scenario audit and tracking, and
+`diff: { added, removed, changed }`. A test freezes the record and checks
+it's byte-identical afterwards. A `catalogYear` other than the loaded
+catalog's throws, because only 2026-27 data exists.
+
+With plan options, `whatIf(record, change, { options, saved })` also plans
+the copy (`basis: "what_if"`, same options and locks) and compares it with
+the saved plan, or with one generated for the record: `plans.diff` gives
+both statuses, planned credits, the last term with a course, and the
+courses added and dropped. The saved plan is returned as given (a validated
+copy), never modified.
 
 ## Statuses
 
@@ -262,9 +529,13 @@ a machine `code` and a human `message`.
 | `count_rule_unmet` | Enough credits, but a rule like "at least one 4000-level" fails. |
 | `counted_elsewhere` | The course already counts toward another requirement. |
 | `waived` / `substitution_applied` / `overlap_allowed` | An advisor exception from the record applied. |
+| `listed_twice` | The program lists the same required course in two of its requirements; one course counts for both (7 programs, 12 courses). |
 | `gpa_below_minimum` | A GPA the engine computed (the UF cumulative GPA) is below a milestone's threshold. |
+| `already_held` | The student already passed or is enrolled in the course (flags, candidate filter). |
+| `not_offered` | Not in the term's complete published Schedule of Courses (candidate filter). |
 | `offering_unconfirmed` | A planned course isn't in a published schedule for that term. |
-| `credit_cap` / `prerequisite_chain` / `deadline_unreachable` / `locked_conflict` | Planner blockers. |
+| `credit_cap` / `prerequisite_chain` / `deadline_unreachable` / `locked_conflict` | Planner blockers (see [Planner](#planner)). |
+| `term_out_of_range` / `duplicate_course` | Plan validation: a term not after the current one or out of order; a course planned twice. |
 | `program_rules_not_captured` | Caveat: page prose rules (residency, upper-division credits, exclusivity) not checked. |
 | `grade_minimums_not_checked` | Caveat: a minimum grade the data doesn't carry (requirement-level grades; a tracking grade given to one course in a line). |
 | `gpa_rule_not_checked` | A GPA threshold the engine reports but doesn't compute (critical-tracking, upper-division, program GPAs). |
@@ -278,10 +549,12 @@ changes when UF edits them). Record entries are cited by id
 
 Every result carries `versions`:
 
-- `contractVersion`: these shapes (`0.1.0`).
+- `contractVersion`: these shapes (`0.2.0`: added the API's student-level
+  results, `taken`/`offering` on eligibility, `dueTerm`/`nextDeadline` on
+  tracking, `totals.remaining` and all four GPA kinds on the audit).
 - `engineVersion`: the rules implementation.
-- `dataVersion`: sha256 of the nine catalog CSVs (first 16 hex). It changes
-  exactly when the data changes.
+- `dataVersion`: sha256 of the ten catalog CSVs (first 16 hex, now including
+  `soc/terms.csv`). It changes exactly when the data changes.
 - `catalogYear`: the catalog year the student is held to.
 - `recordId` / `recordVersion`: the record evaluated.
 
@@ -304,10 +577,15 @@ https://catalog.ufl.edu/UGRD/academic-regulations/grades-grading-policies/):
   means "known not".
 - Exceptions (substitution, waiver, allowed overlap) apply only when written
   in the record.
+- `firstTerm` is the first term of **college** enrollment: a transfer
+  student's first term at the previous school (UF tracking counts their
+  semesters there). For an admitted student who hasn't started, it can come
+  after `currentTerm` (semester 0: nothing is due yet), which is how an
+  incoming freshman is planned.
 
 ## Examples
 
-All built from one synthetic student (`examples/record.json`): a Psychology
+Built from the synthetic student in `examples/record.json`: a Psychology
 BS (Behavioral and Cognitive Neuroscience) major with a Geology minor in
 Fall 2026, their third semester. They have a repeated course (BSC 2010: D,
 then B), a withdrawal, a dual-enrollment course, AP credit and four courses
@@ -315,33 +593,77 @@ in progress.
 
 | file | shows |
 |---|---|
-| `audit.geology-minor.json` | all three rule types; satisfied, in_progress and not_satisfied; a course on two lists counted once; prose rules as caveats; UF cumulative GPA |
+| `audit.geology-minor.json` | all three rule types; satisfied, in_progress and not_satisfied; a course on two lists counted once; prose rules as caveats; labelled GPAs |
 | `audit.english-minor-needs-review.json` | a `needs_review` program: everything `unknown`, with why |
-| `eligibility.json` | every eligibility status: a met OR, a pending prerequisite, a program restriction that settles an AND, "or equivalent", unparsed text |
-| `tracking.psychology-bs.json` | Critical Tracking in semester 3: met course and UF GPA milestones, a count resting on current courses, an unchecked critical-tracking GPA, two incremental lines not trusted, prose notes |
-| `plan.geology-minor.json` | a one-term plan with a confirmed Spring 2027 offering (draft shape) |
+| `eligibility.json` | every eligibility status: a met OR, a pending prerequisite, a program restriction that settles an AND, "or equivalent", unparsed text; already taken and offerings |
+| `tracking.psychology-bs.json` | Critical Tracking in semester 3: met course and UF GPA milestones, a count resting on current courses, an unchecked critical-tracking GPA, two incremental lines not trusted, prose notes, deadline terms |
+| `plan.psychology-geology.json` | a feasible plan through Spring 2029 from the planner: a locked course, gen ed shared with the major, prerequisites in order, tracking deadlines, placeholders for prose electives, stated assumptions |
+| `fixtures/` | three hand-checked students across three program structures (below) |
 
 `__tests__/examples.test.ts` checks every claim in them against the real
 data: course and program ids, requirement definitions, record evidence,
 one-course-one-requirement, the GPA arithmetic, requisite trees and the
 published schedule.
 
+### Hand-checked fixtures
+
+`examples/fixtures/` (issue step 10): an Accounting transfer student with a
+Florida AA and a missed tracking milestone (an impossible plan), a
+certificate student with a repeat, a substitution and locks, and the
+Psychology + Geology student. The answers were worked by hand from the data
+([fixtures/README.md](examples/fixtures/README.md) shows the arithmetic).
+`__tests__/fixtures.test.ts` checks audits, credit, GPA, tracking,
+eligibility and plans against them.
+
+## Coverage
+
+`__tests__/coverage.test.ts` audits and plans **every program** in the
+catalog for an admitted freshman with no prior credit (Fall 2026 start,
+through Spring 2030, 18 credits per term). It runs in about 3 s.
+
+| programs | plans | feasible | main blockers when not |
+|---|---|---|---|
+| majors | 233 | 114 | a tracking deadline the prerequisite chain can't meet for a student with no AP or placement credit (57), no course choosable (30: absent course ids, repeatable topics courses), a course not offered in any planned term (25), credit cap (21), prerequisite chains (19) |
+| minors | 167 | 135 | prerequisites outside the minor (restricted to other majors, senior standing at 12 credits per term), absent ids |
+| certificates | 83 | 65 | as for minors |
+
+No program fails to audit or plan, and every plan the planner calls
+feasible passes `validatePlan`. Infeasible is often the honest answer: many
+semester-1 milestones assume AP, dual-enrollment or placement credit that
+this student doesn't have. The planner is greedy, not an optimizer, so some
+infeasible plans have a feasible ordering it doesn't find.
+
+The audit, eligibility and tracking numbers for one record are in the
+sections above (eligibility: 45% of courses with requisites `unknown`;
+tracking: 48 of 224 programs `unknown` for the synthetic student).
+
 ## Known limitations
 
-- The planner doesn't exist yet; its example is hand-built to the contract.
-  The other engines reproduce their examples (`__tests__/eligibility.test.ts`,
-  `audit.test.ts`, `tracking.test.ts`).
+- Only the UF cumulative GPA is computed (see [GPA](#gpa)). UF's catalog
+  policy pages were unreachable (HTTP 503) when checked on 2026-11-09 and
+  2026-11-20, so the upper-division definition is still unconfirmed.
+- Requirement flags don't match prose slots ("approved elective"), and a
+  course that fills only such a slot is flagged `no`.
 - The audit counts a course toward one requirement of the major (gen ed may
-  overlap with it); see [audit/README.md](audit/README.md#counting-domains)
-  for why, and for the audit's own limits.
+  overlap with it); see [audit/README.md](audit/README.md#counting-domains).
+  The exception is a required course the page lists twice (`listed_twice`).
+  Repeatable topics courses ("take ISS 4932 twice with different topics")
+  can't be counted twice.
 - For the synthetic student, 45% of the 6,742 courses with requisites
-  evaluate `unknown` (down from 56% before class standing was modeled). The
-  unknown leaves are mostly unparsed text (3,796), instructor permission
-  (1,169), program names from prose (749) and "or equivalent" (473). Typing
-  the common prose restrictions is the next win.
-- Eligibility is judged on the record as it stands (completed work, then
-  current courses). For a term two or more terms out, courses the student
-  takes in between aren't known; the planner (checkpoint 3) will supply them.
+  evaluate `unknown`. The unknown leaves are mostly unparsed text (3,796,
+  for example "Degree-seeking students only" on BSC 2010 and 2011),
+  instructor permission (1,169), program names from prose (749) and "or
+  equivalent" (473). Typing the common prose restrictions is the next win.
+- 9 requisite rows name their own course (CHM 2045L's corequisite reads
+  "CHM2045L"; "credit cannot be received for both X and Y" was parsed as a
+  requirement). The engine treats such a leaf as `unknown`. The scraper
+  should drop the exclusion sentences.
+- The planner is deterministic and greedy. It chooses one course per slot
+  by a fixed ranking (`prefer` overrides it), places each course in the
+  earliest term that works, and doesn't backtrack. Plans name requirement
+  courses only. Free electives toward a degree's total credits, residency
+  and upper-division credit minimums aren't planned, and
+  `assumedTermLoad` stands in for them in class standing.
 - Requirement-level minimum grades aren't in the program data
   (`grade_minimums_not_checked`). **Prerequisite** minimum grades are: 2,216
   requisite leaves carry `min_grade`.
@@ -349,13 +671,40 @@ published schedule.
   exclusive to a minor) aren't captured (`program_rules_not_captured`).
 - Critical Tracking computes only the UF cumulative GPA. Of 2,625 GPA rules
   on tracking tabs, 1,589 are UF GPA rules and are checked. The other 1,036
-  (critical-tracking, upper-division, all-institution and program GPAs) are
-  reported with their thresholds but not checked (`gpa_rule_not_checked`).
+  are reported with their thresholds but not checked (`gpa_rule_not_checked`).
 - Tracking attempt limits ("within two attempts") and per-course grades
   inside a line aren't checked, and 816 tracking lines are prose notes.
-  For the synthetic student, 48 of 224 programs track as `unknown`.
-- Summer sessions A/B/C aren't distinguished. The plan's 18-credit cap is a
-  default to verify against UF's registration policy.
-- 29 of 483 programs are `needs_review` and audit as `unknown`.
-- Persistence, record versions and invalidation come from the backend data
-  layer (Maria, TEAM-01); nothing here writes to a database.
+- Summer sessions A/B/C aren't distinguished. The default 15-credit cap and
+  the 12-credit assumed load are planner defaults to confirm against UF's
+  registration policy.
+- Only the 2026-27 catalog is loaded, so a what-if to another catalog year
+  throws.
+- 29 of 483 programs are `needs_review`: they audit as `unknown`, and their
+  plans say they rest on unverified data.
+
+## Readiness
+
+Done on the engine side, against issue #8 steps 3 to 10: the contracts with
+examples; one API for audits, eligibility, tracking, plan generation, plan
+validation and what-if; AND/OR rules, minimum grades, credit totals,
+repeats, transfer credit, permitted overlap and record exceptions, with
+unknown wherever the rules or inputs fall short; labelled GPAs; Critical
+Tracking with deadline terms; plans that respect prerequisites, deadlines,
+caps and locks, report infeasibility and unconfirmed offerings, and keep
+locks on regeneration; what-if on a copy; versions on every result;
+hand-checked fixtures across three structures; published coverage and
+limits.
+
+Not done here, and owned elsewhere or next:
+
+- **Database integration** (step 9, Maria / TEAM-01): records and
+  `recordVersion` from Supabase, result caching and invalidation by
+  `versions`. `buildCatalog` already takes file text, so a Supabase loader
+  only has to produce the same validated `Catalog`.
+- **Section scheduling** (step 9): the scheduler should call
+  `engine.eligibility` and `validatePlan` instead of recomputing.
+- **Recommendation scoring** (issue #11): `scoring.ts` on main should take
+  its two flags from `toScoringFlags(engine.requirementFlags(...))` after
+  `engine.filterCandidates(...)`.
+- **Review**: the fixtures should be reviewed by a second person (an
+  advisor, ideally). The issue asks for "manually reviewed".
