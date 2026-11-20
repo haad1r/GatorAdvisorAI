@@ -28,7 +28,7 @@ The schema for #6 (private student data) and #8 (catalog persistence). One migra
 
 ## Ideas worth understanding
 
-**Foreign keys with `ON DELETE CASCADE`.** A foreign key says "this row must point at a real row over there". Cascade adds "and if that row is deleted, delete me too". That's how deleting one `profiles` row cleans up all 10 private tables. It also blocks a late background job from writing data for a student who no longer exists: the insert fails because there's no profile to point at.
+**Foreign keys with `ON DELETE CASCADE`.** A foreign key says "this row must point at a real row over there". Cascade adds "and if that row is deleted, delete me too". That's how deleting one `profiles` row cleans up the other 11 student tables (all but `account_deletions`). It also blocks a late background job from writing data for a student who no longer exists: the insert fails because there's no profile to point at.
 
 **Ownership enforced by the database.** Child tables (`schedule_sections`, `schedule_meetings`, `plan_courses`, `chat_messages`) repeat the owner's `user_id` and reference their parent by **both** id and user id, e.g. `foreign key (schedule_id, user_id) references schedules (id, user_id)`. So even a buggy endpoint can't attach student B's section to student A's schedule: the database rejects it. The route handlers should still check ownership; this is the second lock.
 
@@ -65,9 +65,11 @@ Each mirrors a file in `data/`, column for column where possible:
 
 ## Setting up Supabase (step [3])
 
+**Already done for the team project (2026-11-19):** the schema was applied with `supabase db push --remote`, and the project's GitHub integration deploys new migrations when they merge to `main`. So change the schema only by adding a new file to `supabase/migrations/`; never edit an applied migration or create tables in the dashboard. The steps below are for setting up a fresh project.
+
 1. **Get access first.** Ask Haadi whether to use an existing GatorAdvisor Supabase project or create one. #6 says not to create parallel projects.
 2. **Create or open the project** at supabase.com. Pick the US East region (closest to UF).
-3. **Apply the schema:** Dashboard → SQL Editor → paste `supabase/migrations/20261118120000_initial_schema.sql` → Run. (With the Supabase CLI: `supabase db push`.) The migration grants the service role access to the `catalog` schema; Supabase only sets that up for `public` on its own. If the server uses `supabase-js` (not a direct Postgres connection), also add `catalog` under Project Settings → API → Exposed schemas.
+3. **Apply the schema:** Dashboard → SQL Editor → paste `supabase/migrations/20261118120000_initial_schema.sql` → Run. (With the Supabase CLI: `supabase link --project-ref <ref>`, then `supabase db push --remote`; without `--remote` it targets a local Docker database.) The migration grants the service role access to the `catalog` schema; Supabase only sets that up for `public` on its own. If the server uses `supabase-js` (not a direct Postgres connection), also add `catalog` under Project Settings → API → Exposed schemas.
 4. **Optional dev data:** paste `supabase/seed.sql` into the SQL Editor after replacing `user_dev_student` with your Clerk test user's id. You get the same student the mocks show.
 5. **Copy two values** from Project Settings → API into `.env.local`:
 
