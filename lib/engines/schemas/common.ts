@@ -14,11 +14,11 @@ import { z } from "zod";
 /** Version of the JSON shapes in this folder. Bump the minor for an additive
  *  field, the major for a rename or removal. Results carry it so a consumer
  *  can tell which shape it was handed. */
-export const CONTRACT_VERSION = "0.1.0";
+export const CONTRACT_VERSION = "0.2.0";
 
 /** Version of the rules implementation (the engines). Bump it when a rule
  *  changes what a result says, so stored results can be recognised as stale. */
-export const ENGINE_VERSION = "0.1.0";
+export const ENGINE_VERSION = "0.2.0";
 
 const SEMVER = /^\d+\.\d+\.\d+$/;
 export const SemVer = z.string().regex(SEMVER, "expected a version like 0.1.0");
@@ -30,6 +30,30 @@ export const CourseId = z
   .string()
   .regex(/^[a-z]{3}\d{4}[a-z]?$/, "expected a course id like mac2311 or chm2045l");
 export type CourseId = z.infer<typeof CourseId>;
+
+const COURSE_ID = /^[a-z]{3}\d{4}[a-z]?$/;
+
+/** The one converter from any spelling of a UF course code to its id:
+ *  "STA 3100", "STA3100", "cop 3502c", "COP3502C" -> "sta3100", "cop3502c".
+ *  The suffix letter is part of the id ("chm2045" and "chm2045l" are
+ *  different courses), so it is never dropped. Null when the text isn't a
+ *  course code. Same rule as the scraper's ids.code_to_id. */
+export function parseCourseId(code: string): CourseId | null {
+  const id = code.replace(/\s+/g, "").toLowerCase();
+  return COURSE_ID.test(id) ? id : null;
+}
+
+/** parseCourseId, throwing RangeError for text that isn't a course code. */
+export function toCourseId(code: string): CourseId {
+  const id = parseCourseId(code);
+  if (id === null) throw new RangeError(`"${code}" is not a UF course code (expected e.g. "COP 3502C")`);
+  return id;
+}
+
+/** "cop3502c" -> "COP 3502C", UF's display form. */
+export function toDisplayCode(courseId: CourseId): string {
+  return `${courseId.slice(0, 3)} ${courseId.slice(3)}`.toUpperCase();
+}
 
 /** "<college>-<program>", e.g. "uglas-gly_umn". Stable across catalog
  *  refreshes because it comes from UF's own page slug, not from row order. */
@@ -67,6 +91,27 @@ const SEASON_ORDER: Record<Season, number> = { spring: 0, summer: 1, fall: 2 };
  *  Negative when a is earlier, 0 when equal, positive when later. */
 export function compareTerms(a: Term, b: Term): number {
   return a.year - b.year || SEASON_ORDER[a.season] - SEASON_ORDER[b.season];
+}
+
+/** The next fall or spring term: what "next semester" means when a caller
+ *  gives no term (summer is opt-in, as at UF). */
+export function nextRegularTerm(t: Term): Term {
+  return t.season === "fall" ? { season: "spring", year: t.year + 1 } : { season: "fall", year: t.year };
+}
+
+const SEASON_MONTH: Record<Season, string> = { spring: "1", summer: "5", fall: "8" };
+
+/** The Schedule of Courses' term code: "2" + two-digit year + start month
+ *  (Spring 2027 = "2271"). The SOC files store terms this way. */
+export function termCode(t: Term): string {
+  return `2${String(t.year % 100).padStart(2, "0")}${SEASON_MONTH[t.season]}`;
+}
+
+export function termOfCode(code: string): Term {
+  const m = /^2(\d\d)([158])$/.exec(code);
+  if (!m) throw new RangeError(`"${code}" is not a Schedule of Courses term code`);
+  const season = ({ "1": "spring", "5": "summer", "8": "fall" } as const)[m[2] as "1" | "5" | "8"];
+  return { season, year: 2000 + Number(m[1]) };
 }
 
 // ---------------------------------------------------------------------------
@@ -137,7 +182,14 @@ export const ReasonCode = z.enum([
   "waived",
   "substitution_applied",
   "overlap_allowed",
+  "listed_twice",
   "gpa_below_minimum",
+  // course filtering (requirement flags, candidate filter)
+  "already_held",
+  "not_offered",
+  // plan validation
+  "term_out_of_range",
+  "duplicate_course",
   // planner
   "offering_unconfirmed",
   "credit_cap",

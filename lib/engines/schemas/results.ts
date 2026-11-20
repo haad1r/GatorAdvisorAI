@@ -6,6 +6,7 @@ import {
   ResultVersions,
   SourceReference,
   Term,
+  compareTerms,
 } from "./common";
 import { RuleType, Section } from "./catalog";
 import { Grade } from "./record";
@@ -189,6 +190,10 @@ export const AuditResult = z
       required: z.strictObject({ credits: z.number().nonnegative().nullable() }),
       completed: z.strictObject({ credits: z.number().nonnegative() }),
       inProgress: z.strictObject({ credits: z.number().nonnegative() }),
+      /** Credits still to take once current courses are passed: each open
+       *  requirement's shortfall (none for satisfied / in_progress ones).
+       *  Null when an open requirement states no credits. */
+      remaining: z.strictObject({ credits: z.number().nonnegative().nullable() }),
     }),
     requirements: z.array(RequirementResult),
     /** Record courses this program counted nowhere (free electives here). */
@@ -223,7 +228,27 @@ export const AuditResult = z
       issue(["totals", "completed"], "totals.completed must sum the counting requirements' completed credits");
     if (Math.abs(a.totals.inProgress.credits - sum(counting.map((r) => r.inProgress.credits))) > EPSILON)
       issue(["totals", "inProgress"], "totals.inProgress must sum the counting requirements' in-progress credits");
+    const remaining = remainingCredits(counting);
+    if (remaining === null ? a.totals.remaining.credits !== null : Math.abs((a.totals.remaining.credits ?? -1) - remaining) > EPSILON)
+      issue(["totals", "remaining"], `totals.remaining.credits must be ${remaining}`);
+    a.gpa.forEach((g, i) => {
+      if (a.gpa.findIndex((x) => x.kind === g.kind) !== i) issue(["gpa", i, "kind"], "one entry per GPA kind");
+    });
   });
+
+/** Each open requirement's credit shortfall after current courses; null if
+ *  an open requirement states no credits. Shared by the audit and its schema. */
+export function remainingCredits(
+  counting: readonly Pick<RequirementResult, "status" | "required" | "completed" | "inProgress">[],
+): number | null {
+  let total = 0;
+  for (const r of counting) {
+    if (r.status === "satisfied" || r.status === "in_progress") continue;
+    if (r.required.credits === null) return null;
+    total += Math.max(0, r.required.credits - r.completed.credits - r.inProgress.credits);
+  }
+  return total;
+}
 export type AuditResult = z.infer<typeof AuditResult>;
 
 // ---------------------------------------------------------------------------
@@ -266,20 +291,64 @@ function inconsistentNodes(node: RequisiteEvaluation, path: (string | number)[])
   return bad;
 }
 
+/** Has the student already taken the course (history.ts `taken`)? */
+export const TakenStatus = z.enum(["passed", "in_progress", "no_grade", "not_passed", "none"]);
+export type TakenStatus = z.infer<typeof TakenStatus>;
+
+export const CourseTaken = z
+  .strictObject({
+    status: TakenStatus,
+    /** The record entries behind it (attempts, exam credit). */
+    evidenceIds: z.array(z.string()),
+  })
+  .refine((t) => (t.status === "none") === (t.evidenceIds.length === 0), "evidence exactly when the course was attempted");
+export type CourseTaken = z.infer<typeof CourseTaken>;
+
+/** Is the course offered in the term? From the Schedule of Courses terms the
+ *  scraper read (offering.ts).
+ *  confirmed: in that term's published schedule.
+ *  not_scheduled: that term's schedule is published and complete, and the
+ *    course isn't in it.
+ *  historical: the term isn't published yet; the course was offered in that
+ *    season before. An assumption, never a confirmation.
+ *  not_seen: the term isn't published; the course wasn't offered in that
+ *    season in any term read.
+ *  unknown: the term's schedule was only partly read, or no term of that
+ *    season was read. */
+export const OfferingStatus = z.enum(["confirmed", "not_scheduled", "historical", "not_seen", "unknown"]);
+export type OfferingStatus = z.infer<typeof OfferingStatus>;
+
+export const Offering = z.strictObject({
+  status: OfferingStatus,
+  term: Term,
+  /** Same-season terms the course had sections in, most recent first. */
+  seenInSeason: z.array(Term),
+  message: z.string().min(1),
+  source: SourceReference,
+});
+export type Offering = z.infer<typeof Offering>;
+
 export const EligibilityResult = z
   .strictObject({
     versions: ResultVersions,
     courseId: CourseId,
     /** The term the student would take it. */
     term: Term,
+    /** Requisites only. Whether the course was already taken or is offered
+     *  is reported beside it (`taken`, `offering`) and never changes it; the
+     *  candidate filter (flags.ts) combines the three. */
     status: EligibilityStatus,
     /** Null when the course has none. */
     prerequisite: RequisiteEvaluation.nullable(),
     corequisite: RequisiteEvaluation.nullable(),
+    taken: CourseTaken,
+    offering: Offering,
     reasons: z.array(Reason),
     sources: z.array(SourceReference),
   })
   .superRefine((e, ctx) => {
+    if (compareTerms(e.offering.term, e.term) !== 0)
+      ctx.addIssue({ code: "custom", path: ["offering", "term"], message: "offering is for the evaluated term" });
     for (const field of ["prerequisite", "corequisite"] as const) {
       const tree = e[field];
       if (tree)
@@ -303,6 +372,9 @@ export const MilestoneResult = z
   .strictObject({
     /** Enrolled fall/spring semester it is due by. */
     semester: z.int().min(1),
+    /** That semester as a calendar term, assuming continuous fall/spring
+     *  enrollment from the record's firstTerm. Due by the end of it. */
+    dueTerm: Term,
     kind: z.enum(["courses", "count", "gpa", "note"]),
     status: MilestoneStatus,
     /** UF's own sentence for it. */
@@ -344,15 +416,34 @@ export const TrackingResult = z
     versions: ResultVersions,
     programId: ProgramId,
     /** Enrolled fall/spring semesters including the current one (summers
-     *  don't count, as in UF's tracking language). */
-    currentSemester: z.int().min(1),
+     *  don't count, as in UF's tracking language). 0: not started yet. */
+    currentSemester: z.int().min(0),
     status: TrackingStatus,
     milestones: z.array(MilestoneResult),
+    /** The earliest semester, this one or later, with a milestone not yet
+     *  met: what the student must do next and by when. Null when every
+     *  milestone is met. */
+    nextDeadline: z
+      .strictObject({
+        semester: z.int().min(1),
+        term: Term,
+        /** Indexes into `milestones`. */
+        milestones: z.array(z.int().nonnegative()).min(1),
+      })
+      .nullable(),
     reasons: z.array(Reason),
     caveats: z.array(Reason),
     sources: z.array(SourceReference),
   })
   .superRefine((t, ctx) => {
+    const open = t.milestones
+      .map((m, i) => ({ m, i }))
+      .filter(({ m }) => m.semester >= t.currentSemester && m.status !== "met");
+    const first = Math.min(...open.map(({ m }) => m.semester));
+    const want = open.filter(({ m }) => m.semester === first).map(({ i }) => i);
+    const got = t.nextDeadline;
+    if (open.length === 0 ? got !== null : got?.semester !== first || got.milestones.join() !== want.join())
+      ctx.addIssue({ code: "custom", path: ["nextDeadline"], message: "nextDeadline must be the earliest open milestone semester from now on" });
     const expected = combineMilestones(t.milestones, t.currentSemester);
     if (t.status !== expected)
       ctx.addIssue({ code: "custom", path: ["status"], message: `status must be "${expected}" for these milestones` });

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CatalogYear, CourseId, ProgramId, SourceReference } from "./common";
+import { CatalogYear, CourseId, ProgramId, SourceReference, Term, Timestamp } from "./common";
 import { Grade } from "./record";
 
 /**
@@ -302,6 +302,37 @@ export const ExamAward = z.strictObject({
 export type ExamAward = z.infer<typeof ExamAward>;
 
 // ---------------------------------------------------------------------------
+// Offerings (data/soc/terms.csv + the `terms` column of data/soc/courses.csv)
+// ---------------------------------------------------------------------------
+
+/** One term the scraper read from the Schedule of Courses. `complete`: every
+ *  page was read, so a course missing from it really wasn't scheduled.
+ *  Spring 2022 is incomplete (UF's server failed part-way; see `problems`). */
+export const ScheduleTerm = z.strictObject({
+  /** SOC term code, "2271" = Spring 2027 (schemas/common.ts termCode). */
+  code: z.string().regex(/^2\d\d[158]$/),
+  term: Term,
+  complete: z.boolean(),
+  /** The term is over (UF can still add sections to an open term). */
+  closed: z.boolean(),
+  problems: z.string().nullable(),
+  /** When the scraper finished reading it. */
+  fetchedAt: Timestamp,
+});
+export type ScheduleTerm = z.infer<typeof ScheduleTerm>;
+
+export const Schedule = z.strictObject({
+  /** Every term read, oldest first. A term not listed is unpublished (or
+   *  older than the scrape). */
+  terms: z.array(ScheduleTerm),
+  /** Term codes each course had sections in. A course absent here was in no
+   *  term read. */
+  offeredTerms: z.record(CourseId, z.array(z.string())),
+  source: SourceReference,
+});
+export type Schedule = z.infer<typeof Schedule>;
+
+// ---------------------------------------------------------------------------
 // The whole catalog
 // ---------------------------------------------------------------------------
 
@@ -313,5 +344,6 @@ export const Catalog = z.strictObject({
   courses: z.record(CourseId, Course),
   programs: z.record(ProgramId, Program),
   examAwards: z.record(z.string(), ExamAward),
+  schedule: Schedule,
 });
 export type Catalog = z.infer<typeof Catalog>;

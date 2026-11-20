@@ -1,5 +1,6 @@
 import type { Catalog } from "./schemas/catalog";
 import type { AcademicRecord, Grade } from "./schemas/record";
+import type { TakenStatus } from "./schemas/results";
 import { type RequisiteValue, combineOr } from "./status";
 
 /**
@@ -118,6 +119,23 @@ export class CourseHistory {
       }
     }
     return { completed: [...completed.values()], pending: [...pending.values()] };
+  }
+
+  /** Has the student already taken the course? passed: a completed attempt
+   *  with a passing grade, or exam credit. in_progress: enrolled now.
+   *  no_grade: completed, grade not recorded (may have passed). not_passed:
+   *  every attempt failed or was withdrawn (a retake is possible). none: no
+   *  attempt. The most decided status wins, in that order. */
+  taken(courseId: string): { status: TakenStatus; evidenceIds: string[] } {
+    const hs = this.holdings(courseId);
+    for (const [status, value] of [["passed", "met"], ["in_progress", "pending"], ["no_grade", "unknown"]] as const) {
+      const hit = hs.filter((h) => h.value === value);
+      if (hit.length) return { status, evidenceIds: hit.map((h) => h.entryId) };
+    }
+    const tried = this.record.attempts.filter((a) => a.courseId === courseId);
+    return tried.length
+      ? { status: "not_passed", evidenceIds: tried.map((a) => a.attemptId) }
+      : { status: "none", evidenceIds: [] };
   }
 
   /** Hours with no course attached (UF elective placeholders). */

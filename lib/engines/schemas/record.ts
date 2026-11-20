@@ -145,7 +145,10 @@ export const AcademicRecord = z
     /** The term "now" is, for this record. The engine never reads the clock:
      *  the same record gives the same answer whenever it is evaluated. */
     currentTerm: Term,
-    /** First UF term, for counting enrolled semesters (Critical Tracking). */
+    /** First term of college enrollment, for counting enrolled semesters
+     *  (Critical Tracking). A transfer student's first term is at the
+     *  previous institution. After currentTerm for an admitted student who
+     *  hasn't started (semester 0: nothing is due yet). */
     firstTerm: Term,
     programs: z.array(DeclaredProgram),
     attempts: z.array(CourseAttempt),
@@ -167,8 +170,8 @@ export const AcademicRecord = z
       if (ids.has(id)) ctx.addIssue({ code: "custom", path, message: `duplicate entry id "${id}"` });
       ids.add(id);
     }
-    if (compareTerms(r.firstTerm, r.currentTerm) > 0)
-      ctx.addIssue({ code: "custom", path: ["firstTerm"], message: "firstTerm is after currentTerm" });
+    if (compareTerms(r.firstTerm, r.currentTerm) > 0 && r.attempts.some((a) => a.term && compareTerms(a.term, r.firstTerm) >= 0))
+      ctx.addIssue({ code: "custom", path: ["firstTerm"], message: "a student who hasn't started (firstTerm after currentTerm) has no UF attempts yet" });
     r.attempts.forEach((a, i) => {
       if (!a.term) return;
       const order = compareTerms(a.term, r.currentTerm);

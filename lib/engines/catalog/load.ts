@@ -11,6 +11,8 @@ import {
   type Program,
   type Requisite,
   type RequirementGroup,
+  type Schedule,
+  termOfCode,
 } from "../schemas";
 
 /**
@@ -34,6 +36,7 @@ export const CATALOG_FILES = [
   "programs/milestones.csv",
   "programs/plans.csv",
   "exam_credit/awards.csv",
+  "soc/terms.csv",
 ] as const;
 export type CatalogFile = (typeof CATALOG_FILES)[number];
 
@@ -124,9 +127,11 @@ export function buildCatalog(files: Record<CatalogFile, string>): Catalog {
 
   const socReqs = requisitesByCourse(rows("soc/requisites.csv"));
   const socSeen = new Set<string>();
+  const offeredTerms: Record<string, string[]> = {};
   for (const r of rows("soc/courses.csv")) {
     if (socSeen.has(r.course_id)) throw new Error(`duplicate SOC course "${r.course_id}"`);
     socSeen.add(r.course_id);
+    offeredTerms[r.course_id] = list(r.terms);
     if (Object.hasOwn(courses, r.course_id)) continue;
     const req = socReqs.get(r.course_id) ?? {};
     courses[r.course_id] = {
@@ -261,6 +266,26 @@ export function buildCatalog(files: Record<CatalogFile, string>): Catalog {
     }, "exam award");
   }
 
+  // Terms the scraper read, oldest first (codes sort chronologically).
+  const termRows = rows("soc/terms.csv").sort((a, b) => a.term.localeCompare(b.term));
+  const schedule: Schedule = {
+    terms: termRows.map((r) => ({
+      code: r.term,
+      term: termOfCode(r.term),
+      complete: bool(r.complete),
+      closed: bool(r.closed),
+      problems: text(r.problems),
+      fetchedAt: r.fetched_to,
+    })),
+    offeredTerms,
+    source: {
+      kind: "schedule_of_courses",
+      label: `UF Schedule of Courses, ${termRows[0]?.name} to ${termRows.at(-1)?.name}`,
+      url: "https://one.uf.edu/soc/",
+      fetchedAt: termRows.map((r) => r.fetched_to).sort().at(-1),
+    },
+  };
+
   // One validation pass over everything assembled above. The casts in this
   // file (`as Program["kind"]`, ...) are checked here, not trusted.
   return Catalog.parse({
@@ -269,5 +294,6 @@ export function buildCatalog(files: Record<CatalogFile, string>): Catalog {
     courses,
     programs,
     examAwards,
+    schedule,
   });
 }
