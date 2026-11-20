@@ -159,7 +159,7 @@ Run these before opening a PR:
 
 First time only: `npx playwright install chromium`.
 
-`npm run test:e2e` reuses a dev server on port 3001 if one is running, otherwise it starts one. It needs `.env.local` with the Clerk publishable key and `NEXT_PUBLIC_API_MOCKS=true`, the same setup as `npm run dev`. No extra Clerk, Supabase, or test projects are needed. Every test runs twice: desktop (1280px) and mobile (375px).
+`npm run test:e2e` reuses a dev server on port 3001 if one is running, otherwise it starts one. It needs `.env.local` with the Clerk publishable key and `NEXT_PUBLIC_API_MOCKS=true`, the same setup as `npm run dev`. A server it starts has every endpoint mocked (`NEXT_PUBLIC_API_LIVE` is forced empty), whatever `.env.local` says; a reused `npm run dev` must have `NEXT_PUBLIC_API_LIVE` empty too. No extra Clerk, Supabase, or test projects are needed. Every test runs twice: desktop (1280px) and mobile (375px).
 
 | File in `e2e/` | Covers |
 | --- | --- |
