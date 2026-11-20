@@ -4,6 +4,7 @@ import type { Catalog, Requisite, RequisiteNode } from "./schemas/catalog";
 import type { AcademicRecord } from "./schemas/record";
 import { EligibilityResult, type RequisiteEvaluation } from "./schemas/results";
 import { ELIGIBILITY_OF, type RequisiteValue, combineAnd, combineOr } from "./status";
+import { offeringOf } from "./offering";
 import { resultVersions } from "./versions";
 
 /**
@@ -40,6 +41,8 @@ type Ctx = {
   history: CourseHistory;
   /** Concurrent courses, only while evaluating a corequisite. */
   concurrent: ReadonlySet<string>;
+  /** The course being evaluated. */
+  self: string;
 };
 
 /** Earned credits each class starts at (UF catalog, Student Classifications:
@@ -88,6 +91,10 @@ function judge(node: RequisiteNode, ctx: Ctx): Judged {
     case "course": {
       const id = node.course_id;
       let label = displayCode(ctx.catalog, id);
+      // A course can't require itself: the catalog text is in error (CHM
+      // 2045L's corequisite reads "CHM2045L"), so the leaf is unknown.
+      if (id === ctx.self)
+        return leaf("course", "unknown", `${label} (the course names itself; a catalog text error)`, { why: "requisite_unverifiable" });
       if (node.min_grade) label += ` (min ${node.min_grade}${node.or_s ? " or S" : ""})`;
       const { value, holdings } = ctx.history.best(id, node.min_grade, node.or_s);
       const evidenceIds = holdings.map((h) => h.entryId);
@@ -247,7 +254,8 @@ function judgeRequisite(req: Requisite | null, ctx: Ctx): Judged | null {
 }
 
 /** Can the student take `courseId` in `term`? `term` must be after the
- *  record's current term: courses in progress then count as pending. */
+ *  record's current term: courses in progress then count as pending. The
+ *  status is about requisites; `taken` and `offering` are reported beside it. */
 export function evaluateEligibility(
   catalog: Catalog,
   record: AcademicRecord,
@@ -261,7 +269,7 @@ export function evaluateEligibility(
   if (compareTerms(term, record.currentTerm) <= 0)
     throw new RangeError("eligibility is evaluated for a term after the record's currentTerm");
 
-  const base: Omit<Ctx, "concurrent"> = { catalog, record, history };
+  const base: Omit<Ctx, "concurrent"> = { catalog, record, history, self: courseId };
   const pre = judgeRequisite(course.prerequisite, { ...base, concurrent: new Set() });
   const co = judgeRequisite(course.corequisite, { ...base, concurrent: new Set(options.concurrent) });
   const status = ELIGIBILITY_OF[combineAnd([pre?.ev.value ?? "met", co?.ev.value ?? "met"])];
@@ -282,6 +290,8 @@ export function evaluateEligibility(
     status,
     prerequisite: pre?.ev ?? null,
     corequisite: co?.ev ?? null,
+    taken: history.taken(courseId),
+    offering: offeringOf(catalog, courseId, term),
     reasons,
     sources: sources.length ? sources : [course.source],
   });

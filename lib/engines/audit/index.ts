@@ -2,10 +2,10 @@ import { CourseHistory } from "../history";
 import type { Reason, SourceReference } from "../schemas/common";
 import type { Catalog, Program, RequirementGroup } from "../schemas/catalog";
 import type { AcademicRecord } from "../schemas/record";
-import { AuditResult, type GpaResult, type RequirementResult } from "../schemas/results";
+import { AuditResult, type GpaResult, type RequirementResult, remainingCredits } from "../schemas/results";
 import { type RequirementStatus, type RequisiteValue, combineRequirementStatuses } from "../status";
 import { resultVersions } from "../versions";
-import { type GroupOutcome, type Substitute, evaluateGroup } from "./group";
+import { type GroupOutcome, type Need, type Substitute, evaluateGroup, fullNeed } from "./group";
 import { type Held, appliedCourse, holdingsOf } from "./held";
 import { coursesOf, countingDomain, groupShape, openSlotsOf, spendOrder } from "./shape";
 
@@ -51,6 +51,18 @@ export function auditProgram(
   programId: string,
   history: CourseHistory = new CourseHistory(record, catalog),
 ): AuditResult {
+  return auditProgramDetailed(catalog, record, programId, history).result;
+}
+
+/** The audit plus, per requirement key, EVERY course that could still fill
+ *  it (the result lists the first REMAINING_SHOWN). Requirement flags read
+ *  these, so "does this course help?" is answered by the audit itself. */
+export function auditProgramDetailed(
+  catalog: Catalog,
+  record: AcademicRecord,
+  programId: string,
+  history: CourseHistory = new CourseHistory(record, catalog),
+): { result: AuditResult; remaining: ReadonlyMap<string, readonly string[]>; needs: ReadonlyMap<string, Need | null> } {
   const program = catalog.programs[programId];
   if (!program) throw new RangeError(`unknown program id "${programId}"`);
   const holdings = holdingsOf(history);
@@ -99,7 +111,7 @@ export function auditProgram(
   const counted = new Set(counting.flatMap((r) => r.appliedCourses.map((a) => a.courseId)));
   const requiredCredits = counting.map((r) => r.required.credits);
 
-  return AuditResult.parse({
+  const result = AuditResult.parse({
     versions: resultVersions(catalog, record),
     programId: program.id,
     programName: program.name,
@@ -112,14 +124,18 @@ export function auditProgram(
       required: { credits: requiredCredits.some((c) => c === null) ? null : sum(requiredCredits as number[]) },
       completed: { credits: sum(counting.map((r) => r.completed.credits)) },
       inProgress: { credits: sum(counting.map((r) => r.inProgress.credits)) },
+      remaining: { credits: remainingCredits(counting) },
     },
     requirements,
     unappliedCourses: holdings.completed
       .filter((h) => !counted.has(h.courseId))
       .map((h) => appliedCourse(catalog, record, h)),
-    gpa: [ufCumulativeGpa(history)],
+    gpa: gpaResults(history, ["uf_cumulative", "upper_division", "major", "critical_tracking"]),
     sources: [programSource, GRADING_POLICY],
   });
+  const remaining = new Map(program.requirements.map((g) => [g.key, outcomes.get(g.key)!.remaining]));
+  const needs = new Map(program.requirements.map((g) => [g.key, outcomes.get(g.key)!.need]));
+  return { result, remaining, needs };
 }
 
 // ---------------------------------------------------------------------------
@@ -195,7 +211,7 @@ function evaluateGroups(
 }
 
 function waived(message: string): GroupOutcome {
-  return { value: "met", applied: [], pending: [], reasons: [{ code: "waived", message }], remaining: [], openSlots: [] };
+  return { value: "met", applied: [], pending: [], reasons: [{ code: "waived", message }], remaining: [], openSlots: [], need: null };
 }
 
 /** A program whose data needs review: nothing is claimed, because a course
@@ -215,6 +231,7 @@ function needsReviewOutcome(group: RequirementGroup, held: ReadonlyMap<string, H
     ],
     remaining: coursesOf(shape).filter((id) => !held.has(id)),
     openSlots,
+    need: fullNeed(group, held),
   };
 }
 
@@ -294,15 +311,31 @@ function caveatsFor(program: Program, record: AcademicRecord): Reason[] {
   return caveats;
 }
 
-function ufCumulativeGpa(history: CourseHistory): GpaResult {
-  const g = history.ufCumulativeGpa();
-  return {
-    kind: "uf_cumulative",
-    status: g.value === null ? "unknown" : "computed",
-    value: g.value,
-    gradePoints: g.gradePoints,
-    gpaHours: g.gpaHours,
-    attemptIds: g.attemptIds,
-    reasons: g.value === null ? [{ code: "missing_input", message: "No graded UF attempts yet." }] : [],
-  };
+/** Why each GPA other than the UF cumulative one isn't computed. A GPA is
+ *  computed only where a source states which courses and attempts count. */
+const GPA_NOT_COMPUTED: Record<Exclude<GpaResult["kind"], "uf_cumulative">, string> = {
+  upper_division:
+    "Not computed: no catalog policy in the data defines the upper-division GPA, and program pages that use it don't agree (one says \"all courses taken after the student earned 60 credits\"; most give no definition).",
+  major: "Not computed: which courses count toward a major GPA is set by each program, and the program data doesn't list them.",
+  critical_tracking:
+    "Not computed: the critical-tracking GPA's courses and attempt rules differ by program (\"all attempts\", \"best of two attempts\"); the tracking result reports each threshold.",
+};
+
+/** Labelled GPAs, one per kind asked for. Only the UF cumulative GPA is
+ *  computed (UF grading policy: UF attempts only, every attempt of a repeat). */
+export function gpaResults(history: CourseHistory, kinds: readonly GpaResult["kind"][]): GpaResult[] {
+  return kinds.map((kind): GpaResult => {
+    if (kind !== "uf_cumulative")
+      return { kind, status: "unknown", value: null, gradePoints: 0, gpaHours: 0, attemptIds: [], reasons: [{ code: "gpa_rule_not_checked", message: GPA_NOT_COMPUTED[kind] }] };
+    const g = history.ufCumulativeGpa();
+    return {
+      kind,
+      status: g.value === null ? "unknown" : "computed",
+      value: g.value,
+      gradePoints: g.gradePoints,
+      gpaHours: g.gpaHours,
+      attemptIds: g.attemptIds,
+      reasons: g.value === null ? [{ code: "missing_input", message: "No graded UF attempts yet." }] : [],
+    };
+  });
 }

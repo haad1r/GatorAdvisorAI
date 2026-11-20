@@ -1,6 +1,6 @@
 import { CourseHistory, displayCode } from "./history";
 import { type MilestoneStatus, type RequisiteValue, combineAnd, combineMilestones, combineOr } from "./status";
-import type { Reason, Term } from "./schemas/common";
+import { type Reason, type Term, nextRegularTerm } from "./schemas/common";
 import type { Catalog, Milestone, Program } from "./schemas/catalog";
 import type { AcademicRecord, Grade } from "./schemas/record";
 import { type MilestoneResult, TrackingResult } from "./schemas/results";
@@ -26,6 +26,8 @@ import { resultVersions } from "./versions";
 
 /** Semesters are UF's enrolled fall/spring terms; summers don't count. */
 export function enrolledSemesters(first: Term, current: Term): number {
+  // An admitted student who hasn't started: semester 0, nothing due.
+  if (order(current) < order(first)) return 0;
   let n = 0;
   for (let year = first.year; year <= current.year; year++)
     for (const season of ["spring", "fall"] as const) {
@@ -36,6 +38,15 @@ export function enrolledSemesters(first: Term, current: Term): number {
   return Math.max(n, 1);
 }
 const order = (t: Term) => t.year * 3 + { spring: 0, summer: 1, fall: 2 }[t.season];
+
+/** The calendar term of enrolled semester `n`: the nth fall/spring term from
+ *  `first` on (continuous enrollment, as `enrolledSemesters` assumes). A
+ *  summer start makes the following fall semester 1. */
+export function semesterTerm(first: Term, n: number): Term {
+  let t: Term = first.season === "summer" ? { season: "fall", year: first.year } : first;
+  for (let i = 1; i < n; i++) t = nextRegularTerm(t);
+  return t;
+}
 
 type Slot = string[][]; // " or " alternatives, each an AND-set
 
@@ -54,12 +65,22 @@ export function evaluateTracking(
 
   const milestones = program.milestones.map((m, i) => evaluateMilestone(ctx, m, program.milestones.slice(0, i)));
   const status = combineMilestones(milestones, currentSemester);
+  const open = milestones.filter((m) => m.semester >= currentSemester && m.status !== "met");
+  const next = open.length ? Math.min(...open.map((m) => m.semester)) : null;
   return TrackingResult.parse({
     versions: resultVersions(catalog, record),
     programId,
     currentSemester,
     status,
     milestones,
+    nextDeadline:
+      next === null
+        ? null
+        : {
+            semester: next,
+            term: semesterTerm(record.firstTerm, next),
+            milestones: milestones.flatMap((m, i) => (m.semester === next && m.status !== "met" ? [i] : [])),
+          },
     reasons: trackingReasons(milestones, currentSemester),
     caveats: caveatsFor(program),
     sources: [program.source],
@@ -77,6 +98,7 @@ type Context = {
 function evaluateMilestone(ctx: Context, m: Milestone, earlier: readonly Milestone[]): MilestoneResult {
   const base = {
     semester: m.semester,
+    dueTerm: semesterTerm(ctx.record.firstTerm, m.semester),
     kind: m.kind,
     rawText: m.rawText,
     minGrade: m.kind === "courses" || m.kind === "count" ? m.minGrade : null,

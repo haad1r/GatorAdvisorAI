@@ -3,7 +3,7 @@ import type { Catalog, RequirementGroup } from "../schemas/catalog";
 import type { Reason, ReasonCode } from "../schemas/common";
 import { type RequisiteValue, combineAnd } from "../status";
 import type { Held, Holdings } from "./held";
-import { type OpenSlot, type Shape, coursesOf, groupShape, openSlotsOf } from "./shape";
+import { type OpenSlot, type Shape, type Slot, coursesOf, groupShape, openSlotsOf } from "./shape";
 
 /**
  * Evaluating ONE requirement group: claim courses for it from what is still
@@ -42,9 +42,24 @@ export type GroupOutcome = {
   /** Course ids that could still fill it, in catalog order. */
   remaining: string[];
   openSlots: OpenSlot[];
+  /** What is still needed, structured for the planner. Null when the group
+   *  is met or will be once current courses pass. */
+  need: Need | null;
 };
 
-type CountRule = NonNullable<RequirementGroup["logic"]["count_rules"]>[number];
+/** What a group still needs, after the student's holdings are claimed.
+ *  slots: each listed slot needs one of its courses (or prose).
+ *  options: every remaining course of ONE option (the one the student
+ *    follows, or any when none is started).
+ *  credits / count: that many more from the pool. An empty pool is prose
+ *    ("approved electives") the data doesn't list. */
+export type Need =
+  | { kind: "slots"; slots: Slot[] }
+  | { kind: "options"; options: string[][]; labels: string[]; started: boolean }
+  | { kind: "credits"; credits: number; pool: string[]; rules: CountRule[]; counted: { courseId: string; credits: number }[] }
+  | { kind: "count"; count: number; pool: string[] };
+
+export type CountRule = NonNullable<RequirementGroup["logic"]["count_rules"]>[number];
 
 const code = (ctx: GroupContext, id: string) => displayCode(ctx.catalog, id);
 const codes = (ctx: GroupContext, ids: readonly string[]) => ids.map((id) => code(ctx, id)).join(", ");
@@ -108,6 +123,19 @@ class Claimer {
     this.ctx.claimed?.set(h.courseId, this.key);
   }
 
+  /** A required course the program lists in two of its requirements (the
+   *  same row stated twice): count it here too, without taking it from the
+   *  requirement that already has it. */
+  readonly listedTwice: string[] = [];
+  shareDuplicate(id: string): Held | undefined {
+    const held = this.ctx.holdings.byCourse.get(id);
+    if (!held || this.taken.includes(held) || !this.elsewhere.has(id)) return undefined;
+    this.elsewhere.delete(id);
+    this.listedTwice.push(id);
+    this.taken.push(held);
+    return held;
+  }
+
   /** Claim order: completed before in progress, then courses that help an
    *  unmet floor rule, then uncontested before contested, then the course
    *  itself before a substitute, then catalog order (the sort is stable). */
@@ -151,7 +179,7 @@ function evaluatePool(
 
   if (shape.needed === null || shape.needed === 0) {
     notes.push(unknownReason("rule_not_modeled", "The catalog states no amount for this requirement, so progress can't be measured."));
-    return { value: "unknown", applied: [], pending: [], notes };
+    return { value: "unknown", applied: [], pending: [], notes, need: null };
   }
   if (shape.pool.length === 0 && c.ctx.substitutes.length === 0) {
     notes.push(
@@ -160,13 +188,23 @@ function evaluatePool(
         "The catalog describes the courses for this requirement in prose, not as a list, so which of the student's courses count can't be decided. An advisor substitution in the record can fill it.",
       ),
     );
-    return { value: "unknown", applied: [], pending: [], notes };
+    const need: Need =
+      shape.kind === "credits"
+        ? { kind: "credits", credits: shape.needed, pool: [], rules, counted: [] }
+        : { kind: "count", count: shape.needed, pool: [] };
+    return { value: "unknown", applied: [], pending: [], notes, need };
   }
 
-  const cands = [
+  let cands = [
     ...shape.pool.map((id) => c.available(id)).filter((h): h is Held => h !== undefined),
     ...c.floating(),
   ];
+  // A language sequence (`is_sequence`) is one language's courses: claim
+  // only the prefix the student holds the most completed credits in (then
+  // most credits counting current courses), so 1130s in two languages
+  // don't add up to one sequence.
+  const sequencePrefix = group.logic.is_sequence ? mainPrefix(cands) : null;
+  if (sequencePrefix) cands = cands.filter((h) => h.courseId.slice(0, 3) === sequencePrefix);
   const helps = (id: string) => rules.some((r) => r.at_least !== undefined && countsToward(r, id));
   const breaksCeiling = (h: Held) =>
     rules.some((r) => r.at_most !== undefined && countsToward(r, h.courseId) && tally(r, [...c.taken, h]) > r.at_most);
@@ -211,7 +249,28 @@ function evaluatePool(
       });
     }
   }
-  return { value, applied, pending, notes };
+  const short = Math.max(0, shape.needed - total);
+  const rulesShort = rules.some((r) => !ruleOk(r, c.taken));
+  const open = shape.pool.filter((id) => !ctx.holdings.byCourse.has(id) && (!sequencePrefix || id.slice(0, 3) === sequencePrefix));
+  const need: Need | null =
+    value === "met" || value === "pending" || (short === 0 && !rulesShort)
+      ? null
+      : shape.kind === "credits"
+        ? { kind: "credits", credits: short, pool: open, rules, counted: c.taken.map((h) => ({ courseId: h.courseId, credits: h.holding.credits })) }
+        : { kind: "count", count: Math.max(short, 1), pool: open };
+  return { value, applied, pending, notes, need };
+}
+
+/** The prefix with the most completed credits among `held`, then the most
+ *  credits counting current courses, then alphabetical. Null when empty. */
+function mainPrefix(held: readonly Held[]): string | null {
+  const score = new Map<string, [number, number]>();
+  for (const h of held) {
+    const p = h.courseId.slice(0, 3);
+    const [done, all] = score.get(p) ?? [0, 0];
+    score.set(p, [done + (h.state === "completed" ? h.holding.credits : 0), all + h.holding.credits]);
+  }
+  return [...score].sort((a, b) => b[1][0] - a[1][0] || b[1][1] - a[1][1] || a[0].localeCompare(b[0]))[0]?.[0] ?? null;
 }
 
 /** Each slot filled by one alternative. Slots with the fewest alternatives
@@ -224,7 +283,7 @@ function evaluateSlots(
   const notes: Reason[] = [];
   if (shape.slots.length === 0) {
     notes.push(unknownReason("rule_not_modeled", "The catalog lists nothing to take for this requirement."));
-    return { value: "unknown", applied: [], pending: [], notes, remaining: [], openSlots: [] };
+    return { value: "unknown", applied: [], pending: [], notes, remaining: [], openSlots: [], need: null };
   }
   const order = shape.slots
     .map((slot, i) => ({ slot, i }))
@@ -235,6 +294,14 @@ function evaluateSlots(
   for (const { slot, i } of order) {
     const native = slot.courses.map((id) => c.available(id)).filter((h): h is Held => h !== undefined);
     const pick = c.ordered(native)[0] ?? c.ordered(c.floating())[0];
+    // A one-course slot whose course another requirement of this program
+    // already counts: the page lists the same required course twice.
+    const dup = !pick && slot.courses.length === 1 && !slot.prose.length ? c.shareDuplicate(slot.courses[0]) : undefined;
+    if (dup) {
+      filledAt.set(dup, i);
+      values.push(dup.state === "completed" ? "met" : "pending");
+      continue;
+    }
     if (pick) {
       c.take(pick);
       filledAt.set(pick, i);
@@ -270,6 +337,7 @@ function evaluateSlots(
     notes,
     remaining: [...new Set(unfilled.flatMap((s) => s.courses))].filter((id) => !ctx.holdings.byCourse.has(id)),
     openSlots: unfilled.flatMap((s) => s.prose),
+    need: unfilled.length ? { kind: "slots", slots: unfilled } : null,
   };
 }
 
@@ -309,7 +377,15 @@ function evaluateOptions(
     else notes.push({ code: "requirements_remaining", message: `Needs every course of one option: ${shape.labels.join("; ")}.` });
   }
   const remaining = best.got.length ? missing : coursesOf(shape);
+  const started = best.got.length > 0;
+  const need: Need | null =
+    value === "met" || value === "pending"
+      ? null
+      : started
+        ? { kind: "options", options: [missing], labels: [shape.labels[best.index]], started }
+        : { kind: "options", options: shape.options.map((o) => o.filter((id) => !ctx.holdings.byCourse.has(id))), labels: shape.labels, started };
   return {
+    need,
     value,
     applied: c.taken.filter((h) => h.state === "completed"),
     pending: c.taken.filter((h) => h.state === "pending"),
@@ -325,7 +401,8 @@ function evaluateOptions(
 export function evaluateGroup(group: RequirementGroup, ctx: GroupContext): GroupOutcome {
   const shape = groupShape(group);
   const c = new Claimer(ctx, group.key);
-  let out: Omit<GroupOutcome, "reasons" | "remaining" | "openSlots"> & {
+  let out: Omit<GroupOutcome, "reasons" | "remaining" | "openSlots" | "need"> & {
+    need: Need | null;
     notes: Reason[];
     remaining?: string[];
     openSlots?: OpenSlot[];
@@ -361,6 +438,8 @@ export function evaluateGroup(group: RequirementGroup, ctx: GroupContext): Group
       });
   for (const h of c.taken.filter((t) => t.exceptionId))
     reasons.push({ code: "substitution_applied", message: `${code(ctx, h.courseId)} counts here by advisor substitution (${h.exceptionId}).`, courseIds: [h.courseId] });
+  for (const id of c.listedTwice)
+    reasons.push({ code: "listed_twice", message: `${code(ctx, id)} is a required course in another requirement of this program too; the page lists it twice, so it counts for both.`, courseIds: [id] });
   for (const id of new Set(c.overlapped.filter((id) => c.taken.some((t) => t.courseId === id))))
     reasons.push({ code: "overlap_allowed", message: `${code(ctx, id)} also counts elsewhere, by advisor exception.`, courseIds: [id] });
 
@@ -374,5 +453,25 @@ export function evaluateGroup(group: RequirementGroup, ctx: GroupContext): Group
       out.remaining ??
       (out.value === "met" || out.value === "pending" ? [] : pool.filter((id) => !ctx.holdings.byCourse.has(id))),
     openSlots: out.openSlots ?? (out.value === "met" ? [] : openSlotsOf(group)),
+    need: out.value === "met" || out.value === "pending" ? null : out.need,
   };
+}
+
+/** The whole need of a group whose holdings can't be trusted (a program
+ *  under review): its shape, minus courses the student already holds. */
+export function fullNeed(group: RequirementGroup, held: { has(id: string): boolean }): Need | null {
+  const shape = groupShape(group);
+  const open = (ids: readonly string[]) => ids.filter((id) => !held.has(id));
+  switch (shape.kind) {
+    case "options":
+      return { kind: "options", options: shape.options.map(open), labels: shape.labels, started: false };
+    case "credits":
+      return shape.needed ? { kind: "credits", credits: shape.needed, pool: open(shape.pool), rules: group.logic.count_rules ?? [], counted: [] } : null;
+    case "count":
+      return shape.needed ? { kind: "count", count: shape.needed, pool: open(shape.pool) } : null;
+    case "slots": {
+      const slots = shape.slots.filter((s) => !s.courses.some((id) => held.has(id)));
+      return slots.length ? { kind: "slots", slots } : null;
+    }
+  }
 }
