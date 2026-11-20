@@ -1,17 +1,23 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware } from "@clerk/nextjs/server";
+import type { NextRequest } from "next/server";
 
-const isPublicPage = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)", "/preview"]);
-const isApi = createRouteMatcher(["/api(.*)"]);
+const PUBLIC_PAGES = ["/sign-in", "/sign-up", "/preview"];
+
+function under(req: NextRequest, prefix: string) {
+  const path = req.nextUrl.pathname;
+  return path === prefix || path.startsWith(`${prefix}/`);
+}
 
 /* With every endpoint mocked there is no real data behind the pages, and the e2e suite browses signed out. */
 const allMocked = process.env.NEXT_PUBLIC_API_MOCKS === "true" && !process.env.NEXT_PUBLIC_API_LIVE?.trim();
 
 /*
- * A first gate only. Each API route still checks the user itself, because
- * Next.js doesn't treat proxy as authorization.
+ * A first gate only, and deny by default: any page not listed above needs a
+ * session. Each API route still checks the user itself, because data is only
+ * reachable through the API and Next.js doesn't treat proxy as authorization.
  */
 export default clerkMiddleware(async (auth, req) => {
-  if (isApi(req)) {
+  if (under(req, "/api")) {
     const { userId } = await auth();
     if (!userId) {
       return Response.json(
@@ -21,7 +27,7 @@ export default clerkMiddleware(async (auth, req) => {
     }
     return;
   }
-  if (isPublicPage(req) || allMocked) return;
+  if (PUBLIC_PAGES.some((p) => under(req, p)) || allMocked) return;
   await auth.protect();
 });
 
