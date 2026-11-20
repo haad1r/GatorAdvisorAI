@@ -162,6 +162,14 @@ class SameDepartment(unittest.TestCase):
         self.assertFalse(same_department("", {"History"}))
 
 
+class Numbers(unittest.TestCase):
+    def test_no_data_is_blank_but_zero_percent_is_kept(self):
+        self.assertEqual(rmp_import._number(-1, zero_is_data=True), "")
+        self.assertEqual(rmp_import._number(0, zero_is_data=True), "0")
+        self.assertEqual(rmp_import._number(0), "")
+        self.assertEqual(rmp_import._number(4.5), "4.5")
+
+
 def page(nodes, result_count, has_next=False):
     edges = [{"node": {"legacyId": n, "firstName": "A", "lastName": f"P{n}", "department": "History",
                        "avgRating": 4, "avgDifficulty": 3, "wouldTakeAgainPercent": 80, "numRatings": 5,

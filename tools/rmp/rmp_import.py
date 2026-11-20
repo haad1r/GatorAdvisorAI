@@ -92,12 +92,12 @@ def _post(variables: dict) -> dict:
         raise RuntimeError(f"Unexpected response shape (RMP may have changed its API): {str(payload)[:300]}") from e
 
 
-def _number(value) -> str:
-    """RMP uses 0 and -1 for 'no data'; store those as blanks."""
+def _number(value, zero_is_data=False) -> str:
+    """RMP uses -1 for 'no data', and 0 too for 1-5 scores; store those as blanks."""
     if value is None:
         return ""
     v = float(value)
-    return "" if v <= 0 else f"{v:g}"
+    return "" if v < 0 or (v == 0 and not zero_is_data) else f"{v:g}"
 
 
 def fetch(force: bool) -> None:
@@ -133,7 +133,7 @@ def fetch(force: bool) -> None:
                 "department": (n.get("department") or "").strip(),
                 "quality": _number(n.get("avgRating")),
                 "difficulty": _number(n.get("avgDifficulty")),
-                "would_take_again": _number(n.get("wouldTakeAgainPercent")),
+                "would_take_again": _number(n.get("wouldTakeAgainPercent"), zero_is_data=True),
                 "num_ratings": int(n.get("numRatings") or 0),
             })
         print(f"  page {requests}: {len(rows)} professors so far (of ~{expected})")
