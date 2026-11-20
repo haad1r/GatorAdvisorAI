@@ -98,6 +98,7 @@ TABLES = [
     Table("terms", ["term"], {
         "term": ("term", required), "name": ("name", required),
         "closed": ("closed", boolean), "complete": ("complete", boolean),
+        "fetched_at": ("fetched_to", text),
     }, one("soc/terms.csv")),
     Table("courses", ["id"], {
         "id": ("id", required), "code": ("code", required), "name": ("name", required),

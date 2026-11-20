@@ -34,7 +34,25 @@ The schema for #6 (private student data) and #8 (catalog persistence). One migra
 
 **Stale writes and versions.** The course list has a `version`. A save sends the version it started from; the server only saves if it still matches, then adds 1. If something else saved in between (another tab), the versions differ and the save is rejected with `409 STALE_WRITE`, which the Import page already handles. The same check makes a double-clicked Save harmless: the second request carries the old version and is rejected instead of adding credits twice.
 
-**Transactions.** Saving a course list means deleting the old rows, inserting the new ones and bumping the version. Do all three in one transaction, so a failure halfway leaves the old list untouched instead of half a list.
+**Transactions.** Saving a course list means deleting the old rows, inserting the new ones and bumping the version. All three happen in one transaction, so a failure halfway leaves the old list untouched instead of half a list. `supabase-js` can't run several statements as one transaction, so the save is a database function the route calls:
+
+```ts
+const { data: version, error } = await db().rpc("save_coursework", {
+  p_user_id: userId,             // from Clerk, never the request
+  p_expected_version: body.version,
+  p_rows: rows,                  // [{ course_code, grade, credits, term, source, status, original_label? }]
+})
+```
+
+It returns the new version. A student with no saved list yet is at version 0. Errors, by `error.code`:
+
+| `error.code` | Meaning | Respond with |
+|---|---|---|
+| `P0409` | The version is out of date (another tab or a double click saved first). Nothing changed. | `409 STALE_WRITE` |
+| `23514` | A row broke a rule (course code format, source, status, negative credits). Nothing changed. | `400 VALIDATION_ERROR` |
+| `23503` | The student has no profile yet. | `404 NOT_FOUND` |
+
+Two saves at the same moment are safe: the second waits for the first, then gets `P0409`. Only the server's secret key can call the function; the browser roles can't.
 
 **Account deletion that never lies.** Deletion has two parts that can fail separately: the database (one `DELETE FROM profiles`, cascade does the rest) and Clerk (an API call). `account_deletions` records each part's completion time, attempts and last error. The app only tells the student "deleted" when both are done; otherwise it retries. That's #6 step 8 and the Settings page's "wasn't fully deleted" message.
 
@@ -50,7 +68,7 @@ Each mirrors a file in `data/`, column for column where possible:
 | `requirement_groups` | `data/programs/requirements.csv` | `program_id, group_key` |
 | `tracking_milestones` | `data/programs/milestones.csv` | `program_id, semester, position` (position = the row's order within its program and semester in the CSV, from 1; rows can repeat word for word) |
 | `model_plan_courses` | `data/programs/plans.csv` | `program_id, semester_index, position` |
-| `terms` | `data/soc/terms.csv` | `term` |
+| `terms` | `data/soc/terms.csv` | `term` (`fetched_at` = when that term's schedule was fetched, from `fetched_to`) |
 | `sections` | `data/soc/sections/<term>.csv` | `term, class_number` |
 | `exam_awards` | `data/exam_credit/awards.csv` | `id` |
 | `professor_ratings` | `data/rmp/professors.csv` | `rmp_id` |

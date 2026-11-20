@@ -115,6 +115,67 @@ end $$;
 -- A queued job can't recreate data for a deleted student.
 select pg_temp.must_fail('recreating data after deletion', $$insert into survey_submissions (user_id, survey_version, interest_list_version, answers) values ('user_A', 'survey_v1', 'interests_v1', '[]')$$);
 
+-- Freshness: terms record when their schedule data was fetched.
+select fetched_at from catalog.terms limit 0;
+\echo PASS  catalog.terms has fetched_at
+
+-- save_coursework: replaces the whole list, bumps the version, refuses stale or partial saves.
+do $$ declare v int; n int;
+begin
+  v := public.save_coursework('user_B', 1, '[
+    {"course_code":"MAC2311","grade":"A","credits":4,"term":"Fall 2026","source":"transcript","status":"confirmed"},
+    {"course_code":"ENC1101","grade":"B+","credits":3,"term":"Fall 2026","source":"manual","status":"needs-review","original_label":"ENC 1101 Expos & Arg Writing"}]');
+  select count(*) into n from coursework where user_id = 'user_B';
+  if v <> 2 or n <> 2 then raise exception 'FAIL first save returned version % with % rows', v, n; end if;
+  v := public.save_coursework('user_B', 2, '[{"course_code":"MAC2311","grade":"A","credits":4,"term":"Fall 2026","source":"transcript","status":"confirmed"}]');
+  select count(*) into n from coursework where user_id = 'user_B';
+  if v <> 3 or n <> 1 then raise exception 'FAIL second save returned version % with % rows', v, n; end if;
+  raise notice 'PASS  save_coursework replaces the list and bumps the version';
+end $$;
+
+do $$ begin
+  perform public.save_coursework('user_B', 2, '[]');
+  raise exception 'FAIL a save with an old version went through';
+exception when sqlstate 'P0409' then
+  raise notice 'PASS  a save with an old version raises P0409 (STALE_WRITE)';
+end $$;
+select pg_temp.must_fail('a save with no version', $$select public.save_coursework('user_B', null, '[]')$$);
+select pg_temp.must_fail('a save with one bad row',
+  $$select public.save_coursework('user_B', 3, '[{"course_code":"COP3530","grade":"A","credits":3,"term":"x","source":"manual","status":"confirmed"},{"course_code":"COP 3530","grade":"A","credits":3,"term":"x","source":"manual","status":"confirmed"}]')$$);
+select pg_temp.must_fail('a save for someone with no profile', $$select public.save_coursework('user_nobody', 0, '[]')$$);
+
+do $$ declare v int; n int;
+begin
+  select version into v from coursework_records where user_id = 'user_B';
+  select count(*) into n from coursework where user_id = 'user_B';
+  if v <> 3 or n <> 1 then raise exception 'FAIL refused saves changed the record: version %, % rows', v, n; end if;
+  raise notice 'PASS  refused saves leave the list and version untouched';
+end $$;
+
+insert into profiles (user_id, email, preferred_name, class_standing, program_id, catalog_year, entry_term, expected_graduation)
+values ('user_C', 'c@ufl.edu', 'Cam', 'junior', 'uglas-csc_bs', '2024-2025', 'Fall 2024', 'Spring 2028');
+do $$ begin
+  if public.save_coursework('user_C', 0, '[]') <> 1 then raise exception 'FAIL first save for a new student'; end if;
+  raise notice 'PASS  a new student starts at version 0 and their first save makes version 1';
+end $$;
+
+grant usage on schema public to anon, authenticated;
+set role anon;
+do $$ begin
+  perform public.save_coursework('user_B', 3, '[]');
+  raise exception 'FAIL the anon role can call save_coursework';
+exception when insufficient_privilege then
+  raise notice 'PASS  the anon role can''t call save_coursework';
+end $$;
+set role authenticated;
+do $$ begin
+  perform public.save_coursework('user_B', 3, '[]');
+  raise exception 'FAIL the authenticated role can call save_coursework';
+exception when insufficient_privilege then
+  raise notice 'PASS  the authenticated role can''t call save_coursework';
+end $$;
+reset role;
+
 -- RLS: a browser role with no policies sees nothing.
 do $$ begin if not exists (select 1 from pg_roles where rolname = 'anon_test') then create role anon_test nologin; end if; end $$;
 grant usage on schema public, catalog to anon_test;
