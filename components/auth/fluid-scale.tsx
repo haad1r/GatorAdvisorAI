@@ -28,10 +28,10 @@ type FluidScaleProps = {
  */
 export function FluidScale({
   children,
-  baseWidth = 540,
+  baseWidth = 650,
   min = 1,
-  max = 1.55,
-  maxStacked = 1.15,
+  max = 1.25,
+  maxStacked = 1.05,
 }: FluidScaleProps) {
   const ref = React.useRef<HTMLDivElement>(null)
   const [zoom, setZoom] = React.useState<number | null>(null)
