@@ -56,12 +56,22 @@ Each mirrors a file in `data/`, column for column where possible:
 | `professor_ratings` | `data/rmp/professors.csv` | `rmp_id` |
 | `instructor_matches` | `data/rmp/instructor_ratings.csv` | `instructor_name` |
 
-**Loading notes for step [11]:**
-- List columns (`gen_ed`, `other_attributes`, `instructors`, `course_ids`, `eligible_course_ids`) are `|`-separated in the CSVs. Convert with `string_to_array(value, '|')`; JSON lists (`mentions`, `eligible_course_ids` in requirements) with a JSON parse.
-- Booleans are `True` / `False`.
-- Empty strings mean "no value" and should load as `NULL` in numeric columns.
-- Reloads should upsert (`INSERT ... ON CONFLICT (key) DO UPDATE`) so ids stay stable and nothing duplicates (#8 acceptance criterion).
-- Every value in the current data fits these column types (checked on 2026-11-18).
+### Loading the catalog (step [11])
+
+`tools/db/load_catalog.py` loads the CSVs into these tables. It was first run on 2026-11-19; everything except the two RMP tables is loaded.
+
+```bash
+python3 tools/db/load_catalog.py                    # every table
+python3 tools/db/load_catalog.py courses sections   # only these
+python3 tools/db/load_catalog.py --dry-run          # write the SQL to tools/db/out/, send nothing
+```
+
+- **Safe to re-run.** Each table is upserted, then rows no longer in the CSV are deleted (per term for `sections`). A re-run with unchanged data writes nothing, and ids stay stable (#8 acceptance criterion). An empty CSV stops the load instead of emptying the table.
+- **How it connects.** Through `supabase db query --remote`, using your Supabase CLI login and the linked project (`supabase login`, then `supabase link`). No password or key needed. If `SUPABASE_DB_URL` is set, it uses `psql` with that URL instead.
+- **Batches.** The CLI rejects requests over ~1 MB, so rows go in batches of ~800 KB (about 80 for `sections`). Each batch is its own transaction; if one fails, the load stops there and a re-run picks up the rest.
+- **Checks.** After each table it compares the database's row count with the CSV. Two different CSV rows with the same key stop the load; exact repeats are dropped.
+- **RMP.** `professor_ratings` and `instructor_matches` are skipped until `data/rmp/` exists (PR #24). Then: `python3 tools/db/load_catalog.py professor_ratings instructor_matches`.
+- **CSV formats it converts:** `|`-separated lists (`gen_ed`, `instructors`, `course_ids`, ...), JSON columns and JSON lists (`tree`, `mentions`, `logic`, `eligible_course_ids`, `slots`, `pool`), `True` / `False` booleans, and empty strings as `NULL`. `tracking_milestones.position` is numbered from the CSV order.
 
 ## Setting up Supabase (step [3])
 
