@@ -8,7 +8,7 @@ import type {
   SurveySubmission,
 } from "@/lib/api/types"
 import { hasErrors, type FieldErrors } from "@/lib/forms"
-import { validateProfile } from "@/lib/onboarding"
+import { emptyProfile, validateProfile } from "@/lib/onboarding"
 import {
   courseworkFixture,
   examFixture,
@@ -19,6 +19,7 @@ import {
   termFor,
   weeklyMeetingsFixture,
 } from "./fixtures"
+import { auditFixture, trackingFixture } from "./audit-fixtures"
 
 type Store = {
   profile: Profile
@@ -123,6 +124,10 @@ export const routes: Record<string, Handler> = {
     return ok({ term: termFor(week), weekStart: week, meetings })
   },
 
+  /* Fixed results: they don't recompute when profile or courses change. */
+  "GET /api/audit": () => ok({ ...auditFixture, recordVersion: store.coursework.version }),
+  "GET /api/tracking": () => ok(trackingFixture),
+
   "GET /api/profile": () => ok(store.profile),
 
   "PUT /api/profile": (body) => {
@@ -141,6 +146,15 @@ export const routes: Record<string, Handler> = {
     if (hasErrors(errors)) return invalid(errors)
     store.survey = structuredClone(submission)
     return ok(store.survey)
+  },
+
+  "DELETE /api/account": () => {
+    store = {
+      profile: structuredClone(emptyProfile),
+      coursework: { version: store.coursework.version + 1, rows: [] },
+      survey: null,
+    }
+    return ok(null)
   },
 
   "GET /api/coursework": () => ok(store.coursework),

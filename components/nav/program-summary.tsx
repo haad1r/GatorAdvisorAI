@@ -4,8 +4,9 @@ import * as React from "react"
 import { useApi } from "@/lib/api/use-api"
 import type { Profile } from "@/lib/api/types"
 import { PLACEHOLDER_MAJOR_OPTIONS } from "@/lib/onboarding"
+import { onProfileChange } from "@/lib/profile-events"
 
-/** "Computer Science · 2025-2026 catalog". Renders nothing until the profile loads, or if it fails. */
+/** "Computer Science · 2025-2026 catalog". Renders nothing until the profile loads, if it fails, or if it is empty. */
 export function ProgramSummary({ className }: { className?: string }) {
   const api = useApi()
   const [profile, setProfile] = React.useState<Profile | null>(null)
@@ -15,12 +16,18 @@ export function ProgramSummary({ className }: { className?: string }) {
     api.getProfile().then((result) => {
       if (live && result.ok) setProfile(result.data)
     })
+    const stop = onProfileChange((p) => {
+      live = false
+      setProfile(p)
+    })
     return () => {
       live = false
+      stop()
     }
   }, [api])
 
-  if (!profile) return null
+  // A new or deleted account has an empty profile: show nothing rather than " ·  catalog".
+  if (!profile?.major || !profile.catalogYear) return null
   const major = PLACEHOLDER_MAJOR_OPTIONS.find((o) => o.value === profile.major)?.label ?? profile.major
   return (
     <p className={className}>

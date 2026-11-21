@@ -55,7 +55,7 @@ export type SurveySubmission = {
 
 export type CourseworkStatus = "confirmed" | "needs-review"
 
-export type CourseworkSource = "transcript" | "manual"
+export type CourseworkSource = "transcript" | "manual" | "exam"
 
 export type CourseworkRow = {
   id: string
@@ -101,6 +101,97 @@ export type WeekSchedule = {
   meetings: ScheduleMeeting[]
 }
 
+/*
+ * Degree audit and Critical Tracking. PROVISIONAL: taken from the engine plan
+ * in issue #8 ("The 5 answers", 1 and 4). Shaun's engine owns these shapes;
+ * confirm or replace them when it publishes its own.
+ */
+
+/** #8: every answer is one of these. Missing data or rules give "unknown", never a guess. */
+export type AuditStatus = "met" | "in_progress" | "not_met" | "unknown"
+
+export type RequirementCategory = "major" | "gen_ed" | "minor"
+
+/** Where a rule came from: catalog page and when it was read. */
+export type SourceReference = {
+  label: string
+  url: string
+  /** ISO timestamp. */
+  fetchedAt: string
+}
+
+export type CountedCourse = {
+  courseCode: string
+  /** null while the course is in progress. */
+  grade: string | null
+  credits: number
+  term: string
+  source: "transcript" | "manual" | "exam" | "transfer"
+  inProgress: boolean
+}
+
+export type RequirementResult = {
+  id: string
+  category: RequirementCategory
+  title: string
+  status: AuditStatus
+  /** null when the requirement isn't measured that way. */
+  needed: { credits: number | null; courses: number | null }
+  earned: { credits: number; courses: number }
+  counted: CountedCourse[]
+  /** What would finish it, as UF words it ("COT 3100", "One of ENC 3246, ENC 2210"). */
+  stillToTake: string[]
+  /** One short sentence. */
+  reason: string
+  sources: SourceReference[]
+}
+
+export type GpaKind = "overall" | "major" | "upper_division"
+
+export type GpaResult = {
+  kind: GpaKind
+  /** null when there is nothing to average yet, or the rule is unknown. */
+  value: number | null
+  note?: string
+}
+
+export type DegreeAudit = {
+  program: { id: string; name: string; catalogYear: string }
+  /** Coursework version the audit was run against. */
+  recordVersion: number
+  generatedAt: string
+  credits: { earned: number; inProgress: number; required: number; remaining: number }
+  /** Earned credits toward the degree, 0-100. From the engine, not computed by the UI (#21). */
+  percentComplete: number
+  gpa: GpaResult[]
+  requirements: RequirementResult[]
+  /** Courses counting toward more than one requirement. */
+  sharedCourses: { courseCode: string; requirementIds: string[] }[]
+  /** Everything the engine couldn't decide. */
+  unknowns: { requirementId: string | null; message: string }[]
+}
+
+/** #8 answer 4. */
+export type TrackingStatus = "met" | "at_risk" | "not_met" | "unknown"
+
+export type TrackingMilestone = {
+  id: string
+  /** Semester number in the program's tracking plan (1 = first). */
+  semester: number
+  description: string
+  /** The term this must be done by, for this student ("Spring 2027"). */
+  deadlineTerm: string
+  status: TrackingStatus
+  reason: string
+  sources: SourceReference[]
+}
+
+export type TrackingResult = {
+  milestones: TrackingMilestone[]
+  /** The earliest milestone that isn't met yet, or null. */
+  nextDeadline: TrackingMilestone | null
+}
+
 /** Shown in the app footer so students know how current the data is. */
 export type DataFreshness = {
   catalogYear: string
@@ -109,7 +200,7 @@ export type DataFreshness = {
 }
 
 export type ApiRequest = {
-  method: "GET" | "POST" | "PUT"
+  method: "GET" | "POST" | "PUT" | "DELETE"
   path: string
   body?: unknown
 }

@@ -22,10 +22,12 @@ import {
   CLASS_STANDING_OPTIONS,
   ONBOARDING_STEPS,
   PLACEHOLDER_CATALOG_YEARS,
+  PLACEHOLDER_ENTRY_TERMS,
   PLACEHOLDER_GRAD_TERMS,
   PLACEHOLDER_MAJOR_OPTIONS,
   PROFILE_LABELS,
   emptyProfile,
+  errorsAfterChange,
   validateProfile,
   type OnboardingProfile,
   type Option,
@@ -67,12 +69,7 @@ export function OnboardingForm({
   function update(field: keyof OnboardingProfile, value: string) {
     setProfile((p) => ({ ...p, [field]: value }))
     // Clear that field's error as soon as the user fixes it.
-    if (state.fieldErrors?.[field]) {
-      setState((s) => ({
-        ...s,
-        fieldErrors: { ...s.fieldErrors, [field]: undefined },
-      }))
-    }
+    setState((s) => ({ ...s, fieldErrors: errorsAfterChange(s.fieldErrors, field) }))
   }
 
   function goTo(next: number) {
@@ -167,6 +164,14 @@ export function OnboardingForm({
               field="catalogYear"
               description="Usually the year you started at UF. It decides which requirements apply to you."
               options={PLACEHOLDER_CATALOG_YEARS}
+              profile={profile}
+              state={state}
+              update={update}
+            />
+            <SelectField
+              field="entryTerm"
+              description="Used to count your semesters for Critical Tracking."
+              options={PLACEHOLDER_ENTRY_TERMS}
               profile={profile}
               state={state}
               update={update}
