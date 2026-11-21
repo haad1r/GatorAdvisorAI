@@ -1,0 +1,55 @@
+{
+  "record": "student-003.record.json",
+  "summary": "Biosecurity and Biological Invasions certificate: a repeat in progress (BSC 2011, E then retaking), an advisor substitution, locks that survive regeneration, a locked course the schedule doesn't offer, and a credit cap too small. Worked by hand in README.md.",
+  "audit": {
+    "ugagl-agl_uct14": {
+      "overallStatus": "not_satisfied",
+      "totals": { "required": 9, "completed": 3, "inProgress": 3, "remaining": 4 },
+      "requirements": {
+        "requirements": { "status": "not_satisfied", "applied": [], "pending": ["als4161"], "remainingTotal": 2 },
+        "approved-electives": { "status": "satisfied", "applied": ["eny3005"], "pending": [], "reasonCodes": ["substitution_applied"] }
+      },
+      "unapplied": ["bsc2010", "bsc2010l", "bsc2011l"]
+    }
+  },
+  "student": {
+    "credits": { "earned": 8, "inProgress": 6 },
+    "gpa": { "uf_cumulative": 2.55, "gradePoints": 28, "gpaHours": 11 },
+    "sharedCourses": [],
+    "unknownKeys": []
+  },
+  "tracking": { "untracked": ["ugagl-agl_uct14"] },
+  "eligibility": [
+    { "course": "ALS 4162", "term": { "season": "spring", "year": 2027 }, "status": "eligible", "taken": "none", "offering": "confirmed" },
+    { "course": "ENY 4905", "term": { "season": "spring", "year": 2027 }, "status": "unknown", "taken": "none", "offering": "confirmed" },
+    { "course": "BSC 2011", "term": { "season": "spring", "year": 2027 }, "status": "unknown", "taken": "in_progress", "offering": "confirmed" },
+    { "course": "ALS 4161", "term": { "season": "spring", "year": 2027 }, "status": "eligible", "taken": "in_progress", "offering": "not_scheduled" }
+  ],
+  "plans": [
+    {
+      "name": "finish Spring 2027 with ENY 4905 locked",
+      "options": { "targetTerm": { "season": "spring", "year": 2027 }, "locks": [{ "course": "ENY 4905", "term": { "season": "spring", "year": 2027 } }] },
+      "status": "feasible",
+      "terms": { "2271": ["als4162", "eny4905"] },
+      "termCredits": { "2271": 4 },
+      "slots": ["ugagl-agl_uct14/requirements#als4162", "ugagl-agl_uct14/requirements#eny4905"],
+      "locked": ["eny4905"]
+    },
+    {
+      "name": "regenerated with IPM 4114 also locked to Spring 2027 (a summer-only course): the ENY 4905 lock survives; the plan is infeasible",
+      "regenerateFrom": 0,
+      "changes": { "locks": [{ "course": "IPM 4114", "term": { "season": "spring", "year": 2027 } }] },
+      "status": "infeasible",
+      "blockerCodesInclude": ["locked_conflict"],
+      "terms": { "2271": ["eny4905", "ipm4114", "als4162"] },
+      "locked": ["eny4905", "ipm4114"]
+    },
+    {
+      "name": "a 3-credit cap: the locked 1-credit ENY 4905 leaves no room for the 3-credit ALS 4162",
+      "options": { "targetTerm": { "season": "spring", "year": 2027 }, "creditCap": 3, "locks": [{ "course": "ENY 4905", "term": { "season": "spring", "year": 2027 } }] },
+      "status": "infeasible",
+      "blockerCodesInclude": ["credit_cap"],
+      "unplaced": ["als4162"]
+    }
+  ]
+}
