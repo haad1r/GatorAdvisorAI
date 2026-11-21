@@ -185,9 +185,9 @@ const requirements: RequirementResult[] = [
     status: "in_progress",
     needed: { credits: 9, courses: null },
     earned: { credits: 0, courses: 0 },
-    counted: [current("DIG1627", 3)],
+    counted: [current("PHI1680", 3)],
     stillToTake: ["6 more credits of H courses after this term"],
-    reason: "DIG 1627 is in progress and counts as Humanities.",
+    reason: "PHI 1680 is in progress and counts as Humanities.",
   }),
   req({
     id: "gened-social",
@@ -208,9 +208,9 @@ const requirements: RequirementResult[] = [
     status: "in_progress",
     needed: { credits: 3, courses: 1 },
     earned: { credits: 0, courses: 0 },
-    counted: [current("DIG1627", 3)],
+    counted: [current("PHI1680", 3)],
     stillToTake: [],
-    reason: "DIG 1627 is a Quest 1 course, in progress this term.",
+    reason: "PHI 1680 is a Quest 1 course, in progress this term.",
   }),
   req({
     id: "gened-quest2",
@@ -239,7 +239,7 @@ const requirements: RequirementResult[] = [
 
 /*
  * Credits: 22 from classes + 9 from AP = 31 earned; 13 in progress
- * (PHY 2048 3, PHY 2048L 1, COT 3100 3, ENC 2210 3, DIG 1627 3).
+ * (PHY 2048 3, PHY 2048L 1, COT 3100 3, ENC 2210 3, PHI 1680 3).
  * GPA counts letter grades only (not S or exam credit): 60.34 points over
  * 18 hours = 3.35. Major GPA here is the two COP courses: 28 / 8 = 3.50.
  */
@@ -258,7 +258,7 @@ export const auditFixture: DegreeAudit = {
   sharedCourses: [
     { courseCode: "PHY2048", requirementIds: ["select-one", "gened-natural_science"] },
     { courseCode: "PHY2048L", requirementIds: ["select-one", "gened-natural_science"] },
-    { courseCode: "DIG1627", requirementIds: ["gened-humanities", "gened-quest1"] },
+    { courseCode: "PHI1680", requirementIds: ["gened-humanities", "gened-quest1"] },
   ],
   unknowns: [
     { requirementId: "required-foundational-coursework-2", message: "Whether an S grade in MAC 2312 meets the C-or-better rule." },

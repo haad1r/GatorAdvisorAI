@@ -2,6 +2,9 @@ import type {
   ApiRequest,
   ApiResult,
   Coursework,
+  CourseDetail,
+  CourseFilters,
+  CourseSearchResult,
   DegreeAudit,
   DataFreshness,
   WeekSchedule,
@@ -10,6 +13,13 @@ import type {
   TrackingResult,
   Transport,
 } from "./types"
+
+function toQuery(params: Record<string, string | number | undefined>) {
+  const q = new URLSearchParams()
+  for (const [k, v] of Object.entries(params)) if (v !== undefined && v !== "") q.set(k, String(v))
+  const text = q.toString()
+  return text ? `?${text}` : ""
+}
 
 export function createApiClient(transport: Transport) {
   const call = <T>(request: ApiRequest) =>
@@ -33,6 +43,11 @@ export function createApiClient(transport: Transport) {
     getAudit: () => call<DegreeAudit>({ method: "GET", path: "/api/audit" }),
     /** #8 answer 4. Provisional shape. */
     getTracking: () => call<TrackingResult>({ method: "GET", path: "/api/tracking" }),
+
+    /** #21 /courses. Provisional shape (ours). */
+    getCourses: (filters: CourseFilters = {}) =>
+      call<CourseSearchResult>({ method: "GET", path: `/api/courses${toQuery(filters)}` }),
+    getCourse: (id: string) => call<CourseDetail>({ method: "GET", path: `/api/courses/${encodeURIComponent(id)}` }),
 
     getDataFreshness: () => call<DataFreshness>({ method: "GET", path: "/api/meta/freshness" }),
 
