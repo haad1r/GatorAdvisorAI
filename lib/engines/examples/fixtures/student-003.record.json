@@ -1,0 +1,24 @@
+{
+  "contractVersion": "0.2.0",
+  "recordId": "synthetic-student-003",
+  "recordVersion": "1",
+  "catalogYear": "2026-2027",
+  "currentTerm": { "season": "fall", "year": 2026 },
+  "firstTerm": { "season": "fall", "year": 2025 },
+  "programs": [{ "programId": "ugagl-agl_uct14" }],
+  "attempts": [
+    { "attemptId": "a01", "courseId": "bsc2010", "status": "completed", "grade": "A", "credits": 3, "source": "uf", "term": { "season": "fall", "year": 2025 } },
+    { "attemptId": "a02", "courseId": "bsc2010l", "status": "completed", "grade": "A", "credits": 1, "source": "uf", "term": { "season": "fall", "year": 2025 } },
+    { "attemptId": "a03", "courseId": "bsc2011", "status": "completed", "grade": "E", "credits": 3, "source": "uf", "term": { "season": "spring", "year": 2026 } },
+    { "attemptId": "a04", "courseId": "bsc2011l", "status": "completed", "grade": "B", "credits": 1, "source": "uf", "term": { "season": "spring", "year": 2026 } },
+    { "attemptId": "a05", "courseId": "eny3005", "status": "completed", "grade": "B", "credits": 3, "source": "uf", "term": { "season": "spring", "year": 2026 } },
+    { "attemptId": "a06", "courseId": "bsc2011", "status": "in_progress", "credits": 3, "source": "uf", "term": { "season": "fall", "year": 2026 } },
+    { "attemptId": "a07", "courseId": "als4161", "status": "in_progress", "credits": 3, "source": "uf", "term": { "season": "fall", "year": 2026 } }
+  ],
+  "examCredits": [],
+  "electiveCredits": [],
+  "exceptions": [
+    { "kind": "substitution", "exceptionId": "s01", "programId": "ugagl-agl_uct14", "requirementKey": "approved-electives", "courseId": "eny3005", "note": "Advisor approved ENY 3005 as the certificate's approved elective." }
+  ],
+  "facts": {}
+}

@@ -263,7 +263,8 @@ REQUIREMENT_HEADER = ["program_id", "group_key", "name", "rtype", "logic", "elig
                       "required_credits", "required_course_count", "sort_order", "section"]
 PLAN_HEADER = ["program_id", "semester_index", "position", "course_id", "placeholder", "credits",
                "is_critical_tracking", "is_summer", "alt_group", "alt_option"]
-MILESTONE_HEADER = ["program_id", "semester", "kind", "slots", "count", "pool", "raw_text"]
+MILESTONE_HEADER = ["program_id", "semester", "kind", "slots", "count", "pool", "raw_text",
+                    "min_grade", "gpa_min", "gpa_scope"]
 QA_HEADER = ["program_id", "severity", "group_key", "message", "advisory"]
 
 
@@ -292,7 +293,7 @@ def write_programs(out_dir: Path, items: list[tuple], catalog_year: str, manifes
     ))
     files["milestones.csv"] = write_csv(out_dir / "milestones.csv", MILESTONE_HEADER, (
         [p.program.id, m.semester, m.kind, _json(m.slots), "" if m.count is None else m.count,
-         _json(m.pool), m.raw_text]
+         _json(m.pool), m.raw_text, m.min_grade or "", _num(m.gpa_min), m.gpa_scope or ""]
         for p, _, _, _ in items for m in p.milestones
     ))
     files["qa.csv"] = write_csv(out_dir / "qa.csv", QA_HEADER, (
