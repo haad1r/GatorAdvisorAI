@@ -224,13 +224,20 @@ class MilestoneRow:
                [] meaning "resolve from the program's critical-tracking plan rows".
     - courses: `slots` = [[[ids…], …], …] — one slot per required course, each a
                list of ` or `-alternatives, each alternative a `/`-joined AND-set.
-    - note   : unparseable/GPA text the engine ignores (kept for transparency)."""
+    - gpa    : a GPA of at least `gpa_min` by this semester, over `gpa_scope`
+               (see `_gpa_rules`). One row per threshold the line states.
+    - note   : unparseable text the engine ignores (kept for transparency).
+    `min_grade`: the lowest passing grade the line demands of its courses ("with
+    a minimum grade of C"), else None (any passing grade)."""
     semester: int
     kind: str
     slots: list = field(default_factory=list)
     count: int | None = None
     pool: list[str] = field(default_factory=list)
     raw_text: str = ""
+    min_grade: str | None = None
+    gpa_min: float | None = None
+    gpa_scope: str | None = None
 
 
 @dataclass
@@ -2280,6 +2287,96 @@ def _classify_count(text: str) -> _CountLine | None:
     )
 
 
+# --- Grades and GPAs on tracking lines (changed from UF Planner) -------------
+# UF Planner kept only "Complete …" lines, so every GPA rule ("2.0 UF GPA
+# required", 1,552 lines; "2.5 GPA required for all critical-tracking
+# courses", 404) and every minimum grade was dropped, and a D in a tracking
+# course read as on track. Both are now data.
+
+# A letter grade or S, followed by nothing that would make it a word or a
+# longer grade ("C" yes; "Category", "C+" read whole).
+_GRADE = r"([A-D][+-]?|S)(?![A-Za-z0-9+-])"
+_MIN_GRADE_RES = [
+    re.compile(r"(?i:\bgrades?\s+of\s+(?:an?\s+)?)" + _GRADE),  # "(minimum) grade(s) of C"
+    re.compile(r"(?i:\bwith\s+an?\s+)" + _GRADE + r"(?i:\s+or\s+(?:better|higher))"),  # "with a C or better"
+    re.compile(r"(?i:\bno\s+grade\s+below\s+(?:an?\s+)?)" + _GRADE),  # "no grade below C"
+]
+
+
+def _min_grade(text: str) -> str | None:
+    """The minimum grade a line states for ALL its courses, or None.
+
+    A grade that belongs to ONE course is skipped, because applying it to the
+    row would fail students who are on track:
+      - inside parentheses that name a course: "Complete all 8 … ( ACG 2071
+        must be completed with a minimum grade of B)"; "(grade of C or above
+        required)" names none and covers the row;
+      - followed by another course: "MAC 2313 or MAC 3474 with a minimum
+        grade of B and MAD 2502", "APK 3110C with a minimum grade of C, BSC
+        2010 …". "… with minimum grades of C: LIST" is followed by ":" and
+        covers the list.
+    Two different row-wide grades leave the row with none (no 2026-27 line
+    has two)."""
+    grades = set()
+    for rx in _MIN_GRADE_RES:
+        for m in rx.finditer(text):
+            before = text[: m.start()]
+            opened = before.rfind("(")
+            if opened > before.rfind(")"):
+                closed = text.find(")", m.end())
+                if COURSE_CODE_RE.search(text[opened: closed if closed >= 0 else len(text)]):
+                    continue
+            if re.match(r"\s*(?:,|;|\band\b)\s*[A-Z]{3}\s?\d{4}", text[m.end():]):
+                continue
+            grades.add(m.group(1))
+    return grades.pop() if len(grades) == 1 else None
+
+
+def _gpa_scope(clause: str) -> str:
+    """Which GPA a threshold is over, from the words after it. Order matters:
+    "2.0 UF GPA required for all critical-tracking courses" is a tracking GPA.
+      critical_tracking  the tracking courses (UF's attempt rules vary by page)
+      upper_division     courses after 60 credits
+      all_institutions   every institution's grades, transfer included
+      uf                 the UF cumulative GPA
+      other              major, core, departmental, "all AEB courses", …"""
+    low = clause.lower()
+    if re.search(r"critical[\s-]*tracking|\btracking\s+course", low):
+        return "critical_tracking"
+    if re.search(r"upper[\s-]*division", low):
+        return "upper_division"
+    if re.search(r"all\s+institutions", low):
+        return "all_institutions"
+    if re.match(r"\s*(?:overall\s+|cumulative\s+)?uf\s+gpa\b", low):
+        return "uf"
+    return "other"
+
+
+def _gpa_rules(text: str) -> list[tuple[float, str]]:
+    """Every (threshold, scope) a line states. A threshold is a d.d(d) number
+    followed, within a few words, by "GPA": "2.0 UF GPA required", "with a 2.6
+    critical-tracking GPA". Its clause runs to the next threshold or ";", so
+    "Maintain a 2.0 overall UF GPA and a 2.5 critical-tracking GPA" is two
+    rules. Numbers outside 0-4 aren't GPAs."""
+    found = list(re.finditer(r"(?<![\d.])([0-4]\.\d{1,2})(?![\d.])", text))
+    rules: list[tuple[float, str]] = []
+    for i, m in enumerate(found):
+        end = found[i + 1].start() if i + 1 < len(found) else len(text)
+        clause = re.split(r";", text[m.end():end])[0]
+        if not re.match(r"[^.;]{0,40}?\bgpa\b", clause, re.IGNORECASE):
+            continue
+        rule = (float(m.group(1)), _gpa_scope(clause))
+        if rule not in rules:
+            rules.append(rule)
+    return rules
+
+
+# A tracking-tab line that sets a minimum grade for every tracking course,
+# outside any "Complete …" line: "A minimum grade of C (based on a maximum of
+# two attempts …) is required for each critical tracking course".
+_PAGE_MIN_GRADE_RE = re.compile(r"(?i:\b(?:each|all)\s+(?:semesters?\s+[\d-]+\s+)?critical[\s-]*tracking\s+courses?)")
+
+
 def parse_critical_tracking(soup: BeautifulSoup) -> list[MilestoneRow]:
     """Parse div#criticaltrackingtextcontainer into per-semester milestones.
     Count milestones are CUMULATIVE across semesters (UF phrases them with
@@ -2289,13 +2386,18 @@ def parse_critical_tracking(soup: BeautifulSoup) -> list[MilestoneRow]:
     alternatives, so "MAC 2233 or MAC 2311" is one member either course
     satisfies; `pool` stays the flat id list for older readers. Anything we
     can't classify degrades to a note (the app then falls back to the
-    model-plan-derived per-course milestone)."""
+    model-plan-derived per-course milestone).
+
+    Every line, "Complete …" or not, also yields a `gpa` row per GPA
+    threshold it states, and a "Complete …" line's minimum grade rides on the
+    course rows it makes."""
     ct = soup.find("div", id="criticaltrackingtextcontainer")
     if ct is None:
         return []
     out: list[MilestoneRow] = []
     pools: dict[str, list] = {}
     running: dict[str, int] = {}
+    page_grade: str | None = None
     for header in ct.find_all(["h2", "h3"]):
         m = re.match(r"semester\s+(\d+)", header.get_text(strip=True), re.IGNORECASE)
         if not m:
@@ -2308,48 +2410,78 @@ def parse_critical_tracking(soup: BeautifulSoup) -> list[MilestoneRow]:
             continue
         for li in block.find_all("li", recursive=False):
             text = " ".join(li.get_text(" ", strip=True).replace("\xa0", " ").split())
-            low = text.lower()
-            if not low.startswith("complete"):
-                continue  # GPA / prose lines
-            span_ids = [
-                code_to_id(s.get_text(strip=True).replace("\xa0", " "))
-                for s in li.find_all("span", class_="sc_courseinline")
-            ]
-            # A list printed as a nested <ul>, one <li> per member (s93,
-            # Entomology BS07's "2 of 5"), flattens to one run with nothing
-            # between the members. Read it with ";" between them, the separator
-            # a count list already treats as a new member. `raw_text` keeps UF's.
-            parse_text = text
-            nested = [x for sub in li.find_all(["ul", "ol"]) for x in sub.find_all("li", recursive=False)]
-            if nested:
-                head = " ".join(
-                    s.strip() for s in li.find_all(string=True)
-                    if not any(p in nested for p in s.parents)
-                )
-                parse_text = " ".join(f"{head} {' ; '.join(x.get_text(' ', strip=True) for x in nested)}"
-                                      .replace("\xa0", " ").split())
-            line = _classify_count(parse_text)
-            if line is not None:
-                out.extend(_count_rows(semester, text, line, pools, running))
+            gpa_rows = [MilestoneRow(semester, "gpa", raw_text=text, gpa_min=v, gpa_scope=s)
+                        for v, s in _gpa_rules(text)]
+            if not text.lower().startswith("complete"):
+                out.extend(gpa_rows)  # "2.0 UF GPA required"; other prose is dropped
+                if _PAGE_MIN_GRADE_RE.search(text) and _min_grade(text):
+                    page_grade = page_grade or _min_grade(text)
                 continue
-            slots = _courses_row_slots(parse_text, set(span_ids)) if span_ids else []
-            if slots:
-                out.append(MilestoneRow(semester, "courses", slots=slots, raw_text=text))
-            else:
-                out.append(MilestoneRow(semester, "note", raw_text=text))
+            start = len(out)
+            _course_rows(semester, li, text, out, pools, running)
+            grade = _min_grade(text)
+            for row in out[start:]:
+                if row.kind in ("count", "courses"):
+                    row.min_grade = grade
+            out.extend(gpa_rows)
+    # A page-wide minimum grade ("… is required for each critical tracking
+    # course") applies to every course row whose own line names none.
+    if page_grade:
+        for row in out:
+            if row.kind in ("count", "courses") and row.min_grade is None:
+                row.min_grade = page_grade
     # "(including ACG 2021)" beside its own "Complete ACG 2021 with a B" row
     # says one thing twice; keep the first statement of a slot per semester.
+    # A GPA rule stated twice in one semester (on a "Complete" line and on its
+    # own line) is kept once.
     seen: set[tuple] = set()
     deduped: list[MilestoneRow] = []
     for row in out:
+        if row.kind == "gpa":
+            key = (row.semester, "gpa", row.gpa_min, row.gpa_scope)
+            if key in seen:
+                continue
+            seen.add(key)
         if row.kind == "courses":
             slots = [s for s in row.slots if (row.semester, json.dumps(s)) not in seen]
             seen.update((row.semester, json.dumps(s)) for s in slots)
             if not slots:
                 continue
-            row = MilestoneRow(row.semester, "courses", slots=slots, raw_text=row.raw_text)
+            row = MilestoneRow(row.semester, "courses", slots=slots, raw_text=row.raw_text,
+                               min_grade=row.min_grade)
         deduped.append(row)
     return deduped
+
+
+def _course_rows(semester: int, li: Tag, text: str, out: list[MilestoneRow],
+                 pools: dict[str, list], running: dict[str, int]) -> None:
+    """The count / courses / note rows one "Complete …" line states."""
+    span_ids = [
+        code_to_id(s.get_text(strip=True).replace("\xa0", " "))
+        for s in li.find_all("span", class_="sc_courseinline")
+    ]
+    # A list printed as a nested <ul>, one <li> per member (s93,
+    # Entomology BS07's "2 of 5"), flattens to one run with nothing
+    # between the members. Read it with ";" between them, the separator
+    # a count list already treats as a new member. `raw_text` keeps UF's.
+    parse_text = text
+    nested = [x for sub in li.find_all(["ul", "ol"]) for x in sub.find_all("li", recursive=False)]
+    if nested:
+        head = " ".join(
+            s.strip() for s in li.find_all(string=True)
+            if not any(p in nested for p in s.parents)
+        )
+        parse_text = " ".join(f"{head} {' ; '.join(x.get_text(' ', strip=True) for x in nested)}"
+                              .replace("\xa0", " ").split())
+    line = _classify_count(parse_text)
+    if line is not None:
+        out.extend(_count_rows(semester, text, line, pools, running))
+        return
+    slots = _courses_row_slots(parse_text, set(span_ids)) if span_ids else []
+    if slots:
+        out.append(MilestoneRow(semester, "courses", slots=slots, raw_text=text))
+    else:
+        out.append(MilestoneRow(semester, "note", raw_text=text))
 
 
 def _count_rows(
