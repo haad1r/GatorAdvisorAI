@@ -77,6 +77,28 @@ export type Weekday = "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT" | "SUN"
 
 export type MeetingKind = "lecture" | "lab" | "discussion" | "exam"
 
+/**
+ * RateMyProfessors summary numbers for one professor. null when RMP has no
+ * value. Comes from tools/rmp (a weekly import); never review text.
+ */
+export type ProfessorRating = {
+  /** RMP's professor id: ratemyprofessors.com/professor/<rmpId>. */
+  rmpId: number
+  /** 1-5. */
+  quality: number | null
+  /** 1-5. */
+  difficulty: number | null
+  /** 0-100. */
+  wouldTakeAgainPercent: number | null
+  numRatings: number
+}
+
+export type Instructor = {
+  name: string
+  /** null when no RMP profile could be matched with confidence. */
+  rating: ProfessorRating | null
+}
+
 /** One weekly class meeting (or a dated exam) for the schedule calendar. */
 export type ScheduleMeeting = {
   id: string
@@ -92,6 +114,8 @@ export type ScheduleMeeting = {
   /** null when TBA or online. */
   location: string | null
   online: boolean
+  /** Empty when UF hasn't named one yet ("Staff"). Same for every meeting of a section. */
+  instructors: Instructor[]
 }
 
 export type WeekSchedule = {

@@ -46,11 +46,12 @@ Import from the `@/` aliases in `components.json`. New UI follows the folder it 
 | --- | --- | --- |
 | `components/ui/` | shadcn primitives (button, input, badge, alert, skeleton, label, native select, dialog). Feature code composes these. It does not restyle them for one screen. | Shared. See below. |
 | `components/feedback/` | `LoadingBlock`, `EmptyState`, `ErrorPanel`, `LoadFailed` (error plus "Try again"), `StatusBadge`, `ResultStatusBadge` (met / in progress / not met / at risk / unknown, always with a label and icon). | Braydin |
+| `components/ratings/` | `InstructorRating`: an instructor's RateMyProfessors numbers, the rating count, and a link to RMP (or a search link when there's no match). Hidden when `NEXT_PUBLIC_SHOW_RMP=false`. | Braydin |
 | `components/audit/`, `components/dashboard/`, `components/import/`, `components/settings/` | The `/audit`, `/dashboard`, `/import`, and `/settings` screens. Import's replace/merge wording is placeholder text in `IMPORT_COPY` until #9 decides. `audit/stats.tsx` has `ProgressBar` and `Stat`, shared with the dashboard. | Braydin (moved from Zain) |
 | `components/forms/` | `FormField`, `FormErrorSummary`, `SubmitButton`. | Zain |
 | `components/auth/` | `AuthShell` and other auth chrome. | Zain |
 | `components/nav/` | `AppShell`, `nav-items.ts` (the page map), `NavList`/`MobileTabBar`/`MobileMenu` (`aria-current` on the active link), `PageTitle`, `ProgramSummary`, `FreshnessFooter`, `AccountButton`, `LogoLink`. | Braydin (was Nav) |
-| `components/calendar/` | `ScheduleView` (week navigation, Week/List switch, loading/empty/error), `WeekGrid`, `AgendaList`, `UnscheduledList`, `CalendarEvent`. Date and label helpers are in `lib/schedule.ts`. | Braydin (was Nav) |
+| `components/calendar/` | `ScheduleView` (week navigation, Week/List switch, an Instructors dialog with ratings, loading/empty/error), `WeekGrid`, `AgendaList`, `UnscheduledList`, `CalendarEvent`. Date and label helpers are in `lib/schedule.ts`. | Braydin (was Nav) |
 | `components/theme/` | `ThemeScript` (in the root layout's `<head>`, sets `.dark` before first paint) and `ThemeToggle`. With no saved choice the theme follows the OS setting. | Braydin (was Nav) |
 | `components/onboarding/` | The onboarding wizard. | Zain |
 | `lib/forms.ts` | The `FormState` contract every form returns. | Zain |

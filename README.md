@@ -42,7 +42,7 @@ Recommends classes based on each student's interests, collected from an interest
 GatorAdvisor's own multi-axis ratings and student reviews.
 
 ### Official Integration
-Direct links out to official UF and RMP pages without scraping RMP content.
+Direct links out to official UF and RateMyProfessors (RMP) pages. Each instructor also shows RMP summary numbers (quality, difficulty, would-take-again, rating count), collected weekly by `tools/rmp/` from RMP's private API and always credited and linked to RMP. No review text is stored. `NEXT_PUBLIC_SHOW_RMP=false` hides it all. RMP's terms and robots.txt don't allow this; the team accepted that risk on 2026-11-18, and the feature can be switched off at any time.
 
 ### AI Advisor
 A grounded conversational assistant designed to explain complex academic paths clearly.
