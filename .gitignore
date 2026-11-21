@@ -44,6 +44,9 @@ next-env.d.ts
 # Supabase CLI link state (project ref, pooler URL)
 supabase/.temp/
 
+# Catalog loader scratch SQL
+tools/db/out/
+
 # playwright
 /test-results/
 /playwright-report/
