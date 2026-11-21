@@ -168,7 +168,12 @@ function CourseEditor({ saved, onReload }: { saved: Coursework; onReload: () => 
       ...f,
       fieldErrors: {
         ...f.fieldErrors,
-        [key(i, "courseCode")]: code && !COURSE_CODE.test(code) ? ["Use a course code like COP3502."] : undefined,
+        // An empty code keeps whatever error "Review and save" set; blurring must not clear it.
+        [key(i, "courseCode")]: !code
+          ? f.fieldErrors?.[key(i, "courseCode")]
+          : !COURSE_CODE.test(code)
+            ? ["Use a course code like COP3502."]
+            : undefined,
       },
     }))
   }
