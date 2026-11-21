@@ -458,3 +458,68 @@ def test_an_open_elective_slot_without_credits_is_reported_not_crashed():
                                required_credits=None, required_course_count=None,
                                sort_order=0, section="major", raw_html="")
     assert any("open elective slot" in i["message"] for i in qa.evaluate(program(slot), set()).issues)
+
+
+# --- Critical Tracking: GPA rules and minimum grades ------------------------
+
+def tracking(name: str) -> list[programs.MilestoneRow]:
+    from bs4 import BeautifulSoup
+    soup = BeautifulSoup((FIXTURES / name).read_text(encoding="utf-8"), "html.parser")
+    return programs.parse_critical_tracking(soup)
+
+
+def test_gpa_lines_become_gpa_rows():
+    # Psychology BS03 raises its UF GPA bar each semester on lines that don't
+    # start with "Complete"; they used to be dropped.
+    rows = tracking("psy_bs03.html")
+    uf = [(r.semester, r.gpa_min) for r in rows if r.kind == "gpa" and r.gpa_scope == "uf"]
+    assert uf == [(1, 2.4), (2, 2.6), (3, 2.7), (4, 2.8), (5, 2.8)]
+    # "… with a 2.75 critical-tracking GPA" on a Complete line is a rule too.
+    ct = [(r.semester, r.gpa_min) for r in rows if r.kind == "gpa" and r.gpa_scope == "critical_tracking"]
+    assert ct == [(3, 2.6), (4, 2.75), (5, 2.75)]
+
+
+def test_a_maintain_line_is_a_gpa_rule_and_course_rows_are_unchanged():
+    rows = tracking("eco_ba.html")
+    sem5 = [(r.kind, r.gpa_min, r.gpa_scope) for r in rows if r.semester == 5]
+    assert sem5 == [("courses", None, None), ("gpa", 3.0, "critical_tracking"), ("gpa", 2.0, "uf")]
+    # The running count over the 4 courses still reads 1, 2, 4.
+    assert [r.count for r in rows if r.kind == "count"] == [1, 2, 4]
+
+
+def test_minimum_grades_ride_on_course_rows():
+    rows = tracking("cve_bsce.html")
+    counts = [(r.semester, r.count, r.min_grade) for r in rows if r.kind == "count"]
+    assert counts[:4] == [(1, 1, "C"), (2, 2, "C"), (3, 4, "C"), (4, 6, "C")]
+    assert all(r.min_grade is None for r in rows if r.kind == "gpa")
+
+
+@pytest.mark.parametrize("text, grade", [
+    ("Complete ECO 3101 with a minimum grade of C", "C"),
+    ("Complete 2 of 7 critical-tracking courses with minimum grades of C: THE 2000 , TPA 1012", "C"),
+    ("Complete ACG 3101 and ACG 3401 with a C or better", "C"),
+    ("Complete MUS 1010 with a grade of S", "S"),
+    ("Complete either CHM 2210 or PHY 2054 (grade of C or above required)", "C"),
+    # A grade that belongs to one course is not the row's grade.
+    ("Complete all 8 critical-tracking courses ( ACG 2071 must be completed with a minimum grade of B)", None),
+    ("Complete MAC 2313 or MAC 3474 with a minimum grade of B and MAD 2502", None),
+    ("Complete STA 3100 and ( STA 4321 with a minimum grade of C+)", None),
+    ("Complete MAC 2311", None),
+])
+def test_min_grade(text, grade):
+    assert programs._min_grade(text) == grade
+
+
+@pytest.mark.parametrize("text, rules", [
+    ("2.0 UF GPA required", [(2.0, "uf")]),
+    ("2.5 GPA required for all critical-tracking courses (lower division)", [(2.5, "critical_tracking")]),
+    ("2.0 UF GPA required for all critical-tracking courses", [(2.0, "critical_tracking")]),
+    ("2.5 upper division GPA required", [(2.5, "upper_division")]),
+    ("2.5 GPA on all work at all institutions", [(2.5, "all_institutions")]),
+    ("2.0 Core GPA required", [(2.0, "other")]),
+    ("Maintain a 2.0 overall UF GPA and a 2.5 critical-tracking GPA", [(2.0, "uf"), (2.5, "critical_tracking")]),
+    ("2.5 critical-tracking GPA required; 2.0 UF GPA required", [(2.5, "critical_tracking"), (2.0, "uf")]),
+    ("Complete 3 credits of ENY 4230", []),
+])
+def test_gpa_rules(text, rules):
+    assert programs._gpa_rules(text) == rules

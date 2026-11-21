@@ -1,0 +1,79 @@
+{
+  "record": "student-002.record.json",
+  "summary": "Accounting BSAc transfer student with a Florida AA, semester 5, Critical Tracking semester 4 missed (MAC 2234). Worked by hand in README.md.",
+  "audit": {
+    "ugact-act_bsac": {
+      "overallStatus": "not_satisfied",
+      "totals": { "required": 120, "completed": 18, "inProgress": 19, "remaining": 62 },
+      "requirements": {
+        "plan-derived": {
+          "status": "not_satisfied",
+          "applied": ["eco2023", "mac2233", "eco2013", "acg2021", "acg2071", "sta2023"],
+          "pending": ["cgs2531", "acg3101", "fin3403", "man3025", "qmb3250"],
+          "remainingTotal": 11
+        },
+        "plan-derived-choice-2": { "status": "not_satisfied", "applied": [], "pending": [] },
+        "plan-derived-choice-3": { "status": "not_satisfied", "applied": [], "pending": [] },
+        "gened-composition": { "status": "satisfied", "applied": [], "pending": [], "reasonCodes": ["waived"] },
+        "gened-humanities": { "status": "satisfied", "applied": [], "pending": [], "reasonCodes": ["waived"] },
+        "gened-natural_science": { "status": "satisfied", "applied": [], "pending": [], "reasonCodes": ["waived"] },
+        "gened-social": { "status": "satisfied", "applied": [], "pending": [], "reasonCodes": ["waived"] },
+        "gened-quest1": { "status": "satisfied", "applied": [], "pending": [], "reasonCodes": ["waived"] },
+        "gened-quest2": { "status": "satisfied", "applied": [], "pending": [], "reasonCodes": ["waived"] }
+      },
+      "unapplied": ["enc1101"]
+    }
+  },
+  "student": {
+    "credits": { "earned": 60, "inProgress": 19 },
+    "gpa": { "uf_cumulative": null },
+    "sharedCourses": [],
+    "unknownKeys": []
+  },
+  "tracking": {
+    "ugact-act_bsac": {
+      "currentSemester": 5,
+      "status": "not_met",
+      "milestones": {
+        "0": "met", "1": "unknown", "2": "unknown",
+        "3": "met", "4": "met",
+        "7": "met", "8": "met",
+        "11": "not_met", "12": "met", "13": "unknown",
+        "16": "pending", "17": "pending", "18": "unknown", "19": "pending",
+        "20": "upcoming", "31": "upcoming"
+      },
+      "nextDeadline": { "semester": 5, "term": { "season": "fall", "year": 2026 }, "milestones": [16, 17, 18, 19] }
+    }
+  },
+  "eligibility": [
+    { "course": "MAC 2234", "term": { "season": "spring", "year": 2027 }, "status": "eligible", "taken": "none", "offering": "confirmed" },
+    { "course": "ACG 4111", "term": { "season": "spring", "year": 2027 }, "status": "eligible_pending", "taken": "none", "offering": "confirmed" },
+    { "course": "TAX 4001", "term": { "season": "spring", "year": 2027 }, "status": "not_eligible", "taken": "none", "offering": "confirmed" },
+    { "course": "GEB 3373", "term": { "season": "spring", "year": 2027 }, "status": "not_eligible", "taken": "none", "offering": "confirmed" },
+    { "course": "ACG 3101", "term": { "season": "spring", "year": 2027 }, "status": "unknown", "taken": "in_progress", "offering": "confirmed" }
+  ],
+  "plans": [
+    {
+      "name": "graduate Fall 2028 at 18 credits: blocked only by the missed semester-4 milestone",
+      "options": { "targetTerm": { "season": "fall", "year": 2028 }, "creditCap": 18 },
+      "status": "infeasible",
+      "blockerCodes": ["deadline_unreachable"],
+      "blockerCount": 1,
+      "plannedCredits": 62,
+      "earliest": { "mac2234": { "season": "spring", "year": 2027 } },
+      "notBefore": {
+        "acg4341": { "season": "fall", "year": 2027 },
+        "geb3373": { "season": "fall", "year": 2027 },
+        "acg4632": { "season": "spring", "year": 2028 },
+        "tax4001": { "season": "spring", "year": 2028 },
+        "man4504": { "season": "spring", "year": 2028 }
+      }
+    },
+    {
+      "name": "graduate Spring 2028 at 18 credits: 62 credits don't fit in 3 x 18 = 54",
+      "options": { "targetTerm": { "season": "spring", "year": 2028 }, "creditCap": 18 },
+      "status": "infeasible",
+      "blockerCodesInclude": ["deadline_unreachable", "credit_cap"]
+    }
+  ]
+}
