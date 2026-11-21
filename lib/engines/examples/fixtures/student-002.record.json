@@ -1,0 +1,29 @@
+{
+  "contractVersion": "0.2.0",
+  "recordId": "synthetic-student-002",
+  "recordVersion": "1",
+  "catalogYear": "2026-2027",
+  "currentTerm": { "season": "fall", "year": 2026 },
+  "firstTerm": { "season": "fall", "year": 2024 },
+  "programs": [{ "programId": "ugact-act_bsac" }],
+  "attempts": [
+    { "attemptId": "t01", "courseId": "enc1101", "status": "completed", "grade": "B", "credits": 3, "source": "transfer", "institution": "Santa Fe College", "originalCode": "ENC 1101" },
+    { "attemptId": "t02", "courseId": "acg2021", "status": "completed", "grade": "B", "credits": 3, "source": "transfer", "institution": "Santa Fe College", "originalCode": "ACG 2021" },
+    { "attemptId": "t03", "courseId": "acg2071", "status": "completed", "grade": "B", "credits": 3, "source": "transfer", "institution": "Santa Fe College", "originalCode": "ACG 2071" },
+    { "attemptId": "t04", "courseId": "eco2013", "status": "completed", "grade": "A", "credits": 3, "source": "transfer", "institution": "Santa Fe College", "originalCode": "ECO 2013" },
+    { "attemptId": "t05", "courseId": "eco2023", "status": "completed", "grade": "B", "credits": 3, "source": "transfer", "institution": "Santa Fe College", "originalCode": "ECO 2023" },
+    { "attemptId": "t06", "courseId": "mac2233", "status": "completed", "grade": "C", "credits": 3, "source": "transfer", "institution": "Santa Fe College", "originalCode": "MAC 2233" },
+    { "attemptId": "t07", "courseId": "sta2023", "status": "completed", "grade": "B", "credits": 3, "source": "transfer", "institution": "Santa Fe College", "originalCode": "STA 2023" },
+    { "attemptId": "a01", "courseId": "acg3101", "status": "in_progress", "credits": 4, "source": "uf", "term": { "season": "fall", "year": 2026 } },
+    { "attemptId": "a02", "courseId": "fin3403", "status": "in_progress", "credits": 4, "source": "uf", "term": { "season": "fall", "year": 2026 } },
+    { "attemptId": "a03", "courseId": "man3025", "status": "in_progress", "credits": 4, "source": "uf", "term": { "season": "fall", "year": 2026 } },
+    { "attemptId": "a04", "courseId": "qmb3250", "status": "in_progress", "credits": 4, "source": "uf", "term": { "season": "fall", "year": 2026 } },
+    { "attemptId": "a05", "courseId": "cgs2531", "status": "in_progress", "credits": 3, "source": "uf", "term": { "season": "fall", "year": 2026 } }
+  ],
+  "examCredits": [],
+  "electiveCredits": [
+    { "entryId": "x01", "label": "AA elective credit, no UF course equivalent (Santa Fe College)", "credits": 39, "source": "transfer", "institution": "Santa Fe College" }
+  ],
+  "exceptions": [],
+  "facts": { "hasFloridaAA": true }
+}
