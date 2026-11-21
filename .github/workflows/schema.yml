@@ -1,0 +1,58 @@
+name: Database schema
+
+# Applies the migration and seed to a throwaway Postgres and runs the schema
+# checks, so a change that breaks ownership, cascades or RLS can't merge
+# unnoticed. See docs/database.md.
+on:
+  pull_request:
+    paths:
+      - "supabase/**"
+      - ".github/workflows/schema.yml"
+  push:
+    branches: [main]
+    paths:
+      - "supabase/**"
+
+jobs:
+  schema:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: gator_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: gator_test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create Supabase's built-in roles
+        run: psql -v ON_ERROR_STOP=1 -q -f supabase/tests/supabase_roles.sql
+
+      - name: Apply migrations
+        run: |
+          for f in supabase/migrations/*.sql; do
+            echo "== $f"
+            psql -v ON_ERROR_STOP=1 -q -f "$f"
+          done
+
+      - name: Load the dev seed
+        run: psql -v ON_ERROR_STOP=1 -q -f supabase/seed.sql
+
+      - name: Run schema checks on a fresh database
+        run: |
+          psql -q -c "drop database if exists gator_checks" -c "create database gator_checks"
+          for f in supabase/migrations/*.sql; do psql -d gator_checks -v ON_ERROR_STOP=1 -q -f "$f"; done
+          psql -d gator_checks -q -f supabase/tests/schema_checks.sql | tee checks.txt
+          grep -q "ALL CHECKS PASSED" checks.txt

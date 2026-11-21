@@ -41,6 +41,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# Supabase CLI link state (project ref, pooler URL)
+supabase/.temp/
+
 # playwright
 /test-results/
 /playwright-report/
