@@ -11,6 +11,8 @@ export type OnboardingProfile = {
   classStanding: string
   major: string
   catalogYear: string
+  /** First term at UF ("Fall 2025"). Anchors Critical Tracking semesters. */
+  entryTerm: string
   expectedGraduation: string
 }
 export const emptyProfile: OnboardingProfile = {
@@ -18,6 +20,7 @@ export const emptyProfile: OnboardingProfile = {
   classStanding: "",
   major: "",
   catalogYear: "",
+  entryTerm: "",
   expectedGraduation: "",
 }
 export type Option = { value: string; label: string }
@@ -39,6 +42,23 @@ export const PLACEHOLDER_CATALOG_YEARS: Option[] = [
   "2025-2026",
   "2026-2027",
 ].map((y) => ({ value: y, label: y }))
+/** Newest first: most students pick a recent term. */
+export const PLACEHOLDER_ENTRY_TERMS: Option[] = [
+  "Spring 2027",
+  "Fall 2026",
+  "Summer 2026",
+  "Spring 2026",
+  "Fall 2025",
+  "Summer 2025",
+  "Spring 2025",
+  "Fall 2024",
+  "Summer 2024",
+  "Spring 2024",
+  "Fall 2023",
+  "Summer 2023",
+  "Spring 2023",
+  "Fall 2022",
+].map((t) => ({ value: t, label: t }))
 export const PLACEHOLDER_GRAD_TERMS: Option[] = [
   "Spring 2027",
   "Fall 2027",
@@ -48,12 +68,26 @@ export const PLACEHOLDER_GRAD_TERMS: Option[] = [
   "Fall 2029",
   "Spring 2030",
 ].map((t) => ({ value: t, label: t }))
+const GRAD_ORDER_ERROR = "Graduation has to come after your first term."
+
+/**
+ * Field errors once `field` has been edited: its own error goes, and so does
+ * the graduation-order error when the first term changes, since that can fix it.
+ */
+export function errorsAfterChange(errors: FieldErrors | undefined, field: keyof OnboardingProfile) {
+  if (!errors) return errors
+  const next: FieldErrors = { ...errors, [field]: undefined }
+  if (field === "entryTerm" && errors.expectedGraduation?.[0] === GRAD_ORDER_ERROR) next.expectedGraduation = undefined
+  return next
+}
+
 /** Human-readable labels, used by FormErrorSummary links and the review step. */
 export const PROFILE_LABELS: Record<keyof OnboardingProfile, string> = {
   preferredName: "Preferred name",
   classStanding: "Class standing",
   major: "Major",
   catalogYear: "Catalog year",
+  entryTerm: "First term at UF",
   expectedGraduation: "Expected graduation",
 }
 export const ONBOARDING_STEPS = [
@@ -65,7 +99,7 @@ export const ONBOARDING_STEPS = [
   {
     id: "program",
     title: "Your program",
-    fields: ["major", "catalogYear", "expectedGraduation"],
+    fields: ["major", "catalogYear", "entryTerm", "expectedGraduation"],
   },
   { id: "review", title: "Review", fields: [] },
 ] as const satisfies ReadonlyArray<{
@@ -74,6 +108,13 @@ export const ONBOARDING_STEPS = [
   fields: ReadonlyArray<keyof OnboardingProfile>
 }>
 const NAME_MAX = 50
+/** "Fall 2025" -> a number that sorts terms in time order, or null. */
+export function termOrder(term: string): number | null {
+  const m = term.match(/^(Spring|Summer|Fall) (\d{4})$/)
+  if (!m) return null
+  return Number(m[2]) * 3 + ["Spring", "Summer", "Fall"].indexOf(m[1])
+}
+
 function oneOf(options: Option[], value: string) {
   return options.some((o) => o.value === value)
 }
@@ -111,10 +152,21 @@ export function validateProfile(
         if (!oneOf(PLACEHOLDER_CATALOG_YEARS, value))
           add(field, "Choose the catalog year you entered under.")
         break
-      case "expectedGraduation":
-        if (!oneOf(PLACEHOLDER_GRAD_TERMS, value))
-          add(field, "Choose when you expect to graduate.")
+      case "entryTerm":
+        if (!oneOf(PLACEHOLDER_ENTRY_TERMS, value))
+          add(field, "Choose your first term at UF.")
         break
+      case "expectedGraduation": {
+        if (!oneOf(PLACEHOLDER_GRAD_TERMS, value)) {
+          add(field, "Choose when you expect to graduate.")
+          break
+        }
+        const start = termOrder(profile.entryTerm.trim())
+        const end = termOrder(value)
+        if (fields.includes("entryTerm") && start !== null && end !== null && end <= start)
+          add(field, GRAD_ORDER_ERROR)
+        break
+      }
     }
   }
   return errors

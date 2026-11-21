@@ -1,0 +1,43 @@
+{
+  "record": "../record.json",
+  "summary": "Psychology BS (Behavioral and Cognitive Neuroscience) + Geology minor, semester 3: a repeat (BSC 2010 D then B), a withdrawal, dual enrollment, AP credit, four courses in progress, Critical Tracking resting on current courses. Worked by hand in README.md and in the examples.",
+  "audit": {
+    "uglas-gly_umn": {
+      "overallStatus": "not_satisfied",
+      "totals": { "required": 17, "completed": 9, "inProgress": 6, "remaining": 3 },
+      "requirements": {}
+    }
+  },
+  "student": {
+    "credits": { "earned": 31, "inProgress": 12 },
+    "gpa": { "uf_cumulative": 2.96, "gradePoints": 71, "gpaHours": 24 },
+    "sharedCoursesInclude": ["psy2012", "bsc2010"]
+  },
+  "tracking": {
+    "uglas-psy_bs01": {
+      "currentSemester": 3,
+      "status": "unknown",
+      "milestones": {},
+      "nextDeadline": { "semester": 3, "term": { "season": "fall", "year": 2026 }, "milestones": [5, 6] }
+    },
+    "untracked": ["uglas-gly_umn"]
+  },
+  "eligibility": [
+    { "course": "GLY 4043", "term": { "season": "spring", "year": 2027 }, "status": "eligible_pending", "taken": "none", "offering": "not_scheduled" },
+    { "course": "GLY 3105C", "term": { "season": "spring", "year": 2027 }, "status": "eligible", "taken": "none", "offering": "not_scheduled" },
+    { "course": "BSC 2010", "term": { "season": "spring", "year": 2027 }, "status": "unknown", "taken": "passed", "offering": "confirmed" }
+  ],
+  "plans": [
+    {
+      "name": "graduate Spring 2029 at 15 credits",
+      "options": { "targetTerm": { "season": "spring", "year": 2029 } },
+      "status": "feasible"
+    },
+    {
+      "name": "graduate next term: about 60 credits can't fit in one 15-credit term",
+      "options": { "targetTerm": { "season": "spring", "year": 2027 } },
+      "status": "infeasible",
+      "blockerCodesInclude": ["credit_cap"]
+    }
+  ]
+}

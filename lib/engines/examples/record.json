@@ -1,0 +1,36 @@
+{
+  "contractVersion": "0.2.0",
+  "recordId": "synthetic-student-001",
+  "recordVersion": "1",
+  "catalogYear": "2026-2027",
+  "currentTerm": { "season": "fall", "year": 2026 },
+  "firstTerm": { "season": "fall", "year": 2025 },
+  "programs": [
+    { "programId": "uglas-psy_bs01" },
+    { "programId": "uglas-gly_umn" }
+  ],
+  "attempts": [
+    { "attemptId": "a01", "courseId": "psy2012", "status": "completed", "grade": "A", "credits": 3, "source": "uf", "term": { "season": "fall", "year": 2025 } },
+    { "attemptId": "a02", "courseId": "gly2010c", "status": "completed", "grade": "B+", "credits": 4, "source": "uf", "term": { "season": "fall", "year": 2025 } },
+    { "attemptId": "a03", "courseId": "enc1101", "status": "completed", "grade": "B", "credits": 3, "source": "uf", "term": { "season": "fall", "year": 2025 } },
+    { "attemptId": "a04", "courseId": "bsc2010", "status": "completed", "grade": "D", "credits": 3, "source": "uf", "term": { "season": "fall", "year": 2025 } },
+    { "attemptId": "a05", "courseId": "gly2100c", "status": "completed", "grade": "A-", "credits": 4, "source": "uf", "term": { "season": "spring", "year": 2026 } },
+    { "attemptId": "a06", "courseId": "sta2023", "status": "completed", "grade": "C", "credits": 3, "source": "uf", "term": { "season": "spring", "year": 2026 } },
+    { "attemptId": "a07", "courseId": "bsc2010", "status": "completed", "grade": "B", "credits": 3, "source": "uf", "term": { "season": "spring", "year": 2026 } },
+    { "attemptId": "a08", "courseId": "gly1102", "status": "completed", "grade": "W", "credits": 3, "source": "uf", "term": { "season": "spring", "year": 2026 } },
+    { "attemptId": "a09", "courseId": "gly1150l", "status": "completed", "grade": "A", "credits": 1, "source": "uf", "term": { "season": "summer", "year": 2026 } },
+    { "attemptId": "a10", "courseId": "gly3202c", "status": "in_progress", "credits": 3, "source": "uf", "term": { "season": "fall", "year": 2026 } },
+    { "attemptId": "a11", "courseId": "gly4155c", "status": "in_progress", "credits": 3, "source": "uf", "term": { "season": "fall", "year": 2026 } },
+    { "attemptId": "a12", "courseId": "psb3340", "status": "in_progress", "credits": 3, "source": "uf", "term": { "season": "fall", "year": 2026 } },
+    { "attemptId": "a13", "courseId": "psy3213l", "status": "in_progress", "credits": 3, "source": "uf", "term": { "season": "fall", "year": 2026 } },
+    { "attemptId": "a14", "courseId": "enc1102", "status": "completed", "grade": "A", "credits": 3, "source": "dual_enrollment", "institution": "Santa Fe College", "originalCode": "ENC 1102" }
+  ],
+  "examCredits": [
+    { "examCreditId": "e01", "awardId": "ap-calculus-ab-3-5", "score": 4, "courseIds": ["mac2311"], "credits": 4 }
+  ],
+  "electiveCredits": [
+    { "entryId": "x01", "label": "Elective credit, no UF equivalent (Santa Fe College)", "credits": 3, "source": "dual_enrollment", "institution": "Santa Fe College" }
+  ],
+  "exceptions": [],
+  "facts": { "hasFloridaAA": false }
+}
