@@ -35,6 +35,7 @@ for (const [path, title] of [
   ["/sign-in", "Sign in to GatorAdvisor AI"],
   ["/sign-up", "Create your account"],
   ["/onboarding", "Plan your UF degree with confidence."],
+  ["/account-deleted", "Plan your UF degree with confidence."],
 ] as const) {
   test(`${path} has exactly one h1`, async ({ page }) => {
     await page.goto(path)

@@ -49,3 +49,7 @@ next-env.d.ts
 # Python bytecode
 __pycache__/
 *.pyc
+
+# Supabase CLI link state and catalog loader scratch SQL
+supabase/.temp/
+tools/db/out/
