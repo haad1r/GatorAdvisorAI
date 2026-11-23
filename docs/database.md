@@ -66,7 +66,7 @@ Each mirrors a file in `data/`, column for column where possible:
 | `requisites` | `data/catalog/requisites.csv` | `course_id, kind` |
 | `programs` | `data/programs/programs.csv` | `id` (`uglas-csc_bs`) |
 | `requirement_groups` | `data/programs/requirements.csv` | `program_id, group_key` |
-| `tracking_milestones` | `data/programs/milestones.csv` | `program_id, semester, position` (position = the row's order within its program and semester in the CSV, from 1; rows can repeat word for word) |
+| `tracking_milestones` | `data/programs/milestones.csv` | `program_id, semester, position` (position = the row's order within its program and semester in the CSV, from 1; rows can repeat word for word). Kinds: `courses`, `count`, `note`, `gpa`; a `gpa` row, and only a `gpa` row, has `gpa_min` and `gpa_scope`. `min_grade` is the grade a course milestone needs. |
 | `model_plan_courses` | `data/programs/plans.csv` | `program_id, semester_index, position` |
 | `terms` | `data/soc/terms.csv` | `term` (`fetched_at` = when that term's schedule was fetched, from `fetched_to`) |
 | `sections` | `data/soc/sections/<term>.csv` | `term, class_number` |

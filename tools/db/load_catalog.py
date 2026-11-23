@@ -31,7 +31,8 @@ BATCH_BYTES = 800_000
 # The CLI changes its output when it thinks an AI agent is running it; pin one shape.
 CLI_FORMAT = ["--agent", "no", "--output-format", "json"]
 
-csv.field_size_limit(sys.maxsize)
+# Long fields (course descriptions, requirement JSON). sys.maxsize overflows a C long on Windows.
+csv.field_size_limit(2**31 - 1)
 
 
 def text(v):
@@ -87,7 +88,7 @@ def number_milestones(rows):
 
 
 def rmp_fetched_at(rows):
-    stamp = json.loads((DATA / "rmp/manifest.json").read_text())["fetched_at"]
+    stamp = json.loads((DATA / "rmp/manifest.json").read_text(encoding="utf-8"))["fetched_at"]
     for r in rows:
         r["fetched_at"] = stamp
 
@@ -129,6 +130,7 @@ TABLES = [
         "program_id": ("program_id", required), "semester": ("semester", required), "position": ("position", required),
         "kind": ("kind", required), "slots": ("slots", json_value), "count": ("count", number),
         "pool": ("pool", json_value), "raw_text": ("raw_text", required),
+        "min_grade": ("min_grade", text), "gpa_min": ("gpa_min", number), "gpa_scope": ("gpa_scope", text),
     }, one("programs/milestones.csv"), extra=number_milestones),
     Table("model_plan_courses", ["program_id", "semester_index", "position"], {
         "program_id": ("program_id", required), "semester_index": ("semester_index", required),
@@ -164,7 +166,7 @@ TABLES = [
 def read_rows(table: Table) -> list[dict]:
     raw = []
     for path in table.files():
-        with open(path, newline="") as f:
+        with open(path, newline="", encoding="utf-8") as f:
             raw.extend(csv.DictReader(f))
     table.extra(raw)
     rows = []
@@ -253,12 +255,12 @@ def statements(table: Table, rows: list[dict]):
 def run(sql: str) -> None:
     OUT.mkdir(exist_ok=True)
     path = OUT / "current.sql"
-    path.write_text(sql)
+    path.write_text(sql, encoding="utf-8")
     if os.environ.get("SUPABASE_DB_URL"):
         cmd = ["psql", os.environ["SUPABASE_DB_URL"], "-v", "ON_ERROR_STOP=1", "-q", "-1", "-f", str(path)]
     else:
         cmd = ["supabase", "db", "query", "--remote", "--yes", *CLI_FORMAT, "-f", str(path)]
-    result = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
+    result = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, encoding="utf-8")
     if result.returncode != 0 or '"_tag":"Error"' in result.stdout.replace(" ", ""):
         sys.stdout.write(result.stdout[-2000:])
         sys.stderr.write(result.stderr[-2000:])
@@ -269,10 +271,10 @@ def count(table: Table) -> int:
     t = f"catalog.{table.name}"
     if os.environ.get("SUPABASE_DB_URL"):
         out = subprocess.run(["psql", os.environ["SUPABASE_DB_URL"], "-tAc", f"select count(*) from {t}"],
-                             capture_output=True, text=True, check=True).stdout
+                             capture_output=True, text=True, encoding="utf-8", check=True).stdout
         return int(out.strip())
     out = subprocess.run(["supabase", "db", "query", "--remote", "--read-only", *CLI_FORMAT,
-                          f"select count(*) as n from {t}"], cwd=ROOT, capture_output=True, text=True, check=True).stdout
+                          f"select count(*) as n from {t}"], cwd=ROOT, capture_output=True, text=True, encoding="utf-8", check=True).stdout
     return int(json.loads(out)[0]["n"])
 
 
@@ -303,7 +305,7 @@ def main() -> None:
         for n, (label, sql) in enumerate(statements(table, rows), 1):
             if args.dry_run:
                 OUT.mkdir(exist_ok=True)
-                (OUT / f"{table.name}-{n:03}.sql").write_text(sql)
+                (OUT / f"{table.name}-{n:03}.sql").write_text(sql, encoding="utf-8")
             else:
                 run(sql)
             print(f"  {label}")

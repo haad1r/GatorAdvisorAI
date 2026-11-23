@@ -115,6 +115,20 @@ end $$;
 -- A queued job can't recreate data for a deleted student.
 select pg_temp.must_fail('recreating data after deletion', $$insert into survey_submissions (user_id, survey_version, interest_list_version, answers) values ('user_A', 'survey_v1', 'interests_v1', '[]')$$);
 
+-- Milestones: GPA rules (kind gpa) carry gpa_min and gpa_scope; nothing else does.
+insert into catalog.programs (id, name, kind, status, catalog_year, source_url, fetched_at)
+values ('test-gpa_bs', 'Test', 'major', 'published', '2026-2027', 'https://example.test', now());
+insert into catalog.tracking_milestones (program_id, semester, position, kind, raw_text, gpa_min, gpa_scope)
+values ('test-gpa_bs', 1, 1, 'gpa', '2.5 UF GPA required', 2.5, 'uf');
+insert into catalog.tracking_milestones (program_id, semester, position, kind, slots, raw_text, min_grade)
+values ('test-gpa_bs', 1, 2, 'courses', '[[["mac2311"]]]', 'MAC 2311 with a C', 'C');
+\echo PASS  a gpa milestone and a course milestone with a minimum grade load
+select pg_temp.must_fail('a gpa milestone with no gpa_min', $$insert into catalog.tracking_milestones (program_id, semester, position, kind, raw_text, gpa_scope) values ('test-gpa_bs', 2, 1, 'gpa', 'x', 'uf')$$);
+select pg_temp.must_fail('a course milestone with a gpa_min', $$insert into catalog.tracking_milestones (program_id, semester, position, kind, raw_text, gpa_min, gpa_scope) values ('test-gpa_bs', 2, 1, 'courses', 'x', 2.0, 'uf')$$);
+select pg_temp.must_fail('an unknown gpa scope', $$insert into catalog.tracking_milestones (program_id, semester, position, kind, raw_text, gpa_min, gpa_scope) values ('test-gpa_bs', 2, 1, 'gpa', 'x', 2.0, 'dept')$$);
+select pg_temp.must_fail('a gpa above 4', $$insert into catalog.tracking_milestones (program_id, semester, position, kind, raw_text, gpa_min, gpa_scope) values ('test-gpa_bs', 2, 1, 'gpa', 'x', 4.5, 'uf')$$);
+delete from catalog.programs where id = 'test-gpa_bs';
+
 -- Freshness: terms record when their schedule data was fetched.
 select fetched_at from catalog.terms limit 0;
 \echo PASS  catalog.terms has fetched_at
