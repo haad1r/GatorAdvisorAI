@@ -12,6 +12,7 @@ import type { ApiError, WeekSchedule } from "@/lib/api/types"
 import { useApi } from "@/lib/api/use-api"
 import { addDays, daysToShow, formatWeekRange, mondayOf, todayInGainesville, unscheduled } from "@/lib/schedule"
 import { AgendaList } from "./agenda-list"
+import { InstructorsDialog } from "./instructors-dialog"
 import { UnscheduledList } from "./unscheduled-list"
 import { WeekGrid } from "./week-grid"
 
@@ -74,7 +75,9 @@ export function ScheduleView() {
           {state.kind === "ok" && <span className="ml-2 text-base font-normal tracking-normal text-muted-foreground">{state.data.term}</span>}
         </h2>
 
-        <div role="group" aria-label="View" className="ml-auto hidden rounded-lg border border-border p-0.5 lg:flex">
+        <div className="ml-auto flex items-center gap-2">
+        {state.kind === "ok" && meetings.length > 0 && <InstructorsDialog meetings={meetings} />}
+        <div role="group" aria-label="View" className="hidden rounded-lg border border-border p-0.5 lg:flex">
           {(
             [
               ["grid", "Week", CalendarDaysIcon],
@@ -92,6 +95,7 @@ export function ScheduleView() {
               {label}
             </Button>
           ))}
+        </div>
         </div>
       </div>
 
