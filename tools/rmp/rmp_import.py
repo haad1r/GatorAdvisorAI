@@ -200,28 +200,8 @@ def load_professors(path: Path) -> list[Professor]:
     return list(seen.values())
 
 
-def _edit_distance_at_most_one(a: str, b: str) -> bool:
-    if abs(len(a) - len(b)) > 1:
-        return False
-    if len(a) > len(b):
-        a, b = b, a
-    i = j = edits = 0
-    while i < len(a) and j < len(b):
-        if a[i] != b[j]:
-            edits += 1
-            if edits > 1:
-                return False
-            if len(a) == len(b):
-                i += 1
-            j += 1
-        else:
-            i += 1
-            j += 1
-    return edits + (len(b) - j) <= 1
-
-
 # Common English short forms. A first name matches another only if they're
-# equal, in the same group here, or a one-letter typo of a long name.
+# equal, in the same group here, or differ only by a doubled letter.
 NICKNAME_GROUPS = [
     {"abby", "abigail"}, {"alex", "alexander", "alexandre", "alexandra", "alejandro"},
     {"andy", "andrew"}, {"ben", "benjamin"}, {"becky", "rebecca"}, {"bill", "will", "william"},
@@ -256,14 +236,6 @@ def first_names_compatible(a: str, b: str) -> bool:
     if any(a in g and b in g for g in NICKNAME_GROUPS):
         return True
     return _undouble(a) == _undouble(b)
-
-
-def first_names_one_letter_apart(a: str, b: str) -> bool:
-    """Any other one-letter difference in a name of 5+ letters with the same
-    first letter. It may be a typo ("alyson" / "alison") or a different
-    name ("andre" / "andrea", "jinping" / "jianping"), so match_one only
-    accepts it within the instructor's department."""
-    return bool(a) and bool(b) and min(len(a), len(b)) >= 5 and a[0] == b[0] and _edit_distance_at_most_one(a, b)
 
 
 # RMP department labels too broad to say two people work in the same place.
@@ -304,8 +276,9 @@ def match_one(
 
     Tries, in order: exact full name; same first name and last name with
     middle names ignored; a nickname or doubled-letter typo of the first name
-    and the same last name; any other one-letter first-name difference, only
-    in the instructor's department. Several candidates are narrowed by department. RMP often lists
+    and the same last name. Any other first-name difference is a different
+    person ("kenji" / "keiji"), even in the same department, so it gets no
+    rating. Several candidates are narrowed by department. RMP often lists
     one person twice: identical full names resolve to the profile with the
     most ratings when they share a department, or when the last name is rare
     at UF (3 or fewer profiles). Anything still tied is "ambiguous" and gets
@@ -344,7 +317,6 @@ def match_one(
         ("exact", [p for p in pool if p.full == name]),
         ("first_last", [p for p in pool if first_of(p) == tokens[0] and fits(p)]),
         ("nickname", [p for p in pool if first_names_compatible(first_of(p), tokens[0]) and fits(p)]),
-        ("typo", [p for p in pool if first_names_one_letter_apart(first_of(p), tokens[0]) and fits(p) and in_dept(p)]),
     ]
 
     for method, found in tiers:
