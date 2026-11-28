@@ -42,3 +42,11 @@ an implemented mock service. Use synthetic students and course IDs in checks.
 Before dependent integration, issue #11 requires owner confirmation, access and
 versioned setup details, and a successful smoke check. This document does not
 assert that any handoff has occurred.
+
+`lib/engines/recommendations/engine-smoke.test.ts` exercises the local academic
+engine with its synthetic record and the committed catalog, then passes a small
+candidate sample to scoring. It checks that held/unknown eligibility is not
+presented as a candidate and demonstrates preserving unknown requirement flags.
+Course tags and levels in this check are placeholders. This is useful local
+evidence, not the owner-confirmed access and integration handoff, a dismissal
+test, or evidence of recommendation quality.
