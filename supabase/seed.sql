@@ -18,16 +18,16 @@ values (:student, 'test.student@ufl.edu', now(), 'Test Student', 'sophomore', 'u
 
 -- 22 class credits + 9 AP credits = 31 earned.
 insert into coursework_records (user_id, version) values (:student, 1);
-insert into coursework (user_id, course_code, grade, credits, term, source, status) values
-  (:student, 'COP3502C', 'A',  4, 'Fall 2025',   'transcript', 'confirmed'),
-  (:student, 'MAC2311',  'B+', 4, 'Fall 2025',   'transcript', 'confirmed'),
-  (:student, 'ENC1101',  'A-', 3, 'Fall 2025',   'transcript', 'confirmed'),
-  (:student, 'PSY2012',  'CR', 3, 'Fall 2025',   'exam',       'confirmed'),
-  (:student, 'AMH2010',  'CR', 3, 'Fall 2025',   'exam',       'confirmed'),
-  (:student, 'AMH2020',  'CR', 3, 'Fall 2025',   'exam',       'confirmed'),
-  (:student, 'COP3503C', 'B',  4, 'Spring 2026', 'transcript', 'needs-review'),
-  (:student, 'MAC2312',  'S',  4, 'Spring 2026', 'transcript', 'needs-review'),
-  (:student, 'CHM2045',  'B-', 3, 'Spring 2026', 'manual',     'confirmed');
+insert into coursework (user_id, course_code, grade, credits, term, source, status, entered_via, review_status) values
+  (:student, 'COP3502C', 'A',  4, 'Fall 2025',   'uf', 'completed', 'import', 'confirmed'),
+  (:student, 'MAC2311',  'B+', 4, 'Fall 2025',   'uf', 'completed', 'import', 'confirmed'),
+  (:student, 'ENC1101',  'A-', 3, 'Fall 2025',   'uf', 'completed', 'import', 'confirmed'),
+  (:student, 'COP3503C', 'B',  4, 'Spring 2026', 'uf', 'completed', 'import', 'needs-review'),
+  (:student, 'MAC2312',  'S',  4, 'Spring 2026', 'uf', 'completed', 'import', 'needs-review'),
+  (:student, 'CHM2045',  'B-', 3, 'Spring 2026', 'uf', 'completed', 'manual', 'confirmed');
+insert into exam_credits (user_id, award_id, score, course_codes, credits, entered_via, review_status) values
+  (:student, 'ap-psychology-3-5',            4, '{PSY2012}',         3, 'import', 'confirmed'),
+  (:student, 'ap-united-states-history-4-5', 5, '{AMH2010,AMH2020}', 6, 'import', 'confirmed');
 
 -- This term (Fall 2026): real section numbers, made-up times and rooms.
 insert into schedules (id, user_id, term, name, is_primary)
