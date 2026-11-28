@@ -31,6 +31,7 @@ export function FormField({
   error,
   required,
   className,
+  labelClassName,
   children,
 }: {
   id: string
@@ -40,6 +41,8 @@ export function FormField({
   error?: string
   required?: boolean
   className?: string
+  /** For layouts that show labels once as a header row: e.g. "sm:sr-only" keeps the label for screen readers. */
+  labelClassName?: string
   children: (control: FieldControlProps) => React.ReactNode
 }) {
   const ids = fieldIds(id)
@@ -54,7 +57,7 @@ export function FormField({
       data-invalid={error ? "" : undefined}
       className={cn("flex flex-col gap-1.5", className)}
     >
-      <Label htmlFor={ids.control}>
+      <Label htmlFor={ids.control} className={labelClassName}>
         {label}
         {required ? (
           <span aria-hidden="true" className="text-destructive">
