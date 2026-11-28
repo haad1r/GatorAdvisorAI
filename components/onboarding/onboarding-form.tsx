@@ -34,6 +34,11 @@ import {
 } from "../../lib/onboarding"
 import { useApi } from "../../lib/api/use-api"
 import { toFormState } from "../../lib/api/errors"
+import { SurveyForm } from "./survey-form"
+
+const INTERESTS_STEP = ONBOARDING_STEPS.findIndex((s) => s.id === "interests")
+/** The steps that collect profile fields, shown on the review step. */
+const PROFILE_STEPS = ONBOARDING_STEPS.filter((s) => s.fields.length > 0)
 
 /** Matches the raised, frosted card Clerk uses for sign-in and sign-up. */
 const clerkCardClass =
@@ -61,6 +66,7 @@ export function OnboardingForm({
   const [profile, setProfile] = React.useState<OnboardingProfile>(emptyProfile)
   const [state, setState] = React.useState<FormState>(initialFormState)
   const [pending, setPending] = React.useState(false)
+  const [done, setDone] = React.useState<null | { surveySaved: boolean }>(null)
   const headingRef = React.useRef<HTMLHeadingElement>(null)
 
   const current = ONBOARDING_STEPS[step]
@@ -91,7 +97,10 @@ export function OnboardingForm({
     if (hasErrors(errors)) return setState(errorState(errors))
     setPending(true)
     try {
-      setState(await (onSubmit ?? saveProfile)(profile))
+      const saved = await (onSubmit ?? saveProfile)(profile)
+      // Profile saved: move on to the optional interest survey.
+      if (saved.status === "success") goTo(INTERESTS_STEP)
+      else setState(saved)
     } catch {
       setState({
         status: "error",
@@ -103,8 +112,32 @@ export function OnboardingForm({
     }
   }
 
-  if (state.status === "success") {
-    return <Done name={profile.preferredName} />
+  if (done) {
+    return <Done name={profile.preferredName} surveySaved={done.surveySaved} />
+  }
+
+  if (current.id === "interests") {
+    return (
+      <div className={cn(clerkCardClass, "flex flex-col gap-6")} style={clerkCardStyle}>
+        <StepIndicator current={step} />
+        <SurveyForm
+          major={profile.major}
+          last={null}
+          header={
+            <h2 ref={headingRef} tabIndex={-1} className="text-lg font-semibold outline-none">
+              {current.title}
+            </h2>
+          }
+          secondaryAction={
+            <Button type="button" variant="outline" onClick={() => setDone({ surveySaved: false })}>
+              Skip for now
+            </Button>
+          }
+          submitLabel="Save and finish"
+          onSaved={() => setDone({ surveySaved: true })}
+        />
+      </div>
+    )
   }
 
   return (
@@ -202,7 +235,7 @@ export function OnboardingForm({
             <span />
           )}
           <SubmitButton pending={pending} pendingLabel="Saving…">
-            {isReview ? "Finish setup" : "Continue"}
+            {isReview ? "Save and continue" : "Continue"}
           </SubmitButton>
         </div>
       </form>
@@ -306,7 +339,7 @@ function Review({
 }) {
   return (
     <div className="flex flex-col gap-4">
-      {ONBOARDING_STEPS.slice(0, -1).map((s, i) => (
+      {PROFILE_STEPS.map((s, i) => (
         <section key={s.id} className="rounded-lg border border-border p-3">
           <div className="mb-2 flex items-center justify-between">
             <h3 className="text-sm font-medium">{s.title}</h3>
@@ -336,7 +369,7 @@ function Review({
   )
 }
 
-function Done({ name }: { name: string }) {
+function Done({ name, surveySaved }: { name: string; surveySaved: boolean }) {
   return (
     <div
       className={cn(clerkCardClass, "flex flex-col gap-5")}
@@ -350,6 +383,9 @@ function Done({ name }: { name: string }) {
         <h2 className="text-lg font-semibold">You&apos;re all set, {name.trim()}.</h2>
       </div>
       <p className="text-sm text-muted-foreground">
+        {surveySaved
+          ? "Your interests are saved, and recommendations will follow them. "
+          : "You can take the interest survey any time from Settings. "}
         Next, import your transcript so we can mark the courses you&apos;ve
         already completed. You can also do this later.
       </p>
