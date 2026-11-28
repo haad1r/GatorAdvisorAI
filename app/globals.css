@@ -7,12 +7,17 @@
 @theme inline {
   --color-brand-blue: var(--brand-blue);
   --color-brand-orange: var(--brand-orange);
+  --color-brand-orange-text: var(--brand-orange-text);
+  --color-track: var(--track);
+  --color-track-done: var(--track-done);
+  --color-attention: var(--attention);
+  --color-attention-foreground: var(--attention-foreground);
   --color-canvas: var(--canvas);
   --color-event-lab: var(--event-lab);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: var(--font-code);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -52,35 +57,50 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/*
+ * "Gator Ink + Ember" (UI redesign). Neutrals lean slightly toward UF blue;
+ * UF orange is the one accent (primary actions, progress, "now").
+ * Layout: --canvas is the page behind the sidebar; --background is the
+ * white sheet the content sits on. Contrast notes are against those two.
+ */
 :root {
-  --background: oklch(1 0 0);
-  /* Calendar lab meetings. */
-  --event-lab: oklch(0.55 0.15 150);
-  /* App content area behind cards: a touch off-white so white cards stand out. */
-  --canvas: oklch(0.975 0.002 250);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  /* #21: orange for primary actions. White on UF orange fails contrast (3.4:1); near-black passes (5.1:1). */
+  --background: #FFFFFF;
+  /* Calendar lab meetings and "met" status. */
+  --event-lab: #16794A;
+  /* Page behind the sidebar and the content sheet. */
+  --canvas: #F3F4F7;
+  --foreground: #0E1525;
+  --card: #FFFFFF;
+  --card-foreground: #0E1525;
+  --popover: #FFFFFF;
+  --popover-foreground: #0E1525;
+  /* #21: orange for primary actions. White on UF orange fails contrast; near-black passes (5.3:1). */
   --primary: var(--orange);
-  --primary-foreground: oklch(0.2 0.01 50);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.5 0 0); /* 4.5:1 on canvas and tinted calendar cards (axe) */
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.53 0.22 27.325);
-  --orange: #F05B26;
-  --blue: #094FA3;
-  /* #21: blue for navigation and headings. Use these, not --orange/--blue, so dark mode stays readable. */
+  --primary-foreground: #16100D;
+  --secondary: #F1F3F7;
+  --secondary-foreground: #0E1525;
+  --muted: #F1F3F7;
+  --muted-foreground: #596173; /* 6.2:1 on white, 5.6:1 on --muted and --canvas, 4.7:1 on tinted calendar cards (axe) */
+  --accent: #F1F3F7;
+  --accent-foreground: #0E1525;
+  --destructive: #C0262D;
+  /* Official UF colors (Pantone 172 / 287). */
+  --orange: #FA4616;
+  --blue: #0021A5;
+  /* #21: use these, not --orange/--blue, so dark mode stays readable. */
   --brand-blue: var(--blue);
   --brand-orange: var(--orange);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  /* Orange as text (links, "now" labels): UF orange itself is only 3.4:1 on white. This is 5.5:1 (5.0:1 on --canvas). */
+  --brand-orange-text: #C2370F;
+  /* Progress bars: the empty track and the earned fill. Both fills are 3:1+ against the track (WCAG 1.4.11). */
+  --track: #EEF0F5;
+  --track-done: #1C2539;
+  /* "We couldn't check" callouts. Text is 6.5:1 on the fill. */
+  --attention: #FCF3E1;
+  --attention-foreground: #7A4E0B;
+  --border: #E6E9EF;
+  --input: #D3D8E1;
+  --ring: #2F5BD8;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -97,30 +117,36 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+/* Dark: a neutral charcoal, not navy. Opt-in through the theme toggle or the OS setting. */
 .dark {
-  --background: oklch(0.27 0.004 70);
-  /* Cards are already lighter than the page in dark mode, so the canvas is the page. */
-  --canvas: var(--background);
-  --event-lab: oklch(0.72 0.15 150);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.31 0.004 70);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.31 0.004 70);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: var(--orange);
-  --primary-foreground: oklch(0.2 0.01 50);
-  /* UF blue is too dark on flint; this lighter blue passes 4.5:1 on background and muted. */
-  --brand-blue: #79B0F2;
-  --secondary: oklch(0.36 0.005 70);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.36 0.005 70);
-  --muted-foreground: oklch(0.8 0.006 70);
-  --accent: oklch(0.36 0.005 70);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.8 0.15 22.216);
-  --border: oklch(1 0 0 / 15%);
-  --input: oklch(1 0 0 / 20%);
-  --ring: oklch(0.556 0 0);
+  --background: #16171B;
+  --canvas: #0D0E11;
+  --event-lab: #4BD293;
+  --foreground: #ECEDF0;
+  --card: #16171B;
+  --card-foreground: #ECEDF0;
+  --popover: #1E2025;
+  --popover-foreground: #ECEDF0;
+  --primary: #FF5A2A;
+  --primary-foreground: #16100D;
+  /* UF blue is too dark on charcoal; this lighter blue passes 4.5:1 on background and muted. */
+  --brand-blue: #8EA7FF;
+  --brand-orange: #FF5A2A;
+  --brand-orange-text: #FF8A63;
+  --track: #2A2D34;
+  --track-done: #D9DCE3;
+  --attention: #2A2112;
+  --attention-foreground: #F2C26B;
+  --secondary: #1E2025;
+  --secondary-foreground: #ECEDF0;
+  --muted: #1E2025;
+  --muted-foreground: #A2A6B0; /* 7.3:1 on background, 6.7:1 on muted */
+  --accent: #1E2025;
+  --accent-foreground: #ECEDF0;
+  --destructive: #FF8A8A;
+  --border: #2A2D34;
+  --input: #3A3E47;
+  --ring: #8EA7FF;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -141,7 +167,8 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-canvas text-foreground;
+    font-variant-numeric: tabular-nums;
   }
   html {
     @apply font-sans;

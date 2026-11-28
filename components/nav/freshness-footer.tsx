@@ -29,8 +29,8 @@ export function FreshnessFooter() {
 
   return (
     /* Mobile bottom padding clears the fixed tab bar (3.5rem + safe area). */
-    <footer className="border-t border-border px-4 pt-3 pb-[calc(4.25rem+env(safe-area-inset-bottom))] text-xs text-muted-foreground sm:px-6 lg:px-8 lg:py-3">
-      <p className="mx-auto max-w-6xl text-center">
+    <footer className="mx-auto w-full max-w-6xl px-4 pt-3 pb-[calc(4.25rem+env(safe-area-inset-bottom))] text-xs text-muted-foreground sm:px-6 lg:px-12 lg:pt-4 lg:pb-6">
+      <p>
         {state.kind === "ok" && (
           <>
             Catalog {state.data.catalogYear} · Schedule data updated{" "}

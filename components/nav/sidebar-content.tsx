@@ -10,7 +10,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       <nav aria-label="Primary" className="flex-1 overflow-y-auto">
         <NavList list="main" onNavigate={onNavigate} />
       </nav>
-      <div className="flex flex-col gap-3 border-t border-border pt-4">
+      <div className="flex flex-col gap-3">
         <NavList list="settings" onNavigate={onNavigate} />
         <AccountButton showName />
       </div>

@@ -63,8 +63,8 @@ export function SettingsView({ deleted: deletedParam = false }: { deleted?: bool
 
   if (deleted) {
     return (
-      <section role="status" className="max-w-2xl rounded-xl border border-border bg-card px-5 py-4">
-        <h2 className="text-base font-medium lg:text-lg">Your account was deleted</h2>
+      <section role="status" className="max-w-2xl rounded-xl bg-muted px-6 py-5">
+        <h2 className="text-lg font-semibold tracking-tight">Your account was deleted</h2>
         <p className="mt-1 text-muted-foreground">
           Your profile, courses, survey answers, plans, schedules, and chats are gone, and you&apos;ve been signed out.
         </p>
@@ -73,7 +73,7 @@ export function SettingsView({ deleted: deletedParam = false }: { deleted?: bool
   }
 
   return (
-    <div className="flex max-w-2xl flex-col gap-6">
+    <div className="flex max-w-4xl flex-col">
       <ProfileSection />
       <SurveySection />
       <CoursesSection />
@@ -95,25 +95,23 @@ function Section({
   id: string
   title: string
   description?: string
-  /** Red border on the page background instead of a card, to set the destructive action apart. */
+  /** Red heading, to set the destructive action apart. */
   danger?: boolean
   children: React.ReactNode
 }) {
+  /* No cards: sections are separated by a hairline, with the title on the left on desktop. */
   return (
     <section
       aria-labelledby={id}
-      className={cn(
-        "flex flex-col gap-4 rounded-xl border px-5 py-4 lg:px-6 lg:py-5",
-        danger ? "border-destructive/50" : "border-border bg-card"
-      )}
+      className="grid gap-5 border-t border-border py-8 first:border-t-0 first:pt-0 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-12"
     >
       <div>
-        <h2 id={id} className="text-base font-semibold lg:text-lg">
+        <h2 id={id} className={cn("text-lg font-semibold tracking-tight", danger && "text-destructive")}>
           {title}
         </h2>
-        {description ? <p className="mt-1 text-sm text-muted-foreground">{description}</p> : null}
+        {description ? <p className="mt-1.5 text-sm text-muted-foreground">{description}</p> : null}
       </div>
-      {children}
+      <div className="flex min-w-0 flex-col gap-4">{children}</div>
     </section>
   )
 }
@@ -174,20 +172,22 @@ function ProfileForm({ initial }: { initial: Profile }) {
   )
 
   return (
-    <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-6">
       <FormErrorSummary state={state} labels={PROFILE_LABELS} />
-      <FormField id="preferredName" label={PROFILE_LABELS.preferredName} error={fieldError(state, "preferredName")} required>
-        {(p) => (
-          <Input {...p} autoComplete="given-name" maxLength={60} value={profile.preferredName} onChange={(e) => update("preferredName", e.target.value)} />
-        )}
-      </FormField>
-      {select("classStanding", CLASS_STANDING_OPTIONS)}
-      {select("major", PLACEHOLDER_MAJOR_OPTIONS)}
-      {select("catalogYear", PLACEHOLDER_CATALOG_YEARS, "Usually the year you started at UF.")}
-      {select("entryTerm", PLACEHOLDER_ENTRY_TERMS, "Used to count your semesters for Critical Tracking.")}
-      {select("expectedGraduation", PLACEHOLDER_GRAD_TERMS)}
+      <div className="grid gap-x-5 gap-y-5 sm:grid-cols-2">
+        <FormField id="preferredName" label={PROFILE_LABELS.preferredName} error={fieldError(state, "preferredName")} required>
+          {(p) => (
+            <Input {...p} autoComplete="given-name" maxLength={60} value={profile.preferredName} onChange={(e) => update("preferredName", e.target.value)} />
+          )}
+        </FormField>
+        {select("classStanding", CLASS_STANDING_OPTIONS)}
+        {select("major", PLACEHOLDER_MAJOR_OPTIONS)}
+        {select("catalogYear", PLACEHOLDER_CATALOG_YEARS, "Usually the year you started at UF.")}
+        {select("entryTerm", PLACEHOLDER_ENTRY_TERMS, "Used to count your semesters for Critical Tracking.")}
+        {select("expectedGraduation", PLACEHOLDER_GRAD_TERMS)}
+      </div>
       <div className="flex flex-wrap items-center gap-3">
-        <SubmitButton pending={pending} pendingLabel="Saving…">
+        <SubmitButton pending={pending} pendingLabel="Saving…" className="h-10 px-5">
           Save profile
         </SubmitButton>
         <p aria-live="polite" className="text-sm text-muted-foreground">
@@ -217,7 +217,7 @@ function SurveySection() {
             {state.data ? `Last taken ${DATE.format(new Date(state.data.submittedAt))}.` : "You haven't taken the survey yet."}
           </p>
           {/* The survey screen is #19 (Zain). Link it here once it has a route. */}
-          <Button variant="outline" disabled>
+          <Button variant="outline" className="h-10 px-4" disabled>
             {state.data ? "Retake survey" : "Take survey"} (coming soon)
           </Button>
         </div>
@@ -251,7 +251,7 @@ function CourseSummary({ coursework }: { coursework: Coursework }) {
         {total === 0 ? "No courses on record." : `${total} ${total === 1 ? "course" : "courses"} on record.`}
         {review > 0 ? ` ${review} ${review === 1 ? "needs" : "need"} review.` : ""}
       </p>
-      <Button variant="outline" render={<Link href="/import" />} nativeButton={false}>
+      <Button variant="outline" className="h-10 px-4" render={<Link href="/import" />} nativeButton={false}>
         {total === 0 ? "Import courses" : "Re-import or edit courses"}
       </Button>
     </div>
@@ -268,7 +268,7 @@ function AppearanceSection() {
         <p className="text-sm">
           Theme: <span className="font-medium">{dark ? "Dark" : "Light"}</span>
         </p>
-        <Button variant="outline" onClick={toggle}>
+        <Button variant="outline" className="h-10 px-4" onClick={toggle}>
           Use {dark ? "light" : "dark"} theme
         </Button>
       </div>
@@ -319,7 +319,7 @@ function DeleteAccountSection({ onDeleted }: { onDeleted: () => void }) {
       description="Permanently removes your account, profile, courses, survey answers, plans, schedules, and chats. This can't be undone."
     >
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogTrigger render={<Button variant="destructive" className="self-start" />}>Delete account</DialogTrigger>
+        <DialogTrigger render={<Button variant="destructive" className="h-10 self-start px-4" />}>Delete account</DialogTrigger>
         <DialogContent>
           <form onSubmit={confirm} className="flex flex-col gap-4">
             <DialogHeader>

@@ -104,15 +104,15 @@ export function ImportView() {
 
 function UploadSection() {
   return (
-    <section aria-labelledby="import-upload" className="flex flex-col gap-3 rounded-xl border border-border bg-card px-5 py-4 lg:px-6 lg:py-5">
-      <h2 id="import-upload" className="text-base font-semibold lg:text-lg">
+    <section aria-labelledby="import-upload" className="flex flex-col gap-3 rounded-xl bg-muted px-5 py-5 lg:px-6">
+      <h2 id="import-upload" className="text-lg font-semibold tracking-tight">
         {IMPORT_COPY.uploadTitle}
       </h2>
-      <p className="text-sm">{IMPORT_COPY.uploadBody}</p>
-      <p className="text-sm text-muted-foreground">{IMPORT_COPY.replaceOrMerge}</p>
-      <div className="flex flex-wrap items-center gap-3">
+      <p className="max-w-[65ch] text-[15px]">{IMPORT_COPY.uploadBody}</p>
+      <p className="max-w-[65ch] text-sm text-muted-foreground">{IMPORT_COPY.replaceOrMerge}</p>
+      <div className="flex flex-wrap items-center gap-3 pt-1">
         {/* Parsing is #9 (Maria/Shaun). Enable once its preview endpoint exists. */}
-        <Button variant="outline" disabled>
+        <Button variant="outline" className="h-10 px-4" disabled>
           <UploadIcon aria-hidden="true" />
           Upload transcript (coming soon)
         </Button>
@@ -234,7 +234,7 @@ function CourseEditor({ saved, onReload }: { saved: Coursework; onReload: () => 
   return (
     <section aria-labelledby="import-courses" className="flex flex-col gap-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id="import-courses" className="text-base font-semibold lg:text-lg">
+        <h2 id="import-courses" className="text-lg font-semibold tracking-tight">
           Courses you&apos;ve taken
         </h2>
         <p className="text-sm text-muted-foreground">
@@ -265,21 +265,32 @@ function CourseEditor({ saved, onReload }: { saved: Coursework; onReload: () => 
       {rows.length === 0 ? (
         <EmptyState title="No courses yet" description="Import your transcript, or add courses by hand." />
       ) : (
-        <ul className="flex flex-col gap-3">
-          {rows.map((r, i) => (
-            <li key={r.id}>
-              <RowEditor row={r} index={i} form={form} onChange={(p) => update(i, p)} onBlurCode={() => blurCode(i)} onRemove={() => remove(i)} />
-            </li>
-          ))}
-        </ul>
+        <div className="flex flex-col gap-2">
+          {/* Desktop shows the field labels once, here; each field keeps its own label for screen readers. */}
+          <div aria-hidden="true" className="hidden grid-cols-4 gap-3 border-b border-border px-4 pb-2 text-sm font-medium text-muted-foreground sm:grid">
+            {FIELDS.map((f) => (
+              <span key={f}>
+                {FIELD_LABEL[f]}
+                <span className="text-destructive"> *</span>
+              </span>
+            ))}
+          </div>
+          <ul className="flex flex-col gap-1">
+            {rows.map((r, i) => (
+              <li key={r.id}>
+                <RowEditor row={r} index={i} form={form} onChange={(p) => update(i, p)} onBlurCode={() => blurCode(i)} onRemove={() => remove(i)} />
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       <p aria-live="polite" className="sr-only">
         {announce}
       </p>
 
-      <div className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <Button ref={addRef} variant="outline" onClick={add} className="self-start">
+      <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
+        <Button ref={addRef} variant="outline" onClick={add} className="h-10 self-start px-4">
           <PlusIcon aria-hidden="true" />
           Add course
         </Button>
@@ -287,7 +298,7 @@ function CourseEditor({ saved, onReload }: { saved: Coursework; onReload: () => 
           <p className="text-sm" aria-live="polite">
             {save.kind === "saved" && !dirty ? "Saved." : dirty ? "Unsaved changes" : ""}
           </p>
-          <Button onClick={review} disabled={!dirty || pending}>
+          <Button onClick={review} disabled={!dirty || pending} className="h-10 px-5">
             Review and save
           </Button>
         </div>
@@ -346,14 +357,18 @@ function RowEditor({
   const review = row.status === "needs-review"
   const name = row.courseCode ? formatCourseCode(row.courseCode) : "new course"
   return (
-    <fieldset className={review ? "rounded-xl border border-brand-orange/70 bg-brand-orange/5 p-4" : "rounded-xl border border-border bg-card p-4"}>
+    /* Rows that need review get a soft amber fill; confirmed rows are plain lines. */
+    <fieldset className={review ? "rounded-xl bg-attention px-4 py-4" : "border-b border-border px-4 py-4"}>
       <legend className="sr-only">
         Row {i + 1}: {name}
         {review ? ", needs review" : ""}
       </legend>
       <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
         {review ? (
-          <span className="rounded-full border border-brand-orange/60 bg-brand-orange/20 px-2 text-xs font-medium">Needs review</span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-background px-2.5 py-0.5 text-xs font-semibold text-attention-foreground">
+            <span aria-hidden="true" className="size-1.5 rounded-full bg-primary" />
+            Needs review
+          </span>
         ) : (
           <span className="text-xs text-muted-foreground">Confirmed</span>
         )}
@@ -371,15 +386,15 @@ function RowEditor({
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <FormField id={key(i, "courseCode")} label={FIELD_LABEL.courseCode} error={fieldError(form, key(i, "courseCode"))} required>
+        <FormField id={key(i, "courseCode")} label={FIELD_LABEL.courseCode} labelClassName="sm:sr-only" error={fieldError(form, key(i, "courseCode"))} required>
           {(p) => (
-            <Input {...p} value={row.courseCode} placeholder="e.g. COP3502" autoCapitalize="characters" onChange={(e) => onChange({ courseCode: e.target.value })} onBlur={onBlurCode} />
+            <Input {...p} className="font-mono" value={row.courseCode} placeholder="e.g. COP3502" autoCapitalize="characters" onChange={(e) => onChange({ courseCode: e.target.value })} onBlur={onBlurCode} />
           )}
         </FormField>
-        <FormField id={key(i, "grade")} label={FIELD_LABEL.grade} error={fieldError(form, key(i, "grade"))} required>
+        <FormField id={key(i, "grade")} label={FIELD_LABEL.grade} labelClassName="sm:sr-only" error={fieldError(form, key(i, "grade"))} required>
           {(p) => <Input {...p} value={row.grade} placeholder="e.g. B+" maxLength={3} onChange={(e) => onChange({ grade: e.target.value.toUpperCase() })} />}
         </FormField>
-        <FormField id={key(i, "credits")} label={FIELD_LABEL.credits} error={fieldError(form, key(i, "credits"))} required>
+        <FormField id={key(i, "credits")} label={FIELD_LABEL.credits} labelClassName="sm:sr-only" error={fieldError(form, key(i, "credits"))} required>
           {(p) => (
             <NativeSelect {...p} value={String(row.credits)} onChange={(e) => onChange({ credits: Number(e.target.value) })}>
               {[0, 1, 2, 3, 4, 5, 6].map((n) => (
@@ -390,7 +405,7 @@ function RowEditor({
             </NativeSelect>
           )}
         </FormField>
-        <FormField id={key(i, "term")} label={FIELD_LABEL.term} error={fieldError(form, key(i, "term"))} required>
+        <FormField id={key(i, "term")} label={FIELD_LABEL.term} labelClassName="sm:sr-only" error={fieldError(form, key(i, "term"))} required>
           {(p) => <Input {...p} value={row.term} placeholder="e.g. Fall 2025" onChange={(e) => onChange({ term: e.target.value })} />}
         </FormField>
       </div>

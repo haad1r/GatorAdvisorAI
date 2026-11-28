@@ -1,12 +1,11 @@
 "use client"
 
 import * as React from "react"
-import { ChevronDownIcon, ExternalLinkIcon } from "lucide-react"
+import { ChevronDownIcon, ExternalLinkIcon, HelpCircleIcon } from "lucide-react"
 import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { NativeSelect } from "@/components/ui/native-select"
 import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { EmptyState } from "@/components/feedback/empty-state"
 import { LoadFailed } from "@/components/feedback/load-failed"
 import { LoadingBlock } from "@/components/feedback/loading-block"
@@ -68,7 +67,7 @@ export function AuditView() {
   const statuses = tab === "tracking" ? TRACKING_STATUSES : AUDIT_STATUSES
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-10">
       <AuditSummary audit={data} />
       {data.unknowns.length > 0 && <Unknowns audit={data} onShow={(id) => showRequirement(id, data, chooseTab)} />}
 
@@ -76,22 +75,27 @@ export function AuditView() {
         <h2 id="audit-results" className="sr-only">
           Requirements
         </h2>
-        <div className="flex flex-wrap items-end gap-3">
-          <div role="group" aria-label="Requirement type" className="flex flex-wrap rounded-lg border border-border p-0.5">
+        <div className="flex flex-wrap items-center gap-3">
+          <div role="group" aria-label="Requirement type" className="flex flex-wrap gap-0.5 rounded-full bg-muted p-1">
             {TABS.map(([value, label]) => (
               <Button
                 key={value}
                 variant="ghost"
                 aria-pressed={tab === value}
                 onClick={() => chooseTab(value)}
-                className={cn("h-9 px-4 text-[15px]", tab === value && "bg-muted text-foreground")}
+                className={cn(
+                  "h-9 rounded-full px-4 text-[15px] text-muted-foreground hover:bg-transparent hover:text-foreground dark:hover:bg-transparent",
+                  tab === value && "bg-background font-semibold text-foreground shadow-[0_1px_2px_rgba(14,21,37,0.08)] hover:bg-background dark:hover:bg-background"
+                )}
               >
                 {label}
               </Button>
             ))}
           </div>
-          <div className="ml-auto flex flex-col gap-1.5">
-            <Label htmlFor="status-filter">Show</Label>
+          <div className="ml-auto flex items-center gap-2">
+            <Label htmlFor="status-filter" className="text-muted-foreground">
+              Show
+            </Label>
             <NativeSelect id="status-filter" value={filter} onChange={(e) => setFilter(e.target.value as ResultStatus | "all")}>
               <option value="all">All statuses</option>
               {statuses.map((s) => (
@@ -139,27 +143,25 @@ function showRequirement(id: string, audit: DegreeAudit, chooseTab: (tab: Tab) =
 
 function AuditSummary({ audit }: { audit: DegreeAudit }) {
   const { credits } = audit
+  // In-progress credits as a share of the bar, after the earned part.
+  const inProgressShare = credits.required > 0 ? Math.round((credits.inProgress / credits.required) * 100) : 0
   return (
-    <section aria-labelledby="audit-summary" className="flex flex-col gap-4 rounded-xl border border-border bg-card px-5 py-4 lg:px-6 lg:py-5">
-      <div>
-        <h2 id="audit-summary" className="text-base font-semibold lg:text-lg">
-          {audit.program.name}
-        </h2>
+    <section aria-labelledby="audit-summary" className="grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:gap-16">
+      <h2 id="audit-summary" className="sr-only">
+        Summary: {audit.program.name}, {audit.program.catalogYear} catalog, checked {formatDate(audit.generatedAt)}
+      </h2>
+      <div className="flex flex-col gap-5">
+        <p className="flex flex-wrap items-baseline gap-x-3">
+          <span className="text-5xl leading-none font-semibold tracking-[-0.04em] sm:text-6xl">{credits.earned}</span>
+          <span className="text-lg text-muted-foreground">of {credits.required} credits</span>
+        </p>
+        <ProgressBar percent={audit.percentComplete} inProgress={inProgressShare} label="Degree progress" showLabel={false} />
         <p className="text-sm text-muted-foreground">
-          {audit.program.catalogYear} catalog · checked {formatDate(audit.generatedAt)}
+          {credits.inProgress} in progress · {credits.remaining} to go
         </p>
       </div>
 
-      <ProgressBar percent={audit.percentComplete} label="Degree progress" />
-
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-4">
-        <Stat term="Earned" value={`${credits.earned} credits`} />
-        <Stat term="In progress" value={`${credits.inProgress} credits`} />
-        <Stat term="Remaining" value={`${credits.remaining} credits`} />
-        <Stat term="Required" value={`${credits.required} credits`} />
-      </dl>
-
-      <dl className="grid grid-cols-1 gap-x-6 gap-y-3 border-t border-border pt-4 sm:grid-cols-3">
+      <dl className="flex flex-wrap gap-x-10 gap-y-4">
         {audit.gpa.map((g) => (
           <Stat key={g.kind} term={GPA_LABEL[g.kind]} value={g.value != null ? g.value.toFixed(2) : "—"} note={g.note} />
         ))}
@@ -171,29 +173,31 @@ function AuditSummary({ audit }: { audit: DegreeAudit }) {
 function Unknowns({ audit, onShow }: { audit: DegreeAudit; onShow: (id: string) => void }) {
   const titleOf = (id: string | null) => audit.requirements.find((r) => r.id === id)?.title
   return (
-    <Alert>
-      <AlertTitle>
+    <section aria-labelledby="audit-unknowns" className="flex flex-col gap-2 rounded-xl bg-attention px-5 py-4 text-attention-foreground">
+      <h2 id="audit-unknowns" className="flex items-center gap-2 font-semibold">
+        <HelpCircleIcon aria-hidden="true" className="size-4" />
         {audit.unknowns.length === 1 ? "1 thing we couldn't check" : `${audit.unknowns.length} things we couldn't check`}
-      </AlertTitle>
-      <AlertDescription>
-        <p>We won&apos;t guess. Ask your advisor about these, or fix your record if something is missing.</p>
-        <ul className="mt-2 flex list-disc flex-col gap-1 pl-5">
-          {audit.unknowns.map((u, i) => (
-            <li key={i}>
-              {u.message}
-              {u.requirementId && titleOf(u.requirementId) ? (
-                <>
-                  {" "}
-                  <button type="button" className="text-brand-blue underline underline-offset-4" onClick={() => onShow(u.requirementId!)}>
-                    Show {titleOf(u.requirementId)}
-                  </button>
-                </>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      </AlertDescription>
-    </Alert>
+      </h2>
+      <ul className="flex list-disc flex-col gap-1 pl-5 text-foreground">
+        {audit.unknowns.map((u, i) => (
+          <li key={i}>
+            {u.message}
+            {u.requirementId && titleOf(u.requirementId) ? (
+              <>
+                {" "}
+                <button
+                  type="button"
+                  className="rounded-sm font-semibold text-attention-foreground underline underline-offset-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                  onClick={() => onShow(u.requirementId!)}
+                >
+                  Show {titleOf(u.requirementId)}
+                </button>
+              </>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    </section>
   )
 }
 
@@ -215,9 +219,9 @@ function RequirementList({ audit, category, filter }: { audit: DegreeAudit; cate
   const titleOf = (id: string) => audit.requirements.find((r) => r.id === id)?.title ?? id
 
   return (
-    <ul className="flex flex-col gap-3">
+    <ul className="flex flex-col border-t border-border">
       {shown.map((r) => (
-        <li key={r.id}>
+        <li key={r.id} className="border-b border-border">
           <RequirementCard
             requirement={r}
             sharedWith={(code) =>
@@ -235,29 +239,37 @@ function RequirementList({ audit, category, filter }: { audit: DegreeAudit; cate
 
 function RequirementCard({ requirement: r, sharedWith }: { requirement: RequirementResult; sharedWith: (code: string) => string[] }) {
   const progress = formatProgress(r.needed, r.earned)
+  const bar = requirementShares(r)
   return (
-    <details id={`req-${r.id}`} className="group rounded-xl border border-border bg-card">
-      <summary className="flex min-h-14 cursor-pointer list-none items-center gap-3 rounded-xl px-4 py-3 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none [&::-webkit-details-marker]:hidden">
-        <span className="flex min-w-0 flex-1 flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3">
-          <span className="font-medium">{r.title}</span>
-          {progress ? <span className="text-sm text-muted-foreground">{progress}</span> : null}
+    <details id={`req-${r.id}`} className="group">
+      <summary className="flex min-h-16 cursor-pointer list-none items-center gap-4 rounded-lg px-1 py-3 outline-none hover:bg-muted/50 focus-visible:ring-3 focus-visible:ring-ring/50 [&::-webkit-details-marker]:hidden">
+        <span className="min-w-0 flex-1 font-semibold">{r.title}</span>
+        {bar && (
+          <span aria-hidden="true" className="hidden h-1.5 w-32 shrink-0 overflow-hidden rounded-full bg-track sm:flex">
+            <span className="h-full bg-track-done" style={{ width: `${bar.earned}%` }} />
+            <span className="h-full bg-primary" style={{ width: `${bar.pending}%` }} />
+          </span>
+        )}
+        {progress ? <span className="hidden w-32 shrink-0 text-right text-sm text-muted-foreground sm:block">{progress}</span> : null}
+        <span className="flex w-28 shrink-0 justify-end">
+          <ResultStatusBadge status={r.status} />
         </span>
-        <ResultStatusBadge status={r.status} />
         <ChevronDownIcon aria-hidden="true" className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
       </summary>
 
-      <div className="flex flex-col gap-4 border-t border-border px-4 py-3 text-sm">
+      <div className="flex flex-col gap-4 px-1 pt-1 pb-5 text-sm">
+        {progress ? <p className="text-muted-foreground sm:hidden">{progress}</p> : null}
         <p>{r.reason}</p>
 
         {r.counted.length > 0 && (
           <div className="flex flex-col gap-1.5">
             <h3 className="text-xs font-medium text-muted-foreground">Counted courses</h3>
-            <ul className="flex flex-col gap-1">
+            <ul className="flex flex-col gap-1.5">
               {r.counted.map((c) => {
                 const shared = sharedWith(c.courseCode)
                 return (
-                  <li key={c.courseCode} className="flex flex-wrap items-baseline gap-x-2">
-                    <span className="font-medium">{formatCourseCode(c.courseCode)}</span>
+                  <li key={c.courseCode} className="flex flex-wrap items-baseline gap-x-3">
+                    <span className="font-mono font-medium">{formatCourseCode(c.courseCode)}</span>
                     <span className="text-muted-foreground">
                       {c.inProgress ? "In progress" : c.source === "exam" ? "Exam credit" : c.grade} · {c.credits} cr{c.source === "exam" ? "" : ` · ${c.term}`}
                     </span>
@@ -284,6 +296,21 @@ function RequirementCard({ requirement: r, sharedWith }: { requirement: Requirem
       </div>
     </details>
   )
+}
+
+/**
+ * Earned and in-progress shares (0-100) for a requirement's small bar, counted
+ * the same way as its "x of y" text (credits or courses). null when the
+ * requirement isn't counted either way.
+ */
+function requirementShares(r: RequirementResult) {
+  const byCredits = r.needed.credits != null
+  const need = byCredits ? r.needed.credits : r.needed.courses
+  if (!need) return null
+  const done = byCredits ? r.earned.credits : r.earned.courses
+  const pending = r.counted.filter((c) => c.inProgress).reduce((sum, c) => sum + (byCredits ? c.credits : 1), 0)
+  const earned = Math.min(100, Math.round((done / need) * 100))
+  return { earned, pending: Math.min(100 - earned, Math.round((pending / need) * 100)) }
 }
 
 function Sources({ sources }: { sources: SourceReference[] }) {
@@ -317,9 +344,9 @@ function TrackingList({ tracking, filter }: { tracking: TrackingResult; filter: 
     return <EmptyState title="Nothing matches this filter" description="Choose another status, or All statuses." />
   }
   return (
-    <ol className="flex flex-col gap-3">
+    <ol className="flex flex-col border-t border-border">
       {shown.map((m) => (
-        <li key={m.id}>
+        <li key={m.id} className="border-b border-border">
           <MilestoneCard milestone={m} next={tracking.nextDeadline?.id === m.id} />
         </li>
       ))}
@@ -329,12 +356,17 @@ function TrackingList({ tracking, filter }: { tracking: TrackingResult; filter: 
 
 function MilestoneCard({ milestone: m, next }: { milestone: TrackingMilestone; next: boolean }) {
   return (
-    <div className={cn("flex flex-col gap-2 rounded-xl border bg-card px-4 py-3 text-sm", next ? "border-brand-blue" : "border-border")}>
+    <div className="flex flex-col gap-2 px-1 py-4 text-sm">
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs text-muted-foreground">
           Semester {m.semester} · due {m.deadlineTerm}
         </span>
-        {next && <span className="rounded-full border border-brand-blue px-2 text-xs font-medium text-brand-blue">Next deadline</span>}
+        {next && (
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-orange-text">
+            <span aria-hidden="true" className="size-2 rounded-full bg-primary" />
+            Next deadline
+          </span>
+        )}
         <ResultStatusBadge status={m.status} className="ml-auto" />
       </div>
       <p className="font-medium">{m.description}</p>

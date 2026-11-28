@@ -11,8 +11,8 @@ export function EmptyState({
 }) {
     const lg = size === "lg"
     return (
-        <section className={cn("rounded-lg border border-border bg-card", lg ? "rounded-xl px-5 py-4 lg:px-6 lg:py-5" : "px-2.5 py-2")}>
-            <h2 className={cn("font-medium", lg ? "text-base lg:text-lg" : "text-sm")}>{title}</h2>
+        <section className={cn("rounded-lg bg-muted", lg ? "rounded-xl px-6 py-5" : "px-4 py-3")}>
+            <h2 className={cn("font-semibold", lg ? "text-lg tracking-tight" : "text-sm")}>{title}</h2>
             <p className={cn("text-muted-foreground", lg ? "mt-1 text-[15px] lg:text-base" : "text-sm")}>{description}</p>
         </section>
     )
