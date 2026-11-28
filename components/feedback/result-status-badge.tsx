@@ -6,11 +6,11 @@ export type ResultStatus = AuditStatus | TrackingStatus
 
 /* Status is never color alone (#21): every badge has a label and an icon shape. */
 const STYLE: Record<ResultStatus, { label: string; icon: LucideIcon; className: string }> = {
-  met: { label: "Met", icon: CheckIcon, className: "bg-event-lab/15 border-event-lab/40" },
-  in_progress: { label: "In progress", icon: CircleDashedIcon, className: "bg-brand-blue/10 border-brand-blue/40" },
-  not_met: { label: "Not met", icon: CircleIcon, className: "border-border" },
-  at_risk: { label: "At risk", icon: AlertTriangleIcon, className: "bg-brand-orange/20 border-brand-orange/60" },
-  unknown: { label: "Unknown", icon: HelpCircleIcon, className: "bg-muted border-border border-dashed" },
+  met: { label: "Met", icon: CheckIcon, className: "bg-event-lab/12 border-transparent" },
+  in_progress: { label: "In progress", icon: CircleDashedIcon, className: "bg-brand-blue/10 border-transparent" },
+  not_met: { label: "Not met", icon: CircleIcon, className: "bg-muted border-transparent" },
+  at_risk: { label: "At risk", icon: AlertTriangleIcon, className: "bg-attention border-transparent" },
+  unknown: { label: "Unknown", icon: HelpCircleIcon, className: "border-input border-dashed" },
 }
 
 export const RESULT_STATUS_LABEL = Object.fromEntries(

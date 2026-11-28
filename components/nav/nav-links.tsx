@@ -32,17 +32,15 @@ export function NavList({ list, onNavigate }: { list: keyof typeof LISTS; onNavi
               onClick={onNavigate}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative flex h-11 items-center gap-3 rounded-xl px-3 text-[15px] transition-colors",
+                "group/nav relative flex h-11 items-center gap-3 rounded-lg px-3 text-[15px] transition-colors",
                 focusRing,
+                /* Active is a raised pill plus bold text, not color alone. */
                 active
-                  ? "bg-brand-blue/10 font-medium text-brand-blue"
-                  : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  ? "bg-background font-semibold text-foreground shadow-[0_1px_2px_rgba(14,21,37,0.06)] ring-1 ring-border"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
-              {active && (
-                <span aria-hidden="true" className="absolute inset-y-2 left-0 w-1 rounded-full bg-brand-blue" />
-              )}
-              <Icon aria-hidden="true" className="size-5 shrink-0" />
+              <Icon aria-hidden="true" className={cn("size-[18px] shrink-0", active && "text-brand-orange")} />
               {label}
             </Link>
           </li>
@@ -58,7 +56,7 @@ export function MobileTabBar() {
   return (
     <nav
       aria-label="Primary"
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden"
     >
       <ul className="grid grid-cols-5">
         {TAB_ITEMS.map(({ href, label, short, icon: Icon }) => {
@@ -71,13 +69,13 @@ export function MobileTabBar() {
                 className={cn(
                   "relative flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs transition-colors",
                   focusRing,
-                  active ? "font-semibold text-brand-blue" : "text-muted-foreground hover:text-foreground"
+                  active ? "font-semibold text-foreground" : "text-muted-foreground hover:text-foreground"
                 )}
               >
                 {active && (
-                  <span aria-hidden="true" className="absolute top-0 h-0.5 w-8 rounded-full bg-brand-blue" />
+                  <span aria-hidden="true" className="absolute top-0 h-0.5 w-8 rounded-full bg-brand-orange" />
                 )}
-                <Icon aria-hidden="true" className="size-5" />
+                <Icon aria-hidden="true" className={cn("size-5", active && "text-brand-orange")} />
                 {short ?? label}
               </Link>
             </li>
