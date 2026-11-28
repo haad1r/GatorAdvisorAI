@@ -1,7 +1,7 @@
 # Starter course-interest tag review
 
 [`tag-review-batch-v1.json`](../../data/recommendations/tag-review-batch-v1.json)
-contains 32 model-assisted proposals for 31 catalog courses from 2026–2027.
+contains 46 model-assisted proposals for 45 catalog courses from 2026–2027.
 Each includes an exact excerpt of the committed catalog description; look up
 the matching `id` in `data/catalog/courses.csv` for the full description and
 source URL. The accompanying test checks IDs, catalog year, interest IDs,

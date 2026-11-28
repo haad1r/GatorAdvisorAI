@@ -36,6 +36,20 @@
     { "course_id": "pos2041", "interest_id": "politics_law", "evidence": "how the national government is structured" },
     { "course_id": "spn1130", "interest_id": "languages_global", "evidence": "basic Spanish language sequence" },
     { "course_id": "the2000", "interest_id": "performing_arts_music", "evidence": "theatre as a collaborative art form" },
-    { "course_id": "wis2040", "interest_id": "animals_wildlife", "evidence": "biological and ecological basis of wildlife issues" }
+    { "course_id": "wis2040", "interest_id": "animals_wildlife", "evidence": "biological and ecological basis of wildlife issues" },
+    { "course_id": "aeb2014", "interest_id": "environment_agriculture", "evidence": "role of agriculture and economics" },
+    { "course_id": "aec3030c", "interest_id": "media_communication", "evidence": "Strategies and techniques for effective presentations" },
+    { "course_id": "ans2002", "interest_id": "animals_wildlife", "evidence": "animal protein production" },
+    { "course_id": "apk2105c", "interest_id": "health_medicine", "evidence": "body functions at the cellular, tissue, organ and systems level" },
+    { "course_id": "bcn1210", "interest_id": "construction_planning", "evidence": "construction materials" },
+    { "course_id": "bsc2005", "interest_id": "life_sciences", "evidence": "cells, organisms, genetics, evolution, ecology, and behavior" },
+    { "course_id": "edf1005", "interest_id": "education_teaching", "evidence": "introduction to education" },
+    { "course_id": "evr2001", "interest_id": "environment_agriculture", "evidence": "principles of environmental science" },
+    { "course_id": "fas2024", "interest_id": "animals_wildlife", "evidence": "Fish biology, ecology, and habitats" },
+    { "course_id": "hos1014", "interest_id": "environment_agriculture", "evidence": "basic principles of vegetable gardening" },
+    { "course_id": "lit2000", "interest_id": "writing_literature", "evidence": "readings representative of a broad range of literary genres" },
+    { "course_id": "phi2630", "interest_id": "history_culture_philosophy", "evidence": "introduction to moral philosophy" },
+    { "course_id": "sds3482", "interest_id": "psychology_behavior", "evidence": "stress and anxiety control and reduction" },
+    { "course_id": "spm2000", "interest_id": "sports_fitness", "evidence": "sport facilities, events and organizations" }
   ]
 }
