@@ -21,8 +21,10 @@ is not on PATH. This local runtime is not part of the repository and will be
 removed by a clean dependency reinstall.
 The standard-library prototype generates its own synthetic events, validates
 impression/feedback associations, and demonstrates a stable user holdout and
-time cutoff. It rejects ambiguous repeated feedback and never treats an
-unlabeled impression as a negative. Feature snapshots, when supplied, are
+time cutoff. It deduplicates exact retries with the same event ID and payload,
+rejects conflicting ID reuse and ambiguous multiple feedback events, and never
+treats an unlabeled impression as a negative. This is only a prototype policy,
+not a substitute for the backend's idempotency contract. Feature snapshots, when supplied, are
 validated and read from the impression rather than the later feedback event.
 No file or real export is read or written.
 

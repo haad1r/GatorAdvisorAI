@@ -9,7 +9,7 @@ import hashlib
 import json
 import math
 
-DATASET_VERSION = "synthetic_dataset_v2"
+DATASET_VERSION = "synthetic_dataset_v3"
 CUTOFF = datetime(2026, 1, 15, tzinfo=timezone.utc)
 FEATURES = ("interest_overlap", "fills_requirement", "level_match")
 
@@ -37,19 +37,26 @@ def prepare(events: list[dict], cutoff: datetime) -> list[dict]:
     """Pair explicit feedback to its exposure without leaking across the cutoff.
 
     This provisional schema is synthetic, not TEAM-01's event export contract.
-    Duplicate IDs, orphan feedback and conflicting labels are rejected rather
-    than silently used as training data. Selections and missing feedback are not
-    treated as labels; this does not correct exposure bias.
+    Exact retries with the same ID and payload are deduplicated; conflicting
+    reuse of an ID, orphan feedback and multiple distinct labels are rejected.
+    Selections and missing feedback are not treated as labels; this does not
+    correct exposure bias. These rules are not the shared backend contract.
     """
     if cutoff.tzinfo is None or cutoff.utcoffset() is None:
         raise ValueError("cutoff must be timezone-aware")
-    ids: set[str] = set()
+    ids: dict[str, str] = {}
     impressions: dict[str, dict] = {}
     feedback: list[dict] = []
     for event in events:
-        if event["event_id"] in ids:
-            raise ValueError("duplicate event ID")
-        ids.add(event["event_id"])
+        event_id = event["event_id"]
+        if not isinstance(event_id, str) or not event_id.strip():
+            raise ValueError("event ID must be a nonempty string")
+        canonical = json.dumps(event, sort_keys=True, separators=(",", ":"), allow_nan=False)
+        if event_id in ids:
+            if ids[event_id] != canonical:
+                raise ValueError("event ID reused with different payload")
+            continue
+        ids[event_id] = canonical
         timestamp = datetime.fromisoformat(event["at"].replace("Z", "+00:00"))
         if timestamp.tzinfo is None or timestamp.utcoffset() is None:
             raise ValueError("event timestamp must be timezone-aware")

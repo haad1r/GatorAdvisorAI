@@ -30,14 +30,20 @@ class SyntheticDatasetTests(unittest.TestCase):
         self.assertEqual(prepare(pair(self.test, before), CUTOFF), [])
         self.assertEqual(prepare(pair(self.train, after), CUTOFF), [])
 
-    def test_unexposed_or_duplicate_feedback_rejected(self):
+    def test_unexposed_or_conflicting_feedback_rejected(self):
         events = pair(self.train, "2026-01-01T00:00:00Z")
         with self.assertRaises(ValueError):
             prepare([events[1]], CUTOFF)
         with self.assertRaises(ValueError):
-            prepare(events + [events[1]], CUTOFF)
+            prepare(events + [{**events[1], "kind": "dislike"}], CUTOFF)
         with self.assertRaises(ValueError):
             prepare(events + [{**events[1], "event_id": "f2", "kind": "dislike"}], CUTOFF)
+
+    def test_exact_event_retries_do_not_duplicate_training_rows(self):
+        events = pair(self.train, "2026-01-01T00:00:00Z")
+        expected = prepare(events, CUTOFF)
+        self.assertEqual(len(expected), 1)
+        self.assertEqual(prepare(events + [dict(events[0]), dict(events[1])], CUTOFF), expected)
 
     def test_unlabeled_impressions_are_not_negative_examples(self):
         self.assertEqual(prepare(pair(self.train, "2026-01-01T00:00:00Z")[:1], CUTOFF), [])
