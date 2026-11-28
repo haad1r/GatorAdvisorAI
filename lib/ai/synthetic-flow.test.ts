@@ -43,4 +43,29 @@ describe("end-to-end synthetic advisor flow", () => {
     expect((await runSyntheticAdvisorFlow(input)).kind).toBe("validated")
     expect(JSON.stringify(input.provider.mock.calls)).not.toContain("Ignore previous instructions")
   })
+  it("withholds a result when the record changes during a mock provider call", async () => {
+    let current = "r1"
+    const input = { ...setup(), readCurrentRecordVersion: async () => current,
+      provider: vi.fn(async (pack: { fact: unknown }) => { current = "r2"; return pack.fact }) }
+    const result = await runSyntheticAdvisorFlow(input)
+    expect(result.kind).toBe("evidence_unavailable")
+    expect(result.text).not.toContain("3 of 6")
+    expect(result.sourceId).toBeNull()
+  })
+  it("preserves an unknown status with missing credits", async () => {
+    const base = setup()
+    const input = { ...base, factPack: { ...base.factPack, requirement: { ...base.factPack.requirement,
+      status: "unknown", completedCredits: null, requiredCredits: null, unknownReason: "Synthetic missing evidence" } } }
+    const result = await runSyntheticAdvisorFlow(input)
+    expect(result.kind).toBe("validated")
+    expect(result.text).toContain("unknown")
+    expect(result.text).not.toContain("satisfied")
+  })
+  it("does not trust a source that is listed in the pack but missing from lookup", async () => {
+    const input = setup()
+    input.factPack.requirement.sourceIds.push("source-2")
+    input.factPack.retrievedSources.push({ sourceId: "source-2", title: "Invented second source" })
+    expect((await runSyntheticAdvisorFlow(input)).kind).toBe("evidence_unavailable")
+    expect(input.provider).not.toHaveBeenCalled()
+  })
 })
