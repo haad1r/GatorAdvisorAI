@@ -13,6 +13,8 @@ class SyntheticTrainingTests(unittest.TestCase):
         self.assertFalse(set(train.user_id) & set(test.user_id))
         self.assertNotIn("label", FEATURES)
         self.assertEqual(set(rows.label), {0, 1})
+        self.assertEqual(len(rows), 800)
+        self.assertTrue(rows[FEATURES].notna().all().all())
 
     def test_training_is_reproducible_and_predictions_are_finite(self):
         _, _, first = train_synthetic()

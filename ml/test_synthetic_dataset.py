@@ -49,6 +49,25 @@ class SyntheticDatasetTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 prepare(altered, CUTOFF)
 
+    def test_features_are_taken_only_from_the_impression_snapshot(self):
+        events = pair(self.train, "2026-01-01T00:00:00Z")
+        events[0]["features"] = {"interest_overlap": 0.8, "fills_requirement": 1, "level_match": 0}
+        events[1]["features"] = {"interest_overlap": 0, "fills_requirement": 0, "level_match": 1}
+        row = prepare(events, CUTOFF)[0]
+        self.assertEqual((row["interest_overlap"], row["fills_requirement"], row["level_match"]), (0.8, 1, 0))
+
+    def test_bad_feature_snapshots_fail_closed(self):
+        for features in [
+            {"interest_overlap": float("nan"), "fills_requirement": 1, "level_match": 0},
+            {"interest_overlap": 1.1, "fills_requirement": 1, "level_match": 0},
+            {"interest_overlap": 0.5, "fills_requirement": True, "level_match": 0},
+            {"interest_overlap": 0.5, "fills_requirement": 1, "level_match": 0, "label": 1},
+        ]:
+            events = pair(self.train, "2026-01-01T00:00:00Z")
+            events[0]["features"] = features
+            with self.assertRaises(ValueError):
+                prepare(events, CUTOFF)
+
 
 if __name__ == "__main__":
     unittest.main()

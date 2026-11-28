@@ -7,9 +7,24 @@ No external data is read and no student data or output files are written.
 from datetime import datetime, timezone
 import hashlib
 import json
+import math
 
-DATASET_VERSION = "synthetic_dataset_v1"
+DATASET_VERSION = "synthetic_dataset_v2"
 CUTOFF = datetime(2026, 1, 15, tzinfo=timezone.utc)
+FEATURES = ("interest_overlap", "fills_requirement", "level_match")
+
+
+def validate_features(value):
+    """Validate the provisional feature snapshot captured at impression time."""
+    if not isinstance(value, dict) or set(value) != set(FEATURES):
+        raise ValueError("invalid feature fields")
+    interest = value["interest_overlap"]
+    if isinstance(interest, bool) or not isinstance(interest, (int, float)) or not math.isfinite(interest) or not 0 <= interest <= 1:
+        raise ValueError("interest overlap must be finite and between 0 and 1")
+    for name in ("fills_requirement", "level_match"):
+        if type(value[name]) is not int or value[name] not in (0, 1):
+            raise ValueError(f"{name} must be 0 or 1")
+    return dict(value)
 
 
 def split_user(user_id: str) -> str:
@@ -39,7 +54,8 @@ def prepare(events: list[dict], cutoff: datetime) -> list[dict]:
         if timestamp.tzinfo is None or timestamp.utcoffset() is None:
             raise ValueError("event timestamp must be timezone-aware")
         if event["kind"] == "impression":
-            impressions[event["event_id"]] = {**event, "timestamp": timestamp}
+            features = validate_features(event["features"]) if "features" in event else None
+            impressions[event["event_id"]] = {**event, "timestamp": timestamp, "validated_features": features}
         elif event["kind"] in ("like", "dislike", "not_interested"):
             feedback.append({**event, "timestamp": timestamp})
         else:
@@ -65,9 +81,12 @@ def prepare(events: list[dict], cutoff: datetime) -> list[dict]:
             partition = "test"
         else:
             continue
-        rows.append({"user_id": impression["user_id"], "course_id": impression["course_id"],
+        row = {"user_id": impression["user_id"], "course_id": impression["course_id"],
                      "position": impression["position"], "scoring_version": impression["scoring_version"],
-                     "label": 1 if feedback_event["kind"] == "like" else 0, "partition": partition})
+                     "label": 1 if feedback_event["kind"] == "like" else 0, "partition": partition}
+        if impression["validated_features"] is not None:
+            row.update(impression["validated_features"])
+        rows.append(row)
     return sorted(rows, key=lambda row: (row["partition"], row["user_id"], row["course_id"]))
 
 

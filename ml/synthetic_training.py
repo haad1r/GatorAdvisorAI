@@ -15,30 +15,35 @@ from sklearn.preprocessing import StandardScaler
 
 # Embedded Python runs in isolated mode and does not add the script directory.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from synthetic_dataset import split_user
+from synthetic_dataset import CUTOFF, DATASET_VERSION, FEATURES, prepare, split_user
 
-DATASET_VERSION = "synthetic_features_v1"
 MODEL_VERSION = "synthetic_logistic_v1"
-FEATURES = ["interest_overlap", "fills_requirement", "level_match"]
+FEATURES = list(FEATURES)
 SEED = 42
 
 
 def synthetic_rows():
     rng = random.Random(SEED)
-    rows = []
+    events = []
     for index in range(200):
         user = f"synthetic-training-user-{index}"
         partition = split_user(user)
-        # Held-out users represent post-cutoff observations; train users are pre-cutoff.
+        # Synthetic events are placed on the relevant side of the cutoff.
+        at = "2026-01-20T12:00:00Z" if partition == "test" else "2026-01-10T12:00:00Z"
         for course in range(4):
             interest = round(rng.random(), 3)
             requirement = rng.randrange(2)
             level = rng.randrange(2)
             label = int(interest + 0.3 * requirement + 0.2 * level + rng.uniform(-0.4, 0.4) > 0.8)
-            rows.append({"user_id": user, "course_id": f"synthetic-course-{course}",
-                         "partition": partition, "interest_overlap": interest,
-                         "fills_requirement": requirement, "level_match": level, "label": label})
-    return pd.DataFrame(rows)
+            course_id = f"synthetic-course-{course}"
+            impression_id = f"impression-{index}-{course}"
+            events.append({"event_id": impression_id, "kind": "impression", "user_id": user,
+                           "course_id": course_id, "at": at, "position": course + 1,
+                           "scoring_version": "scoring_v2", "features": {"interest_overlap": interest,
+                           "fills_requirement": requirement, "level_match": level}})
+            events.append({"event_id": f"feedback-{index}-{course}", "kind": "like" if label else "dislike",
+                           "impression_id": impression_id, "user_id": user, "course_id": course_id, "at": at})
+    return pd.DataFrame(prepare(events, CUTOFF))
 
 
 def train_synthetic():
@@ -50,6 +55,8 @@ def train_synthetic():
     if train.empty or test.empty or train["label"].nunique() != 2:
         raise ValueError("synthetic training data must have both labels and a holdout")
     model = make_pipeline(StandardScaler(), LogisticRegression(random_state=SEED, max_iter=500))
+    if rows[FEATURES].isna().any().any():
+        raise ValueError("missing synthetic feature snapshot")
     model.fit(train[FEATURES], train["label"])
     predictions = model.predict_proba(test[FEATURES])[:, 1]
     return model, rows, predictions
