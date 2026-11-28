@@ -38,7 +38,7 @@ def synthetic_rows():
             course_id = f"synthetic-course-{course}"
             impression_id = f"impression-{index}-{course}"
             events.append({"event_id": impression_id, "kind": "impression", "user_id": user,
-                           "course_id": course_id, "at": at, "position": course + 1,
+                           "course_id": course_id, "request_id": f"synthetic-request-{index}", "at": at, "position": course + 1,
                            "scoring_version": "scoring_v2", "features": {"interest_overlap": interest,
                            "fills_requirement": requirement, "level_match": level}})
             events.append({"event_id": f"feedback-{index}-{course}", "kind": "like" if label else "dislike",

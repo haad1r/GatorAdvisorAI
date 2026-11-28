@@ -9,7 +9,7 @@ import hashlib
 import json
 import math
 
-DATASET_VERSION = "synthetic_dataset_v3"
+DATASET_VERSION = "synthetic_dataset_v4"
 CUTOFF = datetime(2026, 1, 15, tzinfo=timezone.utc)
 FEATURES = ("interest_overlap", "fills_requirement", "level_match")
 
@@ -62,6 +62,8 @@ def prepare(events: list[dict], cutoff: datetime) -> list[dict]:
             raise ValueError("event timestamp must be timezone-aware")
         if event["kind"] == "impression":
             features = validate_features(event["features"]) if "features" in event else None
+            if "request_id" in event and (not isinstance(event["request_id"], str) or not event["request_id"].strip()):
+                raise ValueError("request ID must be a nonempty string")
             impressions[event["event_id"]] = {**event, "timestamp": timestamp, "validated_features": features}
         elif event["kind"] in ("like", "dislike", "not_interested"):
             feedback.append({**event, "timestamp": timestamp})
@@ -93,6 +95,8 @@ def prepare(events: list[dict], cutoff: datetime) -> list[dict]:
                      "label": 1 if feedback_event["kind"] == "like" else 0, "partition": partition}
         if impression["validated_features"] is not None:
             row.update(impression["validated_features"])
+        if "request_id" in impression:
+            row["request_id"] = impression["request_id"]
         rows.append(row)
     return sorted(rows, key=lambda row: (row["partition"], row["user_id"], row["course_id"]))
 

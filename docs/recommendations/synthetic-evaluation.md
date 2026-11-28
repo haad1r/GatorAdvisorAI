@@ -38,9 +38,11 @@ command above also covers the training prototype.
 
 `ml/synthetic_metrics.py` implements per-request NDCG and hit-rate mechanics for
 explicit binary labels, with deterministic tie-breaking and hand-calculated
-tests. Requests with no positive labels produce null metrics. These functions
-are not an experiment runner and do not correct exposure bias; no synthetic
-metric is evidence of recommendation quality.
+tests. A grouped helper computes means by request, checks that request IDs are
+not shared across users, and reports how many groups were excluded for having no
+positive labels. A smoke test connects synthetic held-out predictions to those
+metrics. These functions are not an experiment runner and do not correct
+exposure bias; no synthetic metric is evidence of recommendation quality.
 
 These prototypes are **not** a production training pipeline or experiment runner. They do not define
 the team's event-export schema, deduplication policy, labels, feature set,

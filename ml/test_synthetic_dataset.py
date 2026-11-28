@@ -58,9 +58,12 @@ class SyntheticDatasetTests(unittest.TestCase):
     def test_features_are_taken_only_from_the_impression_snapshot(self):
         events = pair(self.train, "2026-01-01T00:00:00Z")
         events[0]["features"] = {"interest_overlap": 0.8, "fills_requirement": 1, "level_match": 0}
+        events[0]["request_id"] = "synthetic-request"
         events[1]["features"] = {"interest_overlap": 0, "fills_requirement": 0, "level_match": 1}
+        events[1]["request_id"] = "forged-feedback-request"
         row = prepare(events, CUTOFF)[0]
         self.assertEqual((row["interest_overlap"], row["fills_requirement"], row["level_match"]), (0.8, 1, 0))
+        self.assertEqual(row["request_id"], "synthetic-request")
 
     def test_bad_feature_snapshots_fail_closed(self):
         for features in [

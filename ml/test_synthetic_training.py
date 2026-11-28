@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 from synthetic_training import FEATURES, synthetic_rows, train_synthetic
+from synthetic_metrics import grouped_ranking_metrics
 
 
 class SyntheticTrainingTests(unittest.TestCase):
@@ -22,6 +23,15 @@ class SyntheticTrainingTests(unittest.TestCase):
         np.testing.assert_allclose(first, second)
         self.assertTrue(np.all(np.isfinite(first)))
         self.assertTrue(np.all((first >= 0) & (first <= 1)))
+
+    def test_held_out_predictions_can_be_grouped_by_synthetic_request(self):
+        _, rows, predictions = train_synthetic()
+        held_out = rows[rows.partition == "test"].to_dict("records")
+        for row, prediction in zip(held_out, predictions, strict=True):
+            row["score"] = float(prediction)
+        result = grouped_ranking_metrics(held_out, 2)
+        self.assertEqual(result["request_count"], rows[rows.partition == "test"]["request_id"].nunique())
+        self.assertGreater(result["evaluated_count"], 0)
 
 
 if __name__ == "__main__":

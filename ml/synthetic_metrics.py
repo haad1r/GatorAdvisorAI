@@ -29,3 +29,32 @@ def ranking_metrics(rows: list[dict], k: int) -> dict:
     dcg = sum(row["label"] / math.log2(index + 2) for index, row in enumerate(ordered))
     ideal = sum(1 / math.log2(index + 2) for index in range(min(k, positives)))
     return {"ndcg": dcg / ideal, "hit_rate": int(any(row["label"] for row in ordered)), "positive_count": positives}
+
+
+def grouped_ranking_metrics(rows: list[dict], k: int) -> dict:
+    """Aggregate by request; omit no-positive groups and report their count.
+
+    For synthetic mechanics only. Do not merge requests by user or treat this
+    aggregation as an exposure-bias correction or a real-data evaluation.
+    """
+    if type(k) is not int or k < 1 or not rows:
+        raise ValueError("a positive k and nonempty rows are required")
+    groups: dict[str, list[dict]] = {}
+    for row in rows:
+        request_id = row.get("request_id")
+        if not isinstance(request_id, str) or not request_id.strip():
+            raise ValueError("request ID must be a nonempty string")
+        user_id = row.get("user_id")
+        if not isinstance(user_id, str) or not user_id.strip():
+            raise ValueError("user ID must be a nonempty string")
+        if request_id in groups and groups[request_id][0]["user_id"] != user_id:
+            raise ValueError("request ID cannot be shared by different users")
+        groups.setdefault(request_id, []).append(row)
+    values = [ranking_metrics(groups[request_id], k) for request_id in sorted(groups)]
+    evaluated = [value for value in values if value["ndcg"] is not None]
+    count = len(evaluated)
+    return {
+        "request_count": len(groups), "evaluated_count": count, "no_positive_count": len(groups) - count,
+        "mean_ndcg": sum(value["ndcg"] for value in evaluated) / count if count else None,
+        "mean_hit_rate": sum(value["hit_rate"] for value in evaluated) / count if count else None,
+    }

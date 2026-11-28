@@ -1,7 +1,7 @@
 import math
 import unittest
 
-from synthetic_metrics import ranking_metrics
+from synthetic_metrics import grouped_ranking_metrics, ranking_metrics
 
 
 class RankingMetricTests(unittest.TestCase):
@@ -24,6 +24,25 @@ class RankingMetricTests(unittest.TestCase):
                 ranking_metrics(rows, 1)
         with self.assertRaises(ValueError):
             ranking_metrics([valid], 0)
+
+    def test_groups_distinct_requests_and_excludes_no_positive_groups(self):
+        rows = [
+            {"request_id": "r1", "user_id": "u1", "course_id": "A", "score": 0.9, "label": 1},
+            {"request_id": "r2", "user_id": "u1", "course_id": "A", "score": 0.9, "label": 0},
+            {"request_id": "r3", "user_id": "u2", "course_id": "A", "score": 0.9, "label": 0},
+            {"request_id": "r3", "user_id": "u2", "course_id": "B", "score": 0.8, "label": 1},
+        ]
+        result = grouped_ranking_metrics(rows, 1)
+        self.assertEqual(result, {"request_count": 3, "evaluated_count": 2, "no_positive_count": 1,
+                                  "mean_ndcg": 0.5, "mean_hit_rate": 0.5})
+        self.assertEqual(grouped_ranking_metrics(list(reversed(rows)), 1), result)
+
+    def test_rejects_missing_request_or_reused_id_across_users(self):
+        row = {"request_id": "r1", "user_id": "u1", "course_id": "A", "score": 0.9, "label": 1}
+        with self.assertRaises(ValueError):
+            grouped_ranking_metrics([{**row, "request_id": ""}], 1)
+        with self.assertRaises(ValueError):
+            grouped_ranking_metrics([row, {**row, "user_id": "u2", "course_id": "B"}], 1)
 
 
 if __name__ == "__main__":
