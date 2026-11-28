@@ -1,7 +1,7 @@
 import math
 import unittest
 
-from synthetic_metrics import grouped_ranking_metrics, ranking_metrics
+from synthetic_metrics import compare_synthetic_rankings, grouped_ranking_metrics, ranking_metrics
 
 
 class RankingMetricTests(unittest.TestCase):
@@ -43,6 +43,20 @@ class RankingMetricTests(unittest.TestCase):
             grouped_ranking_metrics([{**row, "request_id": ""}], 1)
         with self.assertRaises(ValueError):
             grouped_ranking_metrics([row, {**row, "user_id": "u2", "course_id": "B"}], 1)
+
+    def test_paired_comparison_uses_identical_requests_and_labels(self):
+        baseline = [
+            {"request_id": "r1", "user_id": "u1", "course_id": "A", "score": 0.9, "label": 0},
+            {"request_id": "r1", "user_id": "u1", "course_id": "B", "score": 0.8, "label": 1},
+        ]
+        candidate = [{**baseline[0], "score": 0.1}, {**baseline[1], "score": 0.9}]
+        result = compare_synthetic_rankings(baseline, candidate, 1)
+        self.assertEqual(result["baseline"]["mean_hit_rate"], 0)
+        self.assertEqual(result["candidate"]["mean_hit_rate"], 1)
+        for altered in [candidate[:1], [{**candidate[0], "label": 1}, candidate[1]],
+                        [{**candidate[0], "user_id": "u2"}, {**candidate[1], "user_id": "u2"}]]:
+            with self.assertRaises(ValueError):
+                compare_synthetic_rankings(baseline, altered, 1)
 
 
 if __name__ == "__main__":

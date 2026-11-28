@@ -41,7 +41,8 @@ explicit binary labels, with deterministic tie-breaking and hand-calculated
 tests. A grouped helper computes means by request, checks that request IDs are
 not shared across users, and reports how many groups were excluded for having no
 positive labels. A smoke test connects synthetic held-out predictions to those
-metrics. These functions are not an experiment runner and do not correct
+metrics. A paired comparison helper rejects different requests, courses, users,
+or labels between its two synthetic inputs. These functions are not an experiment runner and do not correct
 exposure bias; no synthetic metric is evidence of recommendation quality.
 
 These prototypes are **not** a production training pipeline or experiment runner. They do not define

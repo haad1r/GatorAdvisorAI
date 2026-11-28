@@ -58,3 +58,18 @@ def grouped_ranking_metrics(rows: list[dict], k: int) -> dict:
         "mean_ndcg": sum(value["ndcg"] for value in evaluated) / count if count else None,
         "mean_hit_rate": sum(value["hit_rate"] for value in evaluated) / count if count else None,
     }
+
+
+def compare_synthetic_rankings(baseline: list[dict], candidate: list[dict], k: int) -> dict:
+    """Compare synthetic rankings only when request/course labels are identical.
+
+    Scores may differ, but the user, request, course, and explicit label must
+    agree. This is a metric helper, not the project-approved experiment runner.
+    """
+    baseline_metrics = grouped_ranking_metrics(baseline, k)
+    candidate_metrics = grouped_ranking_metrics(candidate, k)
+    def labels_by_item(rows):
+        return {(row["request_id"], row["course_id"]): (row["user_id"], row["label"]) for row in rows}
+    if labels_by_item(baseline) != labels_by_item(candidate):
+        raise ValueError("baseline and candidate must use identical requests, courses, users and labels")
+    return {"baseline": baseline_metrics, "candidate": candidate_metrics}
