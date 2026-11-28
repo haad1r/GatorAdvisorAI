@@ -13,8 +13,8 @@ export type Course = {
   code: string
   tags: Tag[]
   level: "intro" | "advanced"
-  fillsMajorSlot: boolean    // from the academic engine (TEAM-02); fake in tests
-  fillsRequirement: boolean  // any requirement slot incl. Gen Ed (TEAM-02); fake in tests
+  fillsMajorSlot: boolean | null    // null = unknown; never treat it as false
+  fillsRequirement: boolean | null  // any requirement slot incl. Gen Ed; null = unknown
 }
 
 // Keys are the stable survey_v1 question IDs. undefined = skipped or hidden.
@@ -66,9 +66,10 @@ export function scoreCourse(c: Course, s: Survey) {
 
   const parts = {
     interest,
-    req: c.fillsRequirement ? 1 : 0,
+    req: c.fillsRequirement === null ? null : c.fillsRequirement ? 1 : 0,
     major:
-      s.major_scope === "inside_major" ? (c.fillsMajorSlot ? 1 : 0)
+      c.fillsMajorSlot === null ? null
+      : s.major_scope === "inside_major" ? (c.fillsMajorSlot ? 1 : 0)
       : s.major_scope === "outside_major" ? (c.fillsMajorSlot ? 0 : 1)
       : null,
     level:
@@ -87,7 +88,7 @@ export function scoreCourse(c: Course, s: Survey) {
     weightSum += w[k]
     components[k] = Math.round(w[k] * v * 1000) / 1000 + 0
   }
-  const score = Math.round((total / weightSum) * 1000) / 1000 + 0
+  const score = weightSum === 0 ? 0 : Math.round((total / weightSum) * 1000) / 1000 + 0
 
   // Every reason maps to an input that actually moved the score.
   const reasons = [
@@ -95,7 +96,7 @@ export function scoreCourse(c: Course, s: Survey) {
     ...lowerHits.map((t) => `Lowered: tagged ${t.interest} (${t.source})`),
     ...(c.fillsRequirement ? ["Counts toward a requirement"] : []),
     ...(s.major_scope === "inside_major" && c.fillsMajorSlot ? ["Counts toward your major"] : []),
-    ...(s.major_scope === "outside_major" && !c.fillsMajorSlot ? ["Matches your preference for courses outside your major requirements"] : []),
+    ...(s.major_scope === "outside_major" && c.fillsMajorSlot === false ? ["Matches your preference for courses outside your major requirements"] : []),
     ...((s.course_level === "intro" || s.course_level === "advanced") && s.course_level === c.level ? [`Matches your preferred ${c.level} course level`] : []),
   ]
   return { code: c.code, score, components, reasons }

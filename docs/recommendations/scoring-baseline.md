@@ -44,6 +44,12 @@ score = ( w_interest*interest + w_req*req + w_major*major + w_level*level )
 
 A component that is skipped (question unanswered or hidden, or no data) is
 dropped and the remaining weights are rescaled. Missing data is never scored as bad.
+Unknown requirement or major-slot flags are `null` and omitted; when all
+components are omitted the neutral base score is 0. When integrating, preserve
+the engine's `yes`/`no`/`unknown` distinction as `true`/`false`/`null`.
+The current engine `toScoringFlags` helper collapses unknown to false, which
+would incorrectly boost an outside-major preference; do not use that helper for
+this scorer without resolving the contract with TEAM-02.
 
 | Component | Survey question | Value |
 |---|---|---|

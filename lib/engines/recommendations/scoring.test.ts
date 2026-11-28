@@ -27,6 +27,15 @@ describe("recommendation explanations", () => {
       "Matches your preferred intro course level",
     ]))
   })
+  it("does not interpret unknown requirement flags as an outside-major match", () => {
+    const unknown = { ...course("AAA 1000", "art"), fillsRequirement: null, fillsMajorSlot: null, tags: [] }
+    const result = scoreCourse(unknown, { major_scope: "outside_major" })
+    expect(result.score).toBe(0)
+    expect(result.components).not.toHaveProperty("req")
+    expect(result.components).not.toHaveProperty("major")
+    expect(result.reasons).not.toContain("Matches your preference for courses outside your major requirements")
+    expect(rank([unknown], { major_scope: "outside_major" })[0].score).toBe(0)
+  })
   it("matches the original ranking on varied synthetic pools, including multiple shared tags", () => {
     for (let seed = 0; seed < 12; seed++) {
       const courses = Array.from({ length: 45 }, (_, i) => {
