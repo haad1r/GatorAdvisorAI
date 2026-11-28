@@ -2,7 +2,8 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { useAuth, useClerk } from "@clerk/nextjs"
+import { useRouter } from "next/navigation"
+import { useClerk } from "@clerk/nextjs"
 import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -44,33 +45,20 @@ import {
 import { announceProfile } from "@/lib/profile-events"
 
 /* Settings (#21): profile and program, survey, courses, theme, delete account. */
-export function SettingsView({ deleted: deletedParam = false }: { deleted?: boolean }) {
+export function SettingsView() {
   const { signOut } = useClerk()
-  const { isLoaded, isSignedIn } = useAuth()
-  const [justDeleted, setJustDeleted] = React.useState(false)
-  // ?account=deleted is where the sign-out lands. It only counts once the session is gone:
-  // a signed-in student who opens that link gets Settings as usual.
-  const deleted = justDeleted || (deletedParam && isLoaded && !isSignedIn)
+  const router = useRouter()
+  const [leaving, setLeaving] = React.useState(false)
 
-  function onDeleted() {
-    setJustDeleted(true)
+  // Sign out first, then confirm on a public page; it checks the session itself.
+  async function onDeleted() {
+    setLeaving(true)
     announceProfile(null)
-    // The account is gone, so its session must end too. The redirect lands back here with the message.
-    signOut({ redirectUrl: "/settings?account=deleted" }).catch(() => {})
+    await signOut({ redirectUrl: "/account-deleted" }).catch(() => {})
+    router.replace("/account-deleted")
   }
 
-  if (deletedParam && !isLoaded) return <LoadingBlock />
-
-  if (deleted) {
-    return (
-      <section role="status" className="max-w-2xl rounded-xl border border-border bg-card px-5 py-4">
-        <h2 className="text-base font-medium lg:text-lg">Your account was deleted</h2>
-        <p className="mt-1 text-muted-foreground">
-          Your profile, courses, survey answers, plans, schedules, and chats are gone, and you&apos;ve been signed out.
-        </p>
-      </section>
-    )
-  }
+  if (leaving) return <LoadingBlock />
 
   return (
     <div className="flex max-w-2xl flex-col gap-6">

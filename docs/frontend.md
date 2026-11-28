@@ -15,10 +15,11 @@ Route groups in brackets do not appear in the URL. `/sign-in`, `/sign-up`, and `
 | `/preview` | `app/preview/page.tsx` | Gallery of loading, empty, error, and status states, plus a mock API demo. Always uses the mocks, never a real backend, and needs no sign-in. | Braydin |
 | `/sign-in` | `app/(auth)/sign-in/[[...sign-in]]/page.tsx` | Clerk `<SignIn />`. A redirect here is not access control. | Zain |
 | `/sign-up` | `app/(auth)/sign-up/[[...sign-up]]/page.tsx` | Clerk `<SignUp />`. | Zain |
-| `/onboarding` | `app/(auth)/onboarding/page.tsx` | Wizard with placeholder majors, catalog years, and terms. Saves the profile on Review, then ends with the optional interest survey (#19). Still public. | Zain |
+| `/onboarding` | `app/(auth)/onboarding/page.tsx` | Wizard with placeholder majors, catalog years, and terms. Saves the profile on Review, then ends with the optional interest survey (#19). Needs sign-in once an endpoint is live. | Zain |
 | `/settings/survey` | `app/(app)/settings/survey/page.tsx` | Take or retake the interest survey, pre-filled from the latest answers. Opened from Settings. | Zain |
+| `/account-deleted` | `app/(auth)/account-deleted/page.tsx` | Where deleting an account lands, after signing out. Public. Says "signed out" only once Clerk confirms it; otherwise offers a Sign out button. | Braydin |
 
-`proxy.ts` is the first gate. Signed out, every `/api/*` request gets a JSON 401 (`UNAUTHENTICATED`), and every page except `/sign-in`, `/sign-up` and `/preview` redirects to `/sign-in`. Pages stay open while every endpoint is mocked (`NEXT_PUBLIC_API_MOCKS=true` and `NEXT_PUBLIC_API_LIVE` empty), since there is no real data behind them and the e2e suite browses signed out. The proxy is not authorization on its own: each route handler still reads the user from Clerk's `auth()` and filters by it.
+`proxy.ts` is the first gate. Signed out, every `/api/*` request gets a JSON 401 (`UNAUTHENTICATED`), and every page except `/sign-in`, `/sign-up`, `/preview` and `/account-deleted` redirects to `/sign-in`. Pages stay open while every endpoint is mocked (`NEXT_PUBLIC_API_MOCKS=true` and `NEXT_PUBLIC_API_LIVE` empty), since there is no real data behind them and the e2e suite browses signed out. The proxy is not authorization on its own: each route handler still reads the user from Clerk's `auth()` and filters by it.
 
 Pages without an agreed API shape stay placeholders. New signed-in routes go in `app/(app)/` and get one entry in `components/nav/nav-items.ts`, which drives the sidebar, menu, tab bar, and page title.
 
@@ -171,7 +172,7 @@ First time only: `npx playwright install chromium`.
 | `accessibility.spec.ts` | axe (WCAG 2.1 A/AA) on `/dashboard`, `/audit`, `/courses`, `/courses/cop3530`, `/schedule`, `/import`, `/settings`, `/settings/survey`, `/preview` in light and dark |
 | `courses.spec.ts` | A new course search shows loading, never the previous search's results |
 | `survey.spec.ts` | Onboarding ends with the survey, Q1/Q2 turn off each other's topics with a reason, undeclared hides Q3 and starts Q6 at "exploring", Skip for now, per-question Clear, keyboard use, a failed save keeps answers and retries, Settings retake is pre-filled, axe on the survey step with turned-off topics |
-| `settings.spec.ts` | Saving a new major updates the top bar, changing the first term clears the graduation-order error, deleting the account shows the deleted message and clears the top bar, the sidebar leads from that message back to Settings |
+| `settings.spec.ts` | Saving a new major updates the top bar, changing the first term clears the graduation-order error, deleting the account clears the top bar, signs out and lands on `/account-deleted`, and `/settings` shows the form again afterwards; an old `?account=deleted` link opens Settings. Signed-in cases need a Clerk test user. |
 
 Signed-in flows are not covered yet: they need a Clerk test user from Maria. Add them once she provides one, using Clerk's testing tokens rather than a real account.
 
