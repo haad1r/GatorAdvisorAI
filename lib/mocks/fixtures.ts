@@ -56,16 +56,19 @@ export function termFor(weekStart: string) {
 }
 
 /*
- * This term (Fall 2026): PHY 2048 + lab, COT 3100, ENC 2210, DIG 1627 (13
- * credits). Times follow UF periods; section numbers and rooms are made up.
- * There is no real source for times yet: the SOC scraper skips meeting times
- * and rooms (they need a signed-in UF session), so students will likely enter
- * them by hand.
+ * This term (Fall 2026): PHY 2048 + lab, COT 3100, ENC 2210 (online), PHI 1680
+ * (13 credits). Section numbers are real Fall 2026 sections, so the mock API
+ * fills in their real instructors and RMP ratings (lib/mocks/courses.ts) and
+ * the schedule matches /courses. Meeting times and rooms are made up: UF's
+ * public data has none, so students will likely enter them by hand.
  */
 
-const PHY = { courseCode: "PHY2048", title: "Physics with Calculus 1", section: "2468", online: false } as const
-const COT = { courseCode: "COT3100", title: "Applications of Discrete Structures", section: "5678", online: false } as const
-const ENC = { courseCode: "ENC2210", title: "Technical Writing", section: "1357", online: false } as const
+/** Fields every meeting of a section shares. */
+type Base = Pick<ScheduleMeeting, "courseCode" | "title" | "section" | "online" | "instructors">
+
+const PHY: Base = { courseCode: "PHY2048", title: "Physics with Calculus 1", section: "2468", online: false, instructors: [] }
+const COT: Base = { courseCode: "COT3100", title: "Applications of Discrete Structures", section: "1096", online: false, instructors: [] }
+const PHI: Base = { courseCode: "PHI1680", title: "AI, Philosophy, and Society", section: "1003", online: false, instructors: [] }
 
 export const weeklyMeetingsFixture: ScheduleMeeting[] = [
   { ...PHY, id: "m1", kind: "lecture", time: { day: "MON", start: "09:35", end: "10:25" }, location: "NPB 1001" },
@@ -76,11 +79,12 @@ export const weeklyMeetingsFixture: ScheduleMeeting[] = [
   { ...COT, id: "m6", kind: "lecture", time: { day: "WED", start: "10:40", end: "11:30" }, location: "CSE A101" },
   { ...COT, id: "m7", kind: "lecture", time: { day: "FRI", start: "10:40", end: "11:30" }, location: "CSE A101" },
   { ...COT, id: "m8", kind: "discussion", time: { day: "TUE", start: "12:50", end: "13:40" }, location: "CSE E115" },
-  { ...ENC, id: "m9", kind: "lecture", time: { day: "MON", start: "12:50", end: "13:40" }, location: "TUR 2322" },
-  { ...ENC, id: "m10", kind: "lecture", time: { day: "WED", start: "12:50", end: "13:40" }, location: "TUR 2322" },
-  { ...ENC, id: "m11", kind: "lecture", time: { day: "FRI", start: "12:50", end: "13:40" }, location: "TUR 2322" },
-  { id: "m12", courseCode: "PHY2048L", title: "Laboratory for PHY 2048", section: "2470", kind: "lab", time: { day: "WED", start: "15:00", end: "16:55" }, location: "NPB B110", online: false },
-  { id: "m13", courseCode: "DIG1627", title: "AI & Art/Science/Fiction", section: "UFOL", kind: "lecture", time: null, location: null, online: true },
+  { ...PHI, id: "m9", kind: "lecture", time: { day: "MON", start: "12:50", end: "13:40" }, location: "FLI 50" },
+  { ...PHI, id: "m10", kind: "lecture", time: { day: "WED", start: "12:50", end: "13:40" }, location: "FLI 50" },
+  { ...PHI, id: "m11", kind: "discussion", time: { day: "FRI", start: "12:50", end: "13:40" }, location: "FLO 100" },
+  { id: "m12", courseCode: "PHY2048L", title: "Laboratory for PHY 2048", section: "2268", kind: "lab", time: { day: "WED", start: "15:00", end: "16:55" }, location: "NPB B110", online: false, instructors: [] },
+  // Every Fall 2026 ENC 2210 section is fully online.
+  { id: "m13", courseCode: "ENC2210", title: "Technical Writing", section: "4B48", kind: "lecture", time: null, location: null, online: true, instructors: [] },
 ]
 
 /* An evening PHY 2048 exam, only in the week starting this Monday. */

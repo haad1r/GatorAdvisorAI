@@ -77,6 +77,28 @@ export type Weekday = "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT" | "SUN"
 
 export type MeetingKind = "lecture" | "lab" | "discussion" | "exam"
 
+/**
+ * RateMyProfessors summary numbers for one professor. null when RMP has no
+ * value. Comes from tools/rmp (a weekly import); never review text.
+ */
+export type ProfessorRating = {
+  /** RMP's professor id: ratemyprofessors.com/professor/<rmpId>. */
+  rmpId: number
+  /** 1-5. */
+  quality: number | null
+  /** 1-5. */
+  difficulty: number | null
+  /** 0-100. */
+  wouldTakeAgainPercent: number | null
+  numRatings: number
+}
+
+export type Instructor = {
+  name: string
+  /** null when no RMP profile could be matched with confidence. */
+  rating: ProfessorRating | null
+}
+
 /** One weekly class meeting (or a dated exam) for the schedule calendar. */
 export type ScheduleMeeting = {
   id: string
@@ -92,6 +114,8 @@ export type ScheduleMeeting = {
   /** null when TBA or online. */
   location: string | null
   online: boolean
+  /** Empty when UF hasn't named one yet ("Staff"). Same for every meeting of a section. */
+  instructors: Instructor[]
 }
 
 export type WeekSchedule = {
@@ -190,6 +214,87 @@ export type TrackingResult = {
   milestones: TrackingMilestone[]
   /** The earliest milestone that isn't met yet, or null. */
   nextDeadline: TrackingMilestone | null
+}
+
+/*
+ * Course catalog (#21 /courses). PROVISIONAL, but ours: the catalog tables
+ * are #6/#8 work we own (see docs/database.md), so these shapes don't wait on
+ * another team. Eligibility is deliberately absent until Shaun's engine (#8)
+ * provides it; screens must not work it out themselves.
+ */
+
+export type GenEdArea = "composition" | "humanities" | "social" | "biological" | "physical" | "mathematics" | "international"
+
+export type Quest = "quest1" | "quest2" | "quest3"
+
+/** UF SOC delivery codes. */
+export type Delivery = "PC" | "HB" | "PD" | "AD"
+
+export type CourseFilters = {
+  /** Code or words in the name: "cop3530", "COP 3530", "calculus". */
+  q?: string
+  /** Department slug, e.g. "computer_and_information_science_and_engineering". */
+  department?: string
+  /** 1000, 2000, 3000 or 4000. */
+  level?: number
+  genEd?: GenEdArea | Quest
+  /** Exact credit count. */
+  credits?: number
+  /** 1-based. */
+  page?: number
+}
+
+export type CourseSummary = {
+  /** Catalog id: "cop3530". */
+  id: string
+  /** As UF prints it: "COP 3530". */
+  code: string
+  name: string
+  credits: { min: number; max: number }
+  genEd: GenEdArea[]
+  quest: Quest | null
+  department: { slug: string; name: string }
+  level: number
+  /** Offered in the upcoming term (CourseSearchResult.term). */
+  offeredNextTerm: boolean
+  /**
+   * Highest RMP quality among the upcoming term's instructors with at least
+   * 5 ratings. null when there's no such instructor.
+   */
+  bestRating: { quality: number; instructor: string } | null
+}
+
+export type CourseSearchResult = {
+  results: CourseSummary[]
+  total: number
+  page: number
+  pageSize: number
+  /** The term "offered" and "bestRating" refer to. */
+  term: { code: string; name: string }
+  /** Every department that has courses, for the filter. */
+  departments: { slug: string; name: string }[]
+}
+
+export type CourseSection = {
+  section: string
+  classNumber: string
+  delivery: Delivery
+}
+
+/** Sections taught by the same instructor(s), sorted best-rated first. */
+export type InstructorSections = {
+  instructors: Instructor[]
+  sections: CourseSection[]
+}
+
+export type CourseDetail = CourseSummary & {
+  description: string
+  requisites: { kind: "prereq" | "coreq"; status: "complete" | "partial" | "unparsed"; text: string }[]
+  /** Seasons it has run in since Fall 2021: "fall", "spring", "summer". */
+  seasons: string[]
+  /** Upcoming term first. Empty sections means it isn't offered that term. */
+  terms: { code: string; name: string; groups: InstructorSections[] }[]
+  source: SourceReference
 }
 
 /** Shown in the app footer so students know how current the data is. */

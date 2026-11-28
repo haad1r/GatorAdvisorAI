@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { CheckIcon, InfoIcon } from "lucide-react"
+import { CheckIcon } from "lucide-react"
 import { cn } from "cn"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
@@ -10,7 +10,6 @@ import { NativeSelect } from "../ui/native-select"
 import { FormField } from "../forms/form-field"
 import { FormErrorSummary } from "../forms/form-error-summary"
 import { SubmitButton } from "../forms/submit-button"
-import { Alert, AlertDescription, AlertTitle } from "../ui/alert"
 import {
   errorState,
   fieldError,
@@ -389,20 +388,6 @@ function Done({ name, surveySaved }: { name: string; surveySaved: boolean }) {
         Next, import your transcript so we can mark the courses you&apos;ve
         already completed. You can also do this later.
       </p>
-      {/*
-        Intentional: saveProfile currently hits the mock transport, which only
-        keeps the profile in memory for this session (lib/mocks/handlers.ts).
-        Nothing is persisted yet, so this notice is accurate. Remove it once
-        PUT /api/profile is backed by the real API.
-      */}
-      <Alert>
-        <InfoIcon aria-hidden="true" />
-        <AlertTitle>Preview build</AlertTitle>
-        <AlertDescription>
-          Your answers weren&apos;t saved. Onboarding isn&apos;t connected to the
-          backend yet.
-        </AlertDescription>
-      </Alert>
       <div className="flex flex-col gap-2 sm:flex-row">
         <Button disabled>Import transcript (coming soon)</Button>
         <Button variant="outline" render={<Link href="/" />} nativeButton={false}>

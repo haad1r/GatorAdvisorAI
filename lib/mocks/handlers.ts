@@ -19,6 +19,7 @@ import {
   weeklyMeetingsFixture,
 } from "./fixtures"
 import { auditFixture, trackingFixture } from "./audit-fixtures"
+import { getCourse, searchCourses, sectionInstructors } from "./courses"
 
 type Store = {
   profile: Profile
@@ -72,19 +73,27 @@ function validateCoursework(body: Coursework): FieldErrors {
   return errors
 }
 
-type Handler = (body: unknown, query: URLSearchParams) => ApiResult<unknown>
+/** Path params (":id") arrive in query. Handlers may be async (e.g. lazy-loaded fixtures). */
+type Handler = (body: unknown, query: URLSearchParams) => ApiResult<unknown> | Promise<ApiResult<unknown>>
 
 export const routes: Record<string, Handler> = {
   "GET /api/meta/freshness": () => ok(freshnessFixture),
 
-  "GET /api/schedule": (_body, query) => {
+  "GET /api/schedule": async (_body, query) => {
     const week = query.get("week") ?? ""
     if (!/^\d{4}-\d{2}-\d{2}$/.test(week)) {
       return { ok: false, error: { code: "VALIDATION_ERROR", message: "week must be a YYYY-MM-DD Monday." } }
     }
-    const meetings = week === examWeekStart ? [...weeklyMeetingsFixture, examFixture] : weeklyMeetingsFixture
+    const base = week === examWeekStart ? [...weeklyMeetingsFixture, examFixture] : weeklyMeetingsFixture
+    // Fill in the real Fall 2026 instructors for each section (see fixtures.ts).
+    const meetings = await Promise.all(
+      base.map(async (m) => ({ ...m, instructors: await sectionInstructors(m.courseCode.toLowerCase(), "2268", m.section) }))
+    )
     return ok({ term: termFor(week), weekStart: week, meetings })
   },
+
+  "GET /api/courses": (_body, query) => searchCourses(query),
+  "GET /api/courses/:id": (_body, query) => getCourse(query.get("id") ?? ""),
 
   /* Fixed results: they don't recompute when profile or courses change. */
   "GET /api/audit": () => ok({ ...auditFixture, recordVersion: store.coursework.version }),

@@ -3,7 +3,7 @@ import { WeekGrid } from "@/components/calendar/week-grid"
 import type { ScheduleMeeting } from "@/lib/api/types"
 import { daysToShow } from "@/lib/schedule"
 
-const base = { title: "Example course", section: "0000", online: false }
+const base = { title: "Example course", section: "0000", online: false, instructors: [] }
 
 const KINDS: ScheduleMeeting[] = [
   { ...base, id: "p1", courseCode: "COP3503", kind: "lecture", time: { day: "MON", start: "10:40", end: "11:30" }, location: "CSE A101" },
