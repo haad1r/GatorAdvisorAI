@@ -8,9 +8,9 @@ an implemented mock service. Use synthetic students and course IDs in checks.
 
 - **Academic engine (TEAM-02):** owner-confirmed, tested access and versioned
   contracts for eligibility, target-term offering, requirement contribution, and
-  plan-add validation. Preserve `yes`, `no`, and `unknown` flags; the existing
-  `toScoringFlags` helper collapses unknown and must not be used to infer an
-  outside-major match. Agree on current versus conditional eligibility and
+  plan-add validation. Preserve `yes`, `no`, and `unknown` flags; the proposed
+  `toScoringFlags` change returns `null` for unknown and needs owner review.
+  Agree on current versus conditional eligibility and
   repeatable-course semantics before exposing recommendations.
 - **Backend (TEAM-01):** shared identity, survey, impression, feedback and
   export interfaces, including idempotency and account deletion semantics.
@@ -50,3 +50,11 @@ presented as a candidate and demonstrates preserving unknown requirement flags.
 Course tags and levels in this check are placeholders. This is useful local
 evidence, not the owner-confirmed access and integration handoff, a dismissal
 test, or evidence of recommendation quality.
+
+`synthetic-pipeline.ts` is a separate fixture-only exercise joining engine
+filtering, explicit in-memory dismissals, requirement flags and ranking. It
+returns eligibility and requirement evidence, excludes unsupported course
+levels, and deduplicates course IDs. Its tests use synthetic records and tags.
+It has no API, authentication, persistence, feedback-event processing or
+section validation. Do not serve its output; the owner-confirmed handoffs and
+review remain required before live integration.

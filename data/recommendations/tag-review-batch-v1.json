@@ -50,6 +50,23 @@
     { "course_id": "lit2000", "interest_id": "writing_literature", "evidence": "readings representative of a broad range of literary genres" },
     { "course_id": "phi2630", "interest_id": "history_culture_philosophy", "evidence": "introduction to moral philosophy" },
     { "course_id": "sds3482", "interest_id": "psychology_behavior", "evidence": "stress and anxiety control and reduction" },
-    { "course_id": "spm2000", "interest_id": "sports_fitness", "evidence": "sport facilities, events and organizations" }
+    { "course_id": "spm2000", "interest_id": "sports_fitness", "evidence": "sport facilities, events and organizations" },
+    { "course_id": "amh2010", "interest_id": "history_culture_philosophy", "evidence": "examine United States history" },
+    { "course_id": "arc1720", "interest_id": "visual_arts_design", "evidence": "architecture throughout history" },
+    { "course_id": "bcn1582", "interest_id": "construction_planning", "evidence": "land development and construction" },
+    { "course_id": "bsc2011", "interest_id": "life_sciences", "evidence": "General biology core" },
+    { "course_id": "bul4310", "interest_id": "politics_law", "evidence": "legal environment of business" },
+    { "course_id": "cop3503c", "interest_id": "programming_software", "evidence": "process of computer programming" },
+    { "course_id": "eco2023", "interest_id": "finance_accounting", "evidence": "Theories of production, determination of prices" },
+    { "course_id": "enc1102", "interest_id": "writing_literature", "evidence": "argumentative and persuasive writing techniques" },
+    { "course_id": "fos2001", "interest_id": "environment_agriculture", "evidence": "nutrition and food science topics" },
+    { "course_id": "phy2053", "interest_id": "math_physical_sciences", "evidence": "kinematics, dynamics, energy, momentum" },
+    { "course_id": "pos2112", "interest_id": "politics_law", "evidence": "State constitutions, political parties and politics" },
+    { "course_id": "sop3004", "interest_id": "psychology_behavior", "evidence": "social factors influencing individual behavior" },
+    { "course_id": "spm3012", "interest_id": "sports_fitness", "evidence": "Societal implications of sport" },
+    { "course_id": "spn1131", "interest_id": "languages_global", "evidence": "basic Spanish language sequence" },
+    { "course_id": "sta2023", "interest_id": "ai_data", "evidence": "descriptive and inferential statistical methods" },
+    { "course_id": "syg2000", "interest_id": "society_social_sciences", "evidence": "basic sociological concepts" },
+    { "course_id": "wis2552", "interest_id": "environment_agriculture", "evidence": "global biotic environment" }
   ]
 }

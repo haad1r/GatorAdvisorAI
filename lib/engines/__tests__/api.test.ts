@@ -222,12 +222,12 @@ describe("requirementFlags: what scoring needs", () => {
     }
   });
 
-  it("an undecidable requirement gives unknown, which scoring reads as no", () => {
+  it("an undecidable requirement remains unknown for scoring", () => {
     // The record doesn't say whether the student has language proficiency,
     // which would waive the CLAS language requirement.
     const f = of("CHI 1130");
     expect(f.fillsRequirement).toBe("unknown");
-    expect(toScoringFlags(f)).toEqual({ fillsRequirement: false, fillsMajorSlot: false });
+    expect(toScoringFlags(f)).toEqual({ fillsRequirement: null, fillsMajorSlot: false });
     expect(toScoringFlags(of("PSB 4343C"))).toEqual({ fillsRequirement: true, fillsMajorSlot: true });
   });
 

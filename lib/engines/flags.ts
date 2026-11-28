@@ -82,11 +82,11 @@ export function requirementFlags(
   return RequirementFlags.parse({ versions: resultVersions(catalog, record), courses: flags, caveats });
 }
 
-/** The scoring baseline's two booleans (scoring.ts `Course`). Only a "yes"
- *  is true: an unknown never boosts a score, as "never treat unknown as OK"
- *  requires. Keep `CourseFlags` itself when the reason should be shown. */
-export function toScoringFlags(f: CourseFlags): { fillsRequirement: boolean; fillsMajorSlot: boolean } {
-  return { fillsRequirement: f.fillsRequirement === "yes", fillsMajorSlot: f.fillsMajorSlot === "yes" };
+/** Preserve unknown so a preference cannot treat it as a confirmed "no".
+ *  Keep `CourseFlags` itself when the supporting reasons should be shown. */
+export function toScoringFlags(f: CourseFlags): { fillsRequirement: boolean | null; fillsMajorSlot: boolean | null } {
+  const convert = (flag: Flag) => flag === "unknown" ? null : flag === "yes";
+  return { fillsRequirement: convert(f.fillsRequirement), fillsMajorSlot: convert(f.fillsMajorSlot) };
 }
 
 // ---------------------------------------------------------------------------

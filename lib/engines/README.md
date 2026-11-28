@@ -101,8 +101,9 @@ requirement of a declared program, gen ed included) and `fillsMajorSlot`
 
 The flags come from the audit's own remaining-course lists, the full ones
 rather than the first 8. They are not recalculated, so a flag can't
-disagree with the audit. `toScoringFlags(f)` turns them into scoring's two
-booleans, and only `yes` is true, so an unknown never raises a score.
+disagree with the audit. `toScoringFlags(f)` maps `yes`/`no`/`unknown` to
+`true`/`false`/`null`, preserving unknown for scoring. This changes the helper's
+return type; consumers must handle `null` rather than interpreting it as `no`.
 `requirements` lists the open requirements behind each flag, for the "why".
 Prose slots ("approved elective") list no courses and flag nothing; the
 result's caveats count them. For the synthetic student: 283 courses fill

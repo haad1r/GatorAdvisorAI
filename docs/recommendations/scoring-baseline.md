@@ -47,9 +47,8 @@ dropped and the remaining weights are rescaled. Missing data is never scored as 
 Unknown requirement or major-slot flags are `null` and omitted; when all
 components are omitted the neutral base score is 0. When integrating, preserve
 the engine's `yes`/`no`/`unknown` distinction as `true`/`false`/`null`.
-The current engine `toScoringFlags` helper collapses unknown to false, which
-would incorrectly boost an outside-major preference; do not use that helper for
-this scorer without resolving the contract with TEAM-02.
+The proposed engine `toScoringFlags` change in this branch preserves unknown as
+`null`; its return-type change needs review by TEAM-02 and affected consumers.
 
 | Component | Survey question | Value |
 |---|---|---|
