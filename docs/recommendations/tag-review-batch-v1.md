@@ -20,3 +20,11 @@ display course code (e.g. `CAP 4621`), `description_reviewed`, the reviewer,
 the agreed tag version, and `interests_v1`. Validate the converted records and
 check current catalog evidence before use. A changed description requires a
 new review. Do not invent reviewer identities or treat this batch as complete.
+
+`lib/engines/recommendations/tag-review.ts` provides a local preparation helper:
+it accepts an explicit reviewer decision and the description fingerprint the
+reviewer checked, verifies the course, evidence, catalog year and official host,
+then returns a scorer-compatible tag and its review evidence. It writes nothing
+and cannot authenticate a reviewer or prove a review happened. The team still
+needs an agreed review process and storage format; do not treat a supplied name
+alone as approval.
