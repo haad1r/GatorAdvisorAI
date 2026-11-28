@@ -42,8 +42,15 @@ tests. A grouped helper computes means by request, checks that request IDs are
 not shared across users, and reports how many groups were excluded for having no
 positive labels. A smoke test connects synthetic held-out predictions to those
 metrics. A paired comparison helper rejects different requests, courses, users,
-or labels between its two synthetic inputs. These functions are not an experiment runner and do not correct
-exposure bias; no synthetic metric is evidence of recommendation quality.
+or labels between its two synthetic inputs. `python -B ml/synthetic_comparison.py`
+performs a self-contained smoke comparison: it calls the actual TypeScript
+`scoreCourse` baseline with synthetic tags and a settled profile, compares it
+with the prototype model on the same held-out fixtures, and reports versioned
+metadata, ranking metrics and up to three synthetic disagreement examples.
+The report is explicitly synthetic and is not the agreed production experiment
+runner. It does not correct exposure bias; no synthetic metric is evidence of
+recommendation quality. The current baseline fixture has no diversity adjustment;
+live comparison requires the agreed ranking contract and evaluation design.
 
 These prototypes are **not** a production training pipeline or experiment runner. They do not define
 the team's event-export schema, deduplication policy, labels, feature set,

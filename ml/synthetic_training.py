@@ -31,7 +31,9 @@ def synthetic_rows():
         # Synthetic events are placed on the relevant side of the cutoff.
         at = "2026-01-20T12:00:00Z" if partition == "test" else "2026-01-10T12:00:00Z"
         for course in range(4):
-            interest = round(rng.random(), 3)
+            # Ten discrete tags allow the real TypeScript baseline to reproduce
+            # the same interest overlap without duplicating its scoring formula.
+            interest = rng.randrange(11) / 10
             requirement = rng.randrange(2)
             level = rng.randrange(2)
             label = int(interest + 0.3 * requirement + 0.2 * level + rng.uniform(-0.4, 0.4) > 0.8)

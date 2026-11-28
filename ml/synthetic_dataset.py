@@ -9,7 +9,7 @@ import hashlib
 import json
 import math
 
-DATASET_VERSION = "synthetic_dataset_v4"
+DATASET_VERSION = "synthetic_dataset_v5"
 CUTOFF = datetime(2026, 1, 15, tzinfo=timezone.utc)
 FEATURES = ("interest_overlap", "fills_requirement", "level_match")
 
