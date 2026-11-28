@@ -15,7 +15,7 @@ from synthetic_metrics import compare_synthetic_rankings
 from synthetic_training import FEATURES, MODEL_VERSION, SEED, train_synthetic
 
 ROOT = Path(__file__).resolve().parent.parent
-REPORT_VERSION = "synthetic_comparison_v1"
+REPORT_VERSION = "synthetic_comparison_v2"
 
 
 def synthetic_comparison():

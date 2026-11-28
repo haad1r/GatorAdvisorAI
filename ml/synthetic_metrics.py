@@ -24,11 +24,13 @@ def ranking_metrics(rows: list[dict], k: int) -> dict:
         seen.add(code)
     positives = sum(row["label"] for row in rows)
     if not positives:
-        return {"ndcg": None, "hit_rate": None, "positive_count": 0}
+        return {"ndcg": None, "hit_rate": None, "reciprocal_rank": None, "positive_count": 0}
     ordered = sorted(rows, key=lambda row: (-row["score"], row["course_id"]))[:k]
     dcg = sum(row["label"] / math.log2(index + 2) for index, row in enumerate(ordered))
     ideal = sum(1 / math.log2(index + 2) for index in range(min(k, positives)))
-    return {"ndcg": dcg / ideal, "hit_rate": int(any(row["label"] for row in ordered)), "positive_count": positives}
+    first_positive = next((index + 1 for index, row in enumerate(ordered) if row["label"]), None)
+    return {"ndcg": dcg / ideal, "hit_rate": int(first_positive is not None),
+            "reciprocal_rank": 1 / first_positive if first_positive else 0, "positive_count": positives}
 
 
 def grouped_ranking_metrics(rows: list[dict], k: int) -> dict:
@@ -57,6 +59,7 @@ def grouped_ranking_metrics(rows: list[dict], k: int) -> dict:
         "request_count": len(groups), "evaluated_count": count, "no_positive_count": len(groups) - count,
         "mean_ndcg": sum(value["ndcg"] for value in evaluated) / count if count else None,
         "mean_hit_rate": sum(value["hit_rate"] for value in evaluated) / count if count else None,
+        "mean_reciprocal_rank": sum(value["reciprocal_rank"] for value in evaluated) / count if count else None,
     }
 
 

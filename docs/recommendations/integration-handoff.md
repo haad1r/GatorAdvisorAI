@@ -54,7 +54,10 @@ test, or evidence of recommendation quality.
 `synthetic-pipeline.ts` is a separate fixture-only exercise joining engine
 filtering, explicit in-memory dismissals, requirement flags and ranking. It
 returns eligibility and requirement evidence, excludes unsupported course
-levels, and deduplicates course IDs. Its tests use synthetic records and tags.
+levels, and deduplicates course IDs. It distinguishes target-term conditional
+eligibility and confirmed versus historical course offerings, and rejects
+mismatched engine result versions. A confirmed course offering does not confirm
+an individual section. Its tests use synthetic records and tags.
 It has no API, authentication, persistence, feedback-event processing or
 section validation. Do not serve its output; the owner-confirmed handoffs and
 review remain required before live integration.

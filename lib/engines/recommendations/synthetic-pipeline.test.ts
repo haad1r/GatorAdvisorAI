@@ -19,9 +19,19 @@ describe("local synthetic recommendation pipeline", () => {
     expect(result.dismissed).toEqual([dismissed])
     expect(result.results.map((item) => item.courseId)).toEqual([kept])
     expect(result.results[0].eligibility).toMatch(/^eligible/)
-    expect(result.results[0].offering).toBeTruthy()
+    expect(["confirmed_course_offering", "historical_course_offering"]).toContain(result.results[0].offeringState)
+    expect(["eligible_for_target_term", "conditional_for_target_term"]).toContain(result.results[0].eligibilityState)
     expect(result.decisions.find((item) => item.courseId === "bsc2010")?.decision).toBe("excluded")
     expect(result.decisions.find((item) => item.input === "not a course")?.decision).toBe("excluded")
     expect(result.versions).toEqual(engine.filterCandidates(record, [kept], term).versions)
+  }, 20000)
+  it("fails closed when academic evidence versions differ", () => {
+    const engine = createAcademicEngine(loadCatalog("data"))
+    const record = JSON.parse(readFileSync("lib/engines/examples/record.json", "utf8"))
+    const inconsistent = { ...engine, requirementFlags: (...args: Parameters<typeof engine.requirementFlags>) => {
+      const result = engine.requirementFlags(...args)
+      return { ...result, versions: { ...result.versions, recordVersion: "changed" } }
+    } }
+    expect(() => recommendSynthetic(inconsistent, record, ["BSC 2010"], { season: "spring", year: 2027 }, {}, {})).toThrow(/evidence changed/)
   }, 20000)
 })

@@ -8,9 +8,10 @@ class RankingMetricTests(unittest.TestCase):
     def test_hand_calculated_rankings(self):
         rows = [{"course_id": "A", "score": 0.8, "label": 0},
                 {"course_id": "B", "score": 0.7, "label": 1}]
-        self.assertEqual(ranking_metrics(rows, 1), {"ndcg": 0.0, "hit_rate": 0, "positive_count": 1})
+        self.assertEqual(ranking_metrics(rows, 1), {"ndcg": 0.0, "hit_rate": 0, "reciprocal_rank": 0, "positive_count": 1})
         self.assertAlmostEqual(ranking_metrics(rows, 2)["ndcg"], 1 / math.log2(3))
         self.assertEqual(ranking_metrics(rows, 2)["hit_rate"], 1)
+        self.assertEqual(ranking_metrics(rows, 2)["reciprocal_rank"], 0.5)
 
     def test_ties_are_stable_and_no_positive_is_not_a_quality_score(self):
         rows = [{"course_id": "B", "score": 1, "label": 0}, {"course_id": "A", "score": 1, "label": 1}]
@@ -34,7 +35,7 @@ class RankingMetricTests(unittest.TestCase):
         ]
         result = grouped_ranking_metrics(rows, 1)
         self.assertEqual(result, {"request_count": 3, "evaluated_count": 2, "no_positive_count": 1,
-                                  "mean_ndcg": 0.5, "mean_hit_rate": 0.5})
+                                  "mean_ndcg": 0.5, "mean_hit_rate": 0.5, "mean_reciprocal_rank": 0.5})
         self.assertEqual(grouped_ranking_metrics(list(reversed(rows)), 1), result)
 
     def test_rejects_missing_request_or_reused_id_across_users(self):

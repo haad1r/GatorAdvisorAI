@@ -36,7 +36,7 @@ test users are disjoint and event timestamps are on opposite sides of the cutoff
 this is not a verified real-export split. No model is saved. The unittest
 command above also covers the training prototype.
 
-`ml/synthetic_metrics.py` implements per-request NDCG and hit-rate mechanics for
+`ml/synthetic_metrics.py` implements per-request NDCG, hit-rate and reciprocal-rank mechanics for
 explicit binary labels, with deterministic tie-breaking and hand-calculated
 tests. A grouped helper computes means by request, checks that request IDs are
 not shared across users, and reports how many groups were excluded for having no

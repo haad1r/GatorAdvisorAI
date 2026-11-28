@@ -35,6 +35,10 @@ export function recommendSynthetic(
     candidates.set(candidate.courseId, candidate)
   }
   const flags = engine.requirementFlags(record, [...candidates.keys()])
+  const versionKeys = ["contractVersion", "engineVersion", "dataVersion", "catalogYear", "recordId", "recordVersion"] as const
+  if (versionKeys.some((key) => filtered.versions[key] !== flags.versions[key])) {
+    throw new Error("Academic evidence changed between filtering and scoring")
+  }
   const flagMap = new Map(flags.courses.map((flag) => [flag.courseId, flag]))
   const scored = rank(flags.courses.map((flag) => ({
     code: flag.code,
@@ -49,7 +53,11 @@ export function recommendSynthetic(
       const id = toCourseId(row.code)
       const candidate = candidates.get(id)!
       const flag = flagMap.get(id)!
+      if (candidate.eligibility !== "eligible" && candidate.eligibility !== "eligible_pending") throw new Error("Candidate eligibility is not usable")
+      if (candidate.offering !== "confirmed" && candidate.offering !== "historical") throw new Error("Candidate offering is not usable")
       return { ...row, courseId: id, eligibility: candidate.eligibility, offering: candidate.offering,
+        eligibilityState: candidate.eligibility === "eligible" ? "eligible_for_target_term" as const : "conditional_for_target_term" as const,
+        offeringState: candidate.offering === "confirmed" ? "confirmed_course_offering" as const : "historical_course_offering" as const,
         eligibilityReasons: candidate.reasons, requirements: flag.requirements, requirementReasons: flag.reasons }
     }),
   }
