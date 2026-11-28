@@ -36,6 +36,11 @@ describe("recommendation explanations", () => {
     expect(result.reasons).not.toContain("Matches your preference for courses outside your major requirements")
     expect(rank([unknown], { major_scope: "outside_major" })[0].score).toBe(0)
   })
+  it("rejects duplicate interest tags rather than double-counting conflicting provenance", () => {
+    const duplicate = course("AAA 1000", "art")
+    duplicate.tags.push({ interest: "art", source: "subject_default" })
+    expect(() => rank([duplicate], { interests: ["art"] })).toThrow(/Duplicate interest tags/)
+  })
   it("matches the original ranking on varied synthetic pools, including multiple shared tags", () => {
     for (let seed = 0; seed < 12; seed++) {
       const courses = Array.from({ length: 45 }, (_, i) => {

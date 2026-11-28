@@ -43,6 +43,9 @@ export function validateSurvey(s: Survey) {
 }
 
 export function scoreCourse(c: Course, s: Survey) {
+  if (new Set(c.tags.map((tag) => tag.interest)).size !== c.tags.length) {
+    throw new Error(`Duplicate interest tags for ${c.code}; resolve tag provenance before scoring`)
+  }
   const picked = s.interests ?? []
   const lower = s.lower_interest_topics ?? []
   const noPositiveSignal = picked.length === 0     // Q1 skipped: use the cold-start fallback

@@ -81,6 +81,8 @@ this scorer without resolving the contract with TEAM-02.
   the list is spread across interests. Avoids an alphabetical list.
 - **Spreading:** each already-chosen course sharing a tag lowers the next by 0.1.
 - **Course with no tags:** the interest component is skipped.
+- **Duplicate course-interest tags:** rejected before scoring; description
+  review overrides the subject default rather than adding a second copy.
 - **Tie-break:** course code, so the order never reshuffles.
 - **Q1 and Q2 overlap is rejected** before scoring.
 
