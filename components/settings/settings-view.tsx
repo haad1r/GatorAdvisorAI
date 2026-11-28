@@ -204,9 +204,9 @@ function SurveySection() {
           <p className="text-sm">
             {state.data ? `Last taken ${DATE.format(new Date(state.data.submittedAt))}.` : "You haven't taken the survey yet."}
           </p>
-          {/* The survey screen is #19 (Zain). Link it here once it has a route. */}
-          <Button variant="outline" disabled>
-            {state.data ? "Retake survey" : "Take survey"} (coming soon)
+          {/* The survey screen is #19 (Zain): components/onboarding/survey-retake.tsx. */}
+          <Button variant="outline" render={<Link href="/settings/survey" />} nativeButton={false}>
+            {state.data ? "Retake survey" : "Take survey"}
           </Button>
         </div>
       )}

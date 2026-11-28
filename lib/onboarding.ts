@@ -102,6 +102,11 @@ export const ONBOARDING_STEPS = [
     fields: ["major", "catalogYear", "entryTerm", "expectedGraduation"],
   },
   { id: "review", title: "Review", fields: [] },
+  /*
+   * After the profile is saved: the survey is stored against the profile, and
+   * Q3/Q6 depend on the major. Optional; its schema lives in lib/survey.ts.
+   */
+  { id: "interests", title: "Interests", fields: [] },
 ] as const satisfies ReadonlyArray<{
   id: string
   title: string

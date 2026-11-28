@@ -3,12 +3,11 @@ import type {
   ApiResult,
   Coursework,
   Profile,
-  SurveyAnswer,
-  SurveyQuestionId,
   SurveySubmission,
 } from "@/lib/api/types"
 import { hasErrors, type FieldErrors } from "@/lib/forms"
 import { emptyProfile, validateProfile } from "@/lib/onboarding"
+import { validateSurvey } from "@/lib/survey"
 import {
   courseworkFixture,
   examFixture,
@@ -74,43 +73,6 @@ function validateCoursework(body: Coursework): FieldErrors {
   return errors
 }
 
-const QUESTION_IDS: SurveyQuestionId[] = [
-  "interests",
-  "lower_interest_topics",
-  "major_scope",
-  "course_level",
-  "requirement_progress",
-  "exploration_mode",
-]
-
-function isEmpty(value: SurveyAnswer["value"]) {
-  return value === null || value === "" || (Array.isArray(value) && value.length === 0)
-}
-
-function validateSurvey(body: SurveySubmission): FieldErrors {
-  const errors: FieldErrors = {}
-  const add = (id: string, msg: string) => (errors[id] ??= []).push(msg)
-
-  for (const answer of body.answers) {
-    if (!QUESTION_IDS.includes(answer.questionId)) {
-      add(answer.questionId, "Unknown question.")
-    } else if (answer.status === "answered" && isEmpty(answer.value)) {
-      add(answer.questionId, "Pick an answer or skip this question.")
-    } else if (answer.status !== "answered" && answer.value !== null) {
-      add(answer.questionId, "Skipped and hidden answers can't have a value.")
-    }
-  }
-
-  const liked = body.answers.find((a) => a.questionId === "interests")?.value
-  const disliked = body.answers.find((a) => a.questionId === "lower_interest_topics")?.value
-  if (Array.isArray(liked) && Array.isArray(disliked)) {
-    if (disliked.some((id) => liked.includes(id)))
-      add("lower_interest_topics", "An interest can't be in both lists.")
-  }
-
-  return errors
-}
-
 /** Path params (":id") arrive in query. Handlers may be async (e.g. lazy-loaded fixtures). */
 type Handler = (body: unknown, query: URLSearchParams) => ApiResult<unknown> | Promise<ApiResult<unknown>>
 
@@ -150,10 +112,10 @@ export const routes: Record<string, Handler> = {
   "GET /api/survey": () => ok(store.survey),
 
   "POST /api/survey": (body) => {
-    const submission = body as SurveySubmission
-    const errors = validateSurvey(submission)
+    // Same check the real endpoint will run (lib/survey.ts).
+    const errors = validateSurvey(body)
     if (hasErrors(errors)) return invalid(errors)
-    store.survey = structuredClone(submission)
+    store.survey = structuredClone(body as SurveySubmission)
     return ok(store.survey)
   },
 
