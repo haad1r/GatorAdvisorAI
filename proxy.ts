@@ -1,7 +1,7 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 
-const PUBLIC_PAGES = ["/sign-in", "/sign-up", "/preview"];
+const PUBLIC_PAGES = ["/sign-in", "/sign-up", "/preview", "/account-deleted"];
 
 function under(req: NextRequest, prefix: string) {
   const path = req.nextUrl.pathname;

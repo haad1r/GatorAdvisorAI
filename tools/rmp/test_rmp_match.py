@@ -71,12 +71,12 @@ class MatchOne(unittest.TestCase):
         method, p, _ = match_one("Randal Switt", {"History"}, profs)
         self.assertEqual((method, p.legacy_id), ("nickname", 70))
 
-    def test_other_one_letter_difference_needs_the_department(self):
-        profs = PROFS + [prof(71, "Jianping", "Wang", "Agronomy"), prof(72, "Andre", "Rossi", "Physics")]
-        self.assertEqual(match_one("Jinping Wang", {"Advertising"}, profs)[:2], ("none", None))
-        self.assertEqual(match_one("Andrea Rossi", {"History"}, profs)[:2], ("none", None))
-        method, p, _ = match_one("Jinping Wang", {"Agronomy"}, profs)
-        self.assertEqual((method, p.legacy_id), ("typo", 71))
+    def test_other_one_letter_difference_is_a_different_person(self):
+        profs = PROFS + [prof(71, "Jianping", "Wang", "Agronomy"), prof(72, "Andre", "Rossi", "Physics"),
+                         prof(73, "Keiji", "Iwamoto", "Languages")]
+        for name, dept in (("Jinping Wang", "Advertising"), ("Jinping Wang", "Agronomy"),
+                           ("Andrea Rossi", "Physics"), ("Kenji Iwamoto", "Languages")):
+            self.assertEqual(match_one(name, {dept}, profs)[:2], ("none", None), f"{name} in {dept}")
 
     def test_bare_initial_is_not_enough(self):
         self.assertEqual(match_one("S Flory", DEPTS, PROFS)[:2], ("none", None))
