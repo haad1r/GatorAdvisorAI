@@ -6,6 +6,12 @@ record-version reader to `explainIfSyntheticEvidenceCurrent`. No API route,
 identity check, database, policy retrieval, real academic engine, or Gemini
 provider is included. Do not use this prototype with student data.
 
+`synthetic-audit-adapter.ts` additionally exercises a committed synthetic
+`AuditResult` fixture. It validates the engine schema and extracts one
+requirement's status, credit amounts, versions and source references. Those
+references are not proof of retrieval, so the adapter deliberately does not
+assign a verified source ID or claim a live integration.
+
 ## Contract for discussion
 
 - **Input:** one requirement ID, its status, completed and required credits
