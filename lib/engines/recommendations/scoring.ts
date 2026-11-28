@@ -1,9 +1,9 @@
-// GatorAdvisor scoring baseline: scoring_v1 (PRELIMINARY).
+// GatorAdvisor scoring baseline: scoring_v2 (PRELIMINARY).
 // Follows docs/recommendations/survey.md (survey_v1) and interest-list.md (interests_v1).
 // Spec: docs/recommendations/scoring-baseline.md
 //
 // Pure functions, no I/O. Eligibility and requirement-slot flags are INPUTS that the
-// academic engine (TEAM-02) will supply; until then they are only exercised with
+// academic engine (TEAM-02) supplies separately; these are only exercised with
 // synthetic fixtures in scoring.check.ts. Do not serve live recommendations from this yet.
 
 export type Source = "subject_default" | "description_reviewed"
@@ -13,8 +13,8 @@ export type Course = {
   code: string
   tags: Tag[]
   level: "intro" | "advanced"
-  fillsMajorSlot: boolean    // from the academic engine (TEAM-02); fake in tests
-  fillsRequirement: boolean  // any requirement slot incl. Gen Ed (TEAM-02); fake in tests
+  fillsMajorSlot: boolean | null    // null = unknown; never treat it as false
+  fillsRequirement: boolean | null  // any requirement slot incl. Gen Ed; null = unknown
 }
 
 // Keys are the stable survey_v1 question IDs. undefined = skipped or hidden.
@@ -27,7 +27,7 @@ export type Survey = {
   exploration_mode?: "exploring" | "settled"
 }
 
-export const SCORING_VERSION = "scoring_v1"
+export const SCORING_VERSION = "scoring_v2"
 const DIVERSITY_STEP = 0.1
 
 // Configurable and versioned. Starting guesses; Ryan reviews them at the design checkpoint.
@@ -43,6 +43,9 @@ export function validateSurvey(s: Survey) {
 }
 
 export function scoreCourse(c: Course, s: Survey) {
+  if (new Set(c.tags.map((tag) => tag.interest)).size !== c.tags.length) {
+    throw new Error(`Duplicate interest tags for ${c.code}; resolve tag provenance before scoring`)
+  }
   const picked = s.interests ?? []
   const lower = s.lower_interest_topics ?? []
   const noPositiveSignal = picked.length === 0     // Q1 skipped: use the cold-start fallback
@@ -59,14 +62,17 @@ export function scoreCourse(c: Course, s: Survey) {
   let interest: number | null = null
   if (n > 0) {
     if (!noPositiveSignal) interest = hits.length / n - lowerHits.length / n
-    else if (lower.length > 0) interest = 0 - lowerHits.length / n
+    // A non-matching or unreviewed Q2 tag is not evidence of a negative signal.
+    // Including a zero here would still alter the score by changing normalization.
+    else if (lowerHits.length > 0) interest = 0 - lowerHits.length / n
   }
 
   const parts = {
     interest,
-    req: c.fillsRequirement ? 1 : 0,
+    req: c.fillsRequirement === null ? null : c.fillsRequirement ? 1 : 0,
     major:
-      s.major_scope === "inside_major" ? (c.fillsMajorSlot ? 1 : 0)
+      c.fillsMajorSlot === null ? null
+      : s.major_scope === "inside_major" ? (c.fillsMajorSlot ? 1 : 0)
       : s.major_scope === "outside_major" ? (c.fillsMajorSlot ? 0 : 1)
       : null,
     level:
@@ -85,7 +91,7 @@ export function scoreCourse(c: Course, s: Survey) {
     weightSum += w[k]
     components[k] = Math.round(w[k] * v * 1000) / 1000 + 0
   }
-  const score = Math.round((total / weightSum) * 1000) / 1000 + 0
+  const score = weightSum === 0 ? 0 : Math.round((total / weightSum) * 1000) / 1000 + 0
 
   // Every reason maps to an input that actually moved the score.
   const reasons = [
@@ -93,6 +99,8 @@ export function scoreCourse(c: Course, s: Survey) {
     ...lowerHits.map((t) => `Lowered: tagged ${t.interest} (${t.source})`),
     ...(c.fillsRequirement ? ["Counts toward a requirement"] : []),
     ...(s.major_scope === "inside_major" && c.fillsMajorSlot ? ["Counts toward your major"] : []),
+    ...(s.major_scope === "outside_major" && c.fillsMajorSlot === false ? ["Matches your preference for courses outside your major requirements"] : []),
+    ...((s.course_level === "intro" || s.course_level === "advanced") && s.course_level === c.level ? [`Matches your preferred ${c.level} course level`] : []),
   ]
   return { code: c.code, score, components, reasons }
 }
@@ -102,14 +110,25 @@ export function scoreCourse(c: Course, s: Survey) {
 export function rank(courses: Course[], s: Survey) {
   validateSurvey(s)
   const spread = s.exploration_mode === "exploring" || !(s.interests?.length)
-  const pool = courses.map((c) => ({ c, r: scoreCourse(c, s) }))
-  const out: typeof pool = []
-  const shares = (a: Course, b: Course) => a.tags.some((t) => b.tags.some((u) => u.interest === t.interest))
+  const pool = courses.map((c) => ({ c, r: scoreCourse(c, s), overlaps: 0, interests: new Set(c.tags.map((t) => t.interest)) }))
+  const out: Array<(typeof pool)[number] & { diversity_penalty: number; adjusted_score: number }> = []
+  // Update each remaining candidate once per selected course. A selected course
+  // contributes at most one overlap even if multiple interest tags match.
   while (pool.length) {
-    const adj = (x: (typeof pool)[number]) =>
-      x.r.score - (spread ? DIVERSITY_STEP * out.filter((o) => shares(o.c, x.c)).length : 0)
-    pool.sort((a, b) => adj(b) - adj(a) || a.r.code.localeCompare(b.r.code))
-    out.push(pool.shift()!)
+    const adj = (x: (typeof pool)[number]) => x.r.score - (spread ? DIVERSITY_STEP * x.overlaps : 0)
+    let best = 0
+    for (let i = 1; i < pool.length; i++) {
+      if (adj(pool[i]) > adj(pool[best]) || (adj(pool[i]) === adj(pool[best]) && pool[i].r.code.localeCompare(pool[best].r.code) < 0)) best = i
+    }
+    const selected = pool.splice(best, 1)[0]
+    const penalty = spread ? DIVERSITY_STEP * selected.overlaps : 0
+    out.push({ ...selected, diversity_penalty: Math.round(penalty * 1000) / 1000, adjusted_score: Math.round((selected.r.score - penalty) * 1000) / 1000 })
+    if (spread && selected.interests.size) {
+      for (const candidate of pool) {
+        if (candidate.c.tags.some((tag) => selected.interests.has(tag.interest))) candidate.overlaps++
+      }
+    }
   }
-  return out.map((x, i) => ({ rank: i + 1, ...x.r, scoring_version: SCORING_VERSION }))
+  return out.map((x, i) => ({ rank: i + 1, ...x.r, diversity_penalty: x.diversity_penalty, adjusted_score: x.adjusted_score,
+    reasons: [...x.r.reasons, ...(x.diversity_penalty > 0 ? [`Diversity adjustment: -${x.diversity_penalty} for overlap with earlier courses`] : [])], scoring_version: SCORING_VERSION }))
 }

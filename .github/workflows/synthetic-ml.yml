@@ -1,0 +1,31 @@
+name: Synthetic ML
+
+on:
+  pull_request:
+    paths:
+      - 'ml/**'
+      - '.github/workflows/synthetic-ml.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ml/**'
+      - '.github/workflows/synthetic-ml.yml'
+
+jobs:
+  synthetic-ml:
+    name: Synthetic ML tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: ml/requirements-synthetic.txt
+      - run: python -m pip install -r ml/requirements-synthetic.txt
+      - run: python -B -m unittest discover -s ml -p 'test_*.py'
+      - run: python -B ml/synthetic_training.py
+      - run: python -B ml/synthetic_comparison.py

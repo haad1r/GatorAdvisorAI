@@ -1,14 +1,19 @@
-# GatorAdvisor scoring baseline: scoring_v1 (preliminary)
+# GatorAdvisor scoring baseline: scoring_v2 (preliminary)
 
 Issue #11, step 5. Follows [survey.md](survey.md) (`survey_v1`) and
 [interest-list.md](interest-list.md) (`interests_v1`).
 
 **Status: preliminary.** The code is `lib/engines/recommendations/scoring.ts`, with
-checks in `scoring.check.ts`. Eligibility filtering and the requirement-slot flags
-(`fillsRequirement`, `fillsMajorSlot`) come from the academic engine (TEAM-02), which
-is not built yet, so they are inputs here and are only exercised with **synthetic**
-fixtures. The results show the logic runs and behaves as specified, not that the
-recommendations are good. Do not serve live recommendations from this yet.
+checks in `scoring.check.ts`. The academic engine now exposes candidate filtering
+and requirement flags; see [its integration notes](../../lib/engines/README.md#recommendation-scoring).
+The scorer still accepts flags as inputs and its checks use **synthetic** fixtures.
+The engine handoff, access and smoke checks in issue #11 are still required before
+live integration. These checks establish behavior, not recommendation quality.
+Do not serve live recommendations from this yet.
+
+The ranking loop tracks diversity overlaps incrementally and selects by a scan.
+It preserves the previous ordering in synthetic comparisons but remains quadratic
+in pool size; full-catalog latency still needs measurement before live use.
 
 Run the checks from the repo root:
 
@@ -39,6 +44,11 @@ score = ( w_interest*interest + w_req*req + w_major*major + w_level*level )
 
 A component that is skipped (question unanswered or hidden, or no data) is
 dropped and the remaining weights are rescaled. Missing data is never scored as bad.
+Unknown requirement or major-slot flags are `null` and omitted; when all
+components are omitted the neutral base score is 0. When integrating, preserve
+the engine's `yes`/`no`/`unknown` distinction as `true`/`false`/`null`.
+The proposed engine `toScoringFlags` change in this branch preserves unknown as
+`null`; its return-type change needs review by TEAM-02 and affected consumers.
 
 | Component | Survey question | Value |
 |---|---|---|
@@ -63,10 +73,15 @@ dropped and the remaining weights are rescaled. Missing data is never scored as 
 - **Q1 skipped, Q2 filled:** Q2 still applies as a penalty, and the student gets
   the cold-start fallback. Ignoring a filled answer would break the rule that
   every question must change a result.
+- If Q1 is skipped and Q2 has no matching description-reviewed tag on a course,
+  omit the interest component: adding a zero would change normalization even
+  though there is no negative evidence.
 - **Cold-start fallback (Q1 skipped):** requirement-filling courses first, then
   the list is spread across interests. Avoids an alphabetical list.
 - **Spreading:** each already-chosen course sharing a tag lowers the next by 0.1.
 - **Course with no tags:** the interest component is skipped.
+- **Duplicate course-interest tags:** rejected before scoring; description
+  review overrides the subject default rather than adding a second copy.
 - **Tie-break:** course code, so the order never reshuffles.
 - **Q1 and Q2 overlap is rejected** before scoring.
 
@@ -89,10 +104,21 @@ and Q1/Q2 overlap being rejected.
 { "rank": 1, "code": "STA 3100", "score": 0.725,
   "components": { "interest": 0.175, "req": 0.4, "major": 0.15, "level": 0 },
   "reasons": ["Matches your interest in ai_data", "Counts toward a requirement", "Counts toward your major"],
-  "scoring_version": "scoring_v1" }
+  "diversity_penalty": 0, "adjusted_score": 0.725,
+  "scoring_version": "scoring_v2" }
 ```
 
-Every reason corresponds to a component that moved the score. Impressions should
+`score` remains the normalized base score. `diversity_penalty` is the adjustment
+at the moment this course is selected, and `adjusted_score` is the base score
+minus that penalty. A nonzero penalty also adds a reason. Adjusted scores are
+selection-time values: penalties for remaining courses can grow on later picks.
+Components are weighted contributions before normalization. Version 2 changes
+the explanation contract and corrects Q2-only missing-evidence normalization;
+the scoring weights and diversity ranking algorithm are unchanged. It
+also adds reasons for matching level and outside-major preferences. Sid must
+review the contract before it is exposed through the advisor API.
+
+Every reason corresponds to a component or adjustment used in ranking. Impressions should
 log `scoring_version`, `survey_version`, and `interest_list_version`.
 
 ## 6. Open questions
@@ -100,8 +126,8 @@ log `scoring_version`, `survey_version`, and `interest_list_version`.
 1. ML review: are the weights and the 0.1 spreading step acceptable for the design
    checkpoint? Is the cold-start fallback acceptable?
 2. Survey owner: confirm that Q1 skipped plus Q2 filled behaves as in section 3.
-3. Academic engine (TEAM-02): what shape will the requirement-slot result have, and
-   when is it published? The code expects two yes/no flags per course and student.
+3. Academic engine (TEAM-02): confirm the handoff and smoke checks for the published
+   candidate filter and requirement flags before connecting them to the scorer.
 4. Advisor (#10): is the output in section 5 enough for the recommendation tool?
 5. Where should scoring code live long term? This PR uses `lib/engines/recommendations/`
    because the README proposes `lib/engines/`; move it if the team prefers elsewhere.
