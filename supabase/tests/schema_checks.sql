@@ -20,10 +20,17 @@ insert into profiles (user_id, email, preferred_name, class_standing, program_id
 values ('user_A', 'a@ufl.edu', 'Ann', 'sophomore', 'uglas-csc_bs', '2025-2026', 'Fall 2025', 'Spring 2029'),
        ('user_B', 'b@ufl.edu', 'Ben', 'freshman',  'uglas-csc_bs', '2026-2027', 'Fall 2026', 'Spring 2030');
 insert into coursework_records (user_id) values ('user_A'), ('user_B');
-insert into coursework (user_id, course_code, grade, credits, term, source, status) values
-  ('user_A', 'COP3502C', 'A', 4, 'Fall 2025', 'transcript', 'confirmed'),
-  ('user_A', 'PSY2012', 'CR', 3, 'Fall 2025', 'exam', 'confirmed'),
-  ('user_A', 'MUS1010', 'S', 0, 'Fall 2025', 'transcript', 'confirmed');
+insert into coursework (user_id, course_code, grade, credits, term, source, status, entered_via, review_status) values
+  ('user_A', 'COP3502C', 'A', 4, 'Fall 2025', 'uf', 'completed', 'import', 'confirmed'),
+  ('user_A', 'MUS1010', 'S', 0, 'Fall 2025', 'uf', 'completed', 'import', 'confirmed'),
+  ('user_A', 'COP3503C', null, 4, 'Fall 2026', 'uf', 'in_progress', 'import', 'confirmed');
+-- A transfer course: no term and no letter grade on the audit, but an institution.
+insert into coursework (user_id, course_code, credits, source, institution, status, entered_via, review_status, original_label) values
+  ('user_A', 'ENC1101', 3, 'transfer', 'Santa Fe College', 'completed', 'import', 'confirmed', 'ENC1101 at SFC');
+insert into exam_credits (user_id, award_id, score, course_codes, credits, entered_via, review_status) values
+  ('user_A', 'ap-psychology-3-5', 4, '{PSY2012}', 3, 'import', 'confirmed');
+insert into elective_credits (user_id, label, credits, source, institution, entered_via, review_status) values
+  ('user_A', 'SPN 1XXX elective', 3, 'transfer', 'Santa Fe College', 'import', 'confirmed');
 insert into schedules (id, user_id, term, is_primary) values
   ('00000000-0000-0000-0000-00000000000a', 'user_A', '2268', true),
   ('00000000-0000-0000-0000-00000000000b', 'user_B', '2268', true);
@@ -52,15 +59,26 @@ select pg_temp.must_fail('B adds a course to A''s plan',
   $$insert into plan_courses (plan_id, user_id, term, course_code) values ('00000000-0000-0000-0000-0000000000f1', 'user_B', 'Fall 2027', 'COP3530')$$);
 
 -- Bad values.
-select pg_temp.must_fail('course code with a space', $$insert into coursework (user_id, course_code, grade, credits, term, source, status) values ('user_A', 'COP 3530', 'A', 3, 'x', 'manual', 'confirmed')$$);
-select pg_temp.must_fail('negative credits', $$insert into coursework (user_id, course_code, grade, credits, term, source, status) values ('user_A', 'COP3530', 'A', -1, 'x', 'manual', 'confirmed')$$);
+-- Each statement below is valid except for the one value its label names.
+select pg_temp.must_fail('course code with a space', $$insert into coursework (user_id, course_code, grade, credits, term, source, status, entered_via, review_status) values ('user_A', 'COP 3530', 'A', 3, 'Fall 2025', 'uf', 'completed', 'manual', 'confirmed')$$);
+select pg_temp.must_fail('negative credits', $$insert into coursework (user_id, course_code, grade, credits, term, source, status, entered_via, review_status) values ('user_A', 'COP3530', 'A', -1, 'Fall 2025', 'uf', 'completed', 'manual', 'confirmed')$$);
+select pg_temp.must_fail('the old source value "transcript"', $$insert into coursework (user_id, course_code, grade, credits, term, source, status, entered_via, review_status) values ('user_A', 'COP3530', 'A', 3, 'Fall 2025', 'transcript', 'completed', 'manual', 'confirmed')$$);
+select pg_temp.must_fail('a grade the engine doesn''t know (CR)', $$insert into coursework (user_id, course_code, grade, credits, term, source, status, entered_via, review_status) values ('user_A', 'COP3530', 'CR', 3, 'Fall 2025', 'uf', 'completed', 'manual', 'confirmed')$$);
+select pg_temp.must_fail('an in-progress course with a grade', $$insert into coursework (user_id, course_code, grade, credits, term, source, status, entered_via, review_status) values ('user_A', 'COP3530', 'A', 3, 'Fall 2026', 'uf', 'in_progress', 'manual', 'confirmed')$$);
+select pg_temp.must_fail('a UF course with no term', $$insert into coursework (user_id, course_code, grade, credits, source, status, entered_via, review_status) values ('user_A', 'COP3530', 'A', 3, 'uf', 'completed', 'manual', 'confirmed')$$);
+select pg_temp.must_fail('a transfer course with no institution', $$insert into coursework (user_id, course_code, credits, source, status, entered_via, review_status) values ('user_A', 'MAC2311', 3, 'transfer', 'completed', 'manual', 'confirmed')$$);
+select pg_temp.must_fail('an unknown entered_via', $$insert into coursework (user_id, course_code, grade, credits, term, source, status, entered_via, review_status) values ('user_A', 'COP3530', 'A', 3, 'Fall 2025', 'uf', 'completed', 'magic', 'confirmed')$$);
+select pg_temp.must_fail('an exam credit with a bad course code', $$insert into exam_credits (user_id, award_id, score, course_codes, credits, entered_via, review_status) values ('user_A', 'ap-psychology-3-5', 4, '{PSY 2012}', 3, 'import', 'confirmed')$$);
+select pg_temp.must_fail('an elective credit with no label', $$insert into elective_credits (user_id, label, credits, source, entered_via, review_status) values ('user_A', '', 3, 'transfer', 'import', 'confirmed')$$);
+select pg_temp.must_fail('an elective credit from UF', $$insert into elective_credits (user_id, label, credits, source, entered_via, review_status) values ('user_A', 'x', 3, 'uf', 'import', 'confirmed')$$);
 select pg_temp.must_fail('same course twice with no section', $$insert into schedule_sections (schedule_id, user_id, course_code) values ('00000000-0000-0000-0000-00000000000a', 'user_A', 'MAC2311')$$);
 select pg_temp.must_fail('same class number twice in a schedule', $$insert into schedule_sections (schedule_id, user_id, course_code, class_number, section) values ('00000000-0000-0000-0000-00000000000a', 'user_A', 'COT3100', '11529', '9999')$$);
-select pg_temp.must_fail('unknown source', $$insert into coursework (user_id, course_code, grade, credits, term, source, status) values ('user_A', 'COP3530', 'A', 3, 'x', 'magic', 'confirmed')$$);
+select pg_temp.must_fail('unknown source', $$insert into coursework (user_id, course_code, grade, credits, term, source, status, entered_via, review_status) values ('user_A', 'COP3530', 'A', 3, 'Fall 2025', 'magic', 'completed', 'manual', 'confirmed')$$);
 select pg_temp.must_fail('two primary schedules in one term', $$insert into schedules (user_id, term, is_primary) values ('user_A', '2268', true)$$);
 select pg_temp.must_fail('meeting ends before it starts', $$insert into schedule_meetings (schedule_section_id, user_id, kind, day, start_time, end_time) values ('00000000-0000-0000-0000-0000000000a1', 'user_A', 'lab', 'TUE', '11:00', '10:00')$$);
 select pg_temp.must_fail('meeting with a day but no times', $$insert into schedule_meetings (schedule_section_id, user_id, kind, day) values ('00000000-0000-0000-0000-0000000000a1', 'user_A', 'lab', 'TUE')$$);
-select pg_temp.must_fail('coursework for a student with no profile', $$insert into coursework (user_id, course_code, grade, credits, term, source, status) values ('user_GONE', 'COP3530', 'A', 3, 'x', 'manual', 'confirmed')$$);
+select pg_temp.must_fail('coursework for a student with no profile', $$insert into coursework (user_id, course_code, grade, credits, term, source, status, entered_via, review_status) values ('user_GONE', 'COP3530', 'A', 3, 'Fall 2025', 'uf', 'completed', 'manual', 'confirmed')$$);
+select pg_temp.must_fail('exam credit for a student with no profile', $$insert into exam_credits (user_id, award_id, score, credits, entered_via, review_status) values ('user_GONE', 'ap-psychology-3-5', 4, 3, 'import', 'confirmed')$$);
 
 -- The server (service_role) can read and load catalog, and reloading a
 -- milestone updates it in place instead of adding a copy.
@@ -100,6 +118,7 @@ delete from profiles where user_id = 'user_A';
 do $$ declare leftover int; b_rows int;
 begin
   select (select count(*) from coursework_records where user_id='user_A') + (select count(*) from coursework where user_id='user_A')
+       + (select count(*) from exam_credits where user_id='user_A') + (select count(*) from elective_credits where user_id='user_A')
        + (select count(*) from survey_submissions where user_id='user_A') + (select count(*) from schedules where user_id='user_A')
        + (select count(*) from schedule_sections where user_id='user_A') + (select count(*) from schedule_meetings where user_id='user_A')
        + (select count(*) from plans where user_id='user_A') + (select count(*) from chat_conversations where user_id='user_A')
@@ -109,7 +128,7 @@ begin
   select count(*) into b_rows from schedules where user_id = 'user_B';
   if b_rows <> 1 then raise exception 'FAIL user_B lost data'; end if;
   if not exists (select 1 from account_deletions where user_id = 'user_A') then raise exception 'FAIL deletion log was removed'; end if;
-  raise notice 'PASS  deleting a profile cascades to all 10 private tables, keeps user_B, keeps the deletion log';
+  raise notice 'PASS  deleting a profile cascades to all 12 private tables, keeps user_B, keeps the deletion log';
 end $$;
 
 -- A queued job can't recreate data for a deleted student.
@@ -133,62 +152,84 @@ delete from catalog.programs where id = 'test-gpa_bs';
 select fetched_at from catalog.terms limit 0;
 \echo PASS  catalog.terms has fetched_at
 
--- save_coursework: replaces the whole list, bumps the version, refuses stale or partial saves.
-do $$ declare v int; n int;
+-- save_coursework: replaces the whole record (attempts, exam credit, elective
+-- credit, facts), bumps the version, refuses stale or partial saves.
+do $$ declare v int; n_att int; n_exam int; n_elec int; aa boolean; lang boolean;
 begin
-  v := public.save_coursework('user_B', 1, '[
-    {"course_code":"MAC2311","grade":"A","credits":4,"term":"Fall 2026","source":"transcript","status":"confirmed"},
-    {"course_code":"ENC1101","grade":"B+","credits":3,"term":"Fall 2026","source":"manual","status":"needs-review","original_label":"ENC 1101 Expos & Arg Writing"}]');
-  select count(*) into n from coursework where user_id = 'user_B';
-  if v <> 2 or n <> 2 then raise exception 'FAIL first save returned version % with % rows', v, n; end if;
-  v := public.save_coursework('user_B', 2, '[{"course_code":"MAC2311","grade":"A","credits":4,"term":"Fall 2026","source":"transcript","status":"confirmed"}]');
-  select count(*) into n from coursework where user_id = 'user_B';
-  if v <> 3 or n <> 1 then raise exception 'FAIL second save returned version % with % rows', v, n; end if;
-  raise notice 'PASS  save_coursework replaces the list and bumps the version';
+  v := public.save_coursework('user_B', 1,
+    '[{"course_code":"MAC2311","grade":"A","credits":4,"term":"Fall 2026","source":"uf","status":"completed","entered_via":"import","review_status":"confirmed"},
+      {"course_code":"ENC1101","credits":3,"source":"transfer","institution":"Santa Fe College","status":"completed","entered_via":"import","review_status":"needs-review","original_label":"ENC1101 at SFC"}]',
+    '[{"award_id":"ap-united-states-history-4-5","score":5,"course_codes":["AMH2010","AMH2020"],"credits":6,"entered_via":"import","review_status":"confirmed"}]',
+    '[{"label":"SPN 1XXX elective","credits":3,"source":"transfer","institution":"Santa Fe College","entered_via":"import","review_status":"confirmed"}]',
+    '{"has_florida_aa": true, "language_proficiency": false}');
+  select count(*) into n_att from coursework where user_id = 'user_B';
+  select count(*) into n_exam from exam_credits where user_id = 'user_B';
+  select count(*) into n_elec from elective_credits where user_id = 'user_B';
+  select has_florida_aa, language_proficiency into aa, lang from coursework_records where user_id = 'user_B';
+  if v <> 2 or n_att <> 2 or n_exam <> 1 or n_elec <> 1 or aa is not true or lang is not false then
+    raise exception 'FAIL first save: version %, % attempts, % exam, % elective, aa %, language %', v, n_att, n_exam, n_elec, aa, lang;
+  end if;
+
+  v := public.save_coursework('user_B', 2,
+    '[{"course_code":"MAC2311","grade":"A","credits":4,"term":"Fall 2026","source":"uf","status":"completed","entered_via":"import","review_status":"confirmed"}]',
+    '[]', '[]', '{}');
+  select count(*) into n_att from coursework where user_id = 'user_B';
+  select count(*) into n_exam from exam_credits where user_id = 'user_B';
+  select count(*) into n_elec from elective_credits where user_id = 'user_B';
+  select has_florida_aa, language_proficiency into aa, lang from coursework_records where user_id = 'user_B';
+  if v <> 3 or n_att <> 1 or n_exam <> 0 or n_elec <> 0 or aa is not null or lang is not null then
+    raise exception 'FAIL second save: version %, % attempts, % exam, % elective, aa %, language %', v, n_att, n_exam, n_elec, aa, lang;
+  end if;
+  raise notice 'PASS  save_coursework replaces the whole record, bumps the version, and a missing fact becomes unknown';
 end $$;
 
 do $$ begin
-  perform public.save_coursework('user_B', 2, '[]');
+  perform public.save_coursework('user_B', 2, '[]', '[]', '[]', '{}');
   raise exception 'FAIL a save with an old version went through';
 exception when sqlstate 'P0409' then
   raise notice 'PASS  a save with an old version raises P0409 (STALE_WRITE)';
 end $$;
-select pg_temp.must_fail('a save with no version', $$select public.save_coursework('user_B', null, '[]')$$);
-select pg_temp.must_fail('a save with one bad row',
-  $$select public.save_coursework('user_B', 3, '[{"course_code":"COP3530","grade":"A","credits":3,"term":"x","source":"manual","status":"confirmed"},{"course_code":"COP 3530","grade":"A","credits":3,"term":"x","source":"manual","status":"confirmed"}]')$$);
-select pg_temp.must_fail('a save for someone with no profile', $$select public.save_coursework('user_nobody', 0, '[]')$$);
+select pg_temp.must_fail('a save with no version', $$select public.save_coursework('user_B', null, '[]', '[]', '[]', '{}')$$);
+select pg_temp.must_fail('a save with one bad attempt',
+  $$select public.save_coursework('user_B', 3, '[{"course_code":"COP3530","grade":"A","credits":3,"term":"Fall 2025","source":"uf","status":"completed","entered_via":"manual","review_status":"confirmed"},{"course_code":"COP 3530","grade":"A","credits":3,"term":"Fall 2025","source":"uf","status":"completed","entered_via":"manual","review_status":"confirmed"}]', '[]', '[]', '{}')$$);
+select pg_temp.must_fail('a save with one bad exam credit',
+  $$select public.save_coursework('user_B', 3, '[]', '[{"award_id":"ap-psychology-3-5","score":4,"course_codes":["PSY 2012"],"credits":3,"entered_via":"import","review_status":"confirmed"}]', '[]', '{}')$$);
+select pg_temp.must_fail('a save with a fact that isn''t true/false',
+  $$select public.save_coursework('user_B', 3, '[]', '[]', '[]', '{"has_florida_aa": "maybe"}')$$);
+select pg_temp.must_fail('a save for someone with no profile', $$select public.save_coursework('user_nobody', 0, '[]', '[]', '[]', '{}')$$);
 
 do $$ declare v int; n int;
 begin
   select version into v from coursework_records where user_id = 'user_B';
   select count(*) into n from coursework where user_id = 'user_B';
   if v <> 3 or n <> 1 then raise exception 'FAIL refused saves changed the record: version %, % rows', v, n; end if;
-  raise notice 'PASS  refused saves leave the list and version untouched';
+  raise notice 'PASS  refused saves leave the record and version untouched';
 end $$;
 
 insert into profiles (user_id, email, preferred_name, class_standing, program_id, catalog_year, entry_term, expected_graduation)
 values ('user_C', 'c@ufl.edu', 'Cam', 'junior', 'uglas-csc_bs', '2024-2025', 'Fall 2024', 'Spring 2028');
 do $$ begin
-  if public.save_coursework('user_C', 0, '[]') <> 1 then raise exception 'FAIL first save for a new student'; end if;
+  if public.save_coursework('user_C', 0, '[]', '[]', '[]', '{}') <> 1 then raise exception 'FAIL first save for a new student'; end if;
   raise notice 'PASS  a new student starts at version 0 and their first save makes version 1';
 end $$;
 
 grant usage on schema public to anon, authenticated;
 set role anon;
 do $$ begin
-  perform public.save_coursework('user_B', 3, '[]');
+  perform public.save_coursework('user_B', 3, '[]', '[]', '[]', '{}');
   raise exception 'FAIL the anon role can call save_coursework';
 exception when insufficient_privilege then
   raise notice 'PASS  the anon role can''t call save_coursework';
 end $$;
 set role authenticated;
 do $$ begin
-  perform public.save_coursework('user_B', 3, '[]');
+  perform public.save_coursework('user_B', 3, '[]', '[]', '[]', '{}');
   raise exception 'FAIL the authenticated role can call save_coursework';
 exception when insufficient_privilege then
   raise notice 'PASS  the authenticated role can''t call save_coursework';
 end $$;
 reset role;
+select pg_temp.must_fail('the old 3-argument save_coursework', $$select public.save_coursework('user_B', 3, '[]'::jsonb)$$);
 
 -- RLS: a browser role with no policies sees nothing.
 do $$ begin if not exists (select 1 from pg_roles where rolname = 'anon_test') then create role anon_test nologin; end if; end $$;
@@ -202,6 +243,14 @@ begin
   raise notice 'PASS  browser role reads 0 profiles even with SELECT granted (RLS)';
 end $$;
 reset role;
+-- Tables added by later migrations don't get RLS from the initial loop.
+do $$ declare missing text;
+begin
+  select string_agg(schemaname || '.' || tablename, ', ') into missing
+  from pg_tables where schemaname in ('public', 'catalog') and not rowsecurity;
+  if missing is not null then raise exception 'FAIL RLS is off on: %', missing; end if;
+  raise notice 'PASS  RLS is on for every public and catalog table';
+end $$;
 -- Roles are server-wide, so clean up to keep the file rerunnable.
 drop owned by anon_test;
 drop role anon_test;
