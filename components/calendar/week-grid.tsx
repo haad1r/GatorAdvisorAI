@@ -2,6 +2,7 @@ import { cn } from "cn"
 import type { ScheduleMeeting } from "@/lib/api/types"
 import { type CalendarDay, formatTime, layoutLanes, meetingsOn, toMinutes } from "@/lib/schedule"
 import { CalendarEvent } from "./calendar-event"
+import { NowLine } from "./now-line"
 
 /* Below this the grid scrolls inside itself instead of squashing meetings. 72px/hour gives a
    50-minute class room for course and time on two lines. */
@@ -43,7 +44,7 @@ export function WeekGrid({
       aria-label="Week grid"
       tabIndex={0}
       className={cn(
-        "overflow-y-auto rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50 border border-black/10 bg-card shadow-[0_2px_4px_rgba(0,0,0,0.04),0_12px_32px_-8px_rgba(0,0,0,0.16)] dark:border-border dark:shadow-[0_12px_32px_-10px_rgba(0,0,0,0.6)]",
+        "overflow-y-auto rounded-xl border border-border bg-card outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
         className
       )}
     >
@@ -60,14 +61,11 @@ export function WeekGrid({
           return (
             <div
               key={day.weekday}
-              className={cn(
-                "sticky top-0 z-10 flex items-baseline gap-2 border-b border-l border-border bg-card px-3 py-2.5",
-                isToday && "bg-[color-mix(in_oklch,var(--brand-blue)_10%,var(--card))]"
-              )}
+              className="sticky top-0 z-10 flex items-baseline gap-2 border-b border-l border-border bg-card px-3 py-3"
             >
-              <span className={cn("text-base font-semibold", isToday && "text-brand-blue")}>{day.name.slice(0, 3)}</span>
-              <span className="text-base text-muted-foreground">{day.short}</span>
-              {isToday && <span className="ml-auto rounded bg-brand-blue px-1.5 py-0.5 text-xs font-semibold text-background">Today</span>}
+              <span className={cn("text-base font-semibold", isToday && "text-brand-orange-text")}>{day.name.slice(0, 3)}</span>
+              <span className={cn("text-base", isToday ? "text-brand-orange-text" : "text-muted-foreground")}>{day.short}</span>
+              {isToday && <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">Today</span>}
             </div>
           )
         })}
@@ -93,9 +91,10 @@ export function WeekGrid({
               key={day.weekday}
               aria-label={`${day.name}, ${day.short}${isToday ? ", today" : ""}`}
               aria-current={isToday ? "date" : undefined}
-              className={cn("relative border-l border-border", isToday && "bg-brand-blue/5")}
+              className={cn("relative border-l border-border", isToday && "bg-muted/50")}
               style={hourLines}
             >
+              {isToday && <NowLine startHour={startHour} endHour={endHour} />}
               {dayMeetings.length === 0 && <p className="sr-only">No classes</p>}
               <ol>
                 {dayMeetings.map((m) => {
